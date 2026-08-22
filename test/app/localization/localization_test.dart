@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'dart:ui' as ui;
 
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
@@ -91,6 +92,6 @@ void main() {
     final directionality = tester.widget<Directionality>(
       find.byType(Directionality).first,
     );
-    expect(directionality.textDirection, TextDirection.rtl);
+    expect(directionality.textDirection, ui.TextDirection.rtl);
   });
 }

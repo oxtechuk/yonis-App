@@ -13,7 +13,12 @@ class YounisApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Reading the locale registers a dependency on easy_localization's
+    // provider; keying by it forces a full rebuild of the navigation tree so
+    // widgets that render via `.tr()` pick up the new translations.
+    final locale = context.locale;
     return MaterialApp.router(
+      key: ValueKey<Locale>(locale),
       onGenerateTitle: (context) => LocaleKeys.appName.tr(),
       localizationsDelegates: context.localizationDelegates,
       supportedLocales: context.supportedLocales,
