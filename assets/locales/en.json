@@ -1,0 +1,40 @@
+{
+  "appName": "Yonis",
+  "common": {
+    "ok": "OK",
+    "cancel": "Cancel",
+    "save": "Save",
+    "continue": "Continue",
+    "retry": "Retry",
+    "back": "Back"
+  },
+  "navigation": {
+    "home": "Home",
+    "search": "Search",
+    "profile": "Profile"
+  },
+  "placeholders": {
+    "homeTabContent": "Home tab content",
+    "searchTabContent": "Search tab content",
+    "profileTabContent": "Profile tab content",
+    "increment": "Increment",
+    "counterValue": "Counter: {value}",
+    "openItemDetails": "Open item details",
+    "itemDetailTitle": "Item detail",
+    "itemDetailOf": "Item detail: {itemId}"
+  },
+  "errors": {
+    "general": "Something went wrong. Please try again.",
+    "network": "A network error occurred. Please check your connection.",
+    "offline": "You appear to be offline. Please reconnect and try again.",
+    "timeout": "The request took too long. Please try again.",
+    "unauthorized": "Please sign in to continue.",
+    "forbidden": "You do not have permission to perform this action.",
+    "notFound": "The requested content could not be found.",
+    "server": "Something went wrong on our side. Please try again later.",
+    "parsing": "Received malformed data."
+  },
+  "validation": {
+    "required": "This field is required"
+  }
+}

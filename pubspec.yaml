@@ -1,0 +1,51 @@
+name: younis_app
+description: "Younis application."
+publish_to: 'none'
+
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.11.5
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  cupertino_icons: ^1.0.8
+
+  # State management
+  flutter_bloc: ^9.1.1
+
+  # Dependency injection
+  get_it: ^8.2.0
+
+  # Routing
+  go_router: ^16.0.0
+
+  # Networking
+  dio: ^5.8.0
+
+  # Connectivity
+  connectivity_plus: ^6.1.5
+
+  # Storage
+  flutter_secure_storage: ^9.2.4
+  shared_preferences: ^2.5.5
+
+  # Value equality for states/failures
+  equatable: ^2.0.7
+
+  # Localization
+  easy_localization: ^3.0.8
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+  flutter_lints: ^6.0.0
+
+flutter:
+  uses-material-design: true
+
+  assets:
+    - assets/locales/
