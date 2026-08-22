@@ -61,37 +61,39 @@ void main() {
     });
   });
 
-  testWidgets('renders english navigation labels by default', (tester) async {
+  testWidgets('renders arabic navigation labels by default', (tester) async {
     await pumpLocalizedApp(tester);
+    await enterMainApp(tester);
 
     expect(find.text(LocaleKeys.navigation_home.tr()), findsOneWidget);
-    expect(find.text('Home'), findsOneWidget);
-    expect(find.text('Search'), findsOneWidget);
-    expect(find.text('Profile'), findsOneWidget);
-  });
-
-  testWidgets('switching to arabic translates labels and applies RTL', (
-    tester,
-  ) async {
-    await pumpLocalizedApp(tester);
-
-    final context = tester.element(find.byType(NavigationBar));
-    await context.setLocale(const Locale('ar'));
-    await tester.pumpAndSettle();
-
-    // Translated bottom-navigation labels.
     expect(find.text('الرئيسية'), findsOneWidget);
     expect(find.text('البحث'), findsOneWidget);
     expect(find.text('حسابي'), findsOneWidget);
-    expect(find.text('Home'), findsNothing);
+  });
+
+  testWidgets('switching to english translates labels and applies LTR', (
+    tester,
+  ) async {
+    await pumpLocalizedApp(tester);
+    await enterMainApp(tester);
+
+    final context = tester.element(find.byType(NavigationBar));
+    await context.setLocale(const Locale('en'));
+    await tester.pumpAndSettle();
+
+    // Translated bottom-navigation labels.
+    expect(find.text('Home'), findsOneWidget);
+    expect(find.text('Search'), findsOneWidget);
+    expect(find.text('Profile'), findsOneWidget);
+    expect(find.text('الرئيسية'), findsNothing);
 
     // Placeholder content translated too.
-    expect(find.text('محتوى تبويب الرئيسية'), findsOneWidget);
+    expect(find.text('Home tab content'), findsOneWidget);
 
-    // RTL applied at the app root.
+    // LTR applied at the app root.
     final directionality = tester.widget<Directionality>(
       find.byType(Directionality).first,
     );
-    expect(directionality.textDirection, ui.TextDirection.rtl);
+    expect(directionality.textDirection, ui.TextDirection.ltr);
   });
 }

@@ -7,7 +7,12 @@ import 'router/app_router.dart';
 import 'theme/app_theme.dart';
 
 class YounisApp extends StatelessWidget {
-  YounisApp({super.key});
+  YounisApp({super.key, this.appBuilder});
+
+  /// Optional wrapper applied around the whole app (e.g. DevicePreview's
+  /// appBuilder). Kept out of the default constructor so widget tests pump a
+  /// clean tree; bootstrap injects it only in non-release modes.
+  final TransitionBuilder? appBuilder;
 
   final GoRouter _router = createAppRouter();
 
@@ -27,6 +32,7 @@ class YounisApp extends StatelessWidget {
       theme: AppTheme.light(),
       darkTheme: AppTheme.dark(),
       themeMode: ThemeMode.system,
+      builder: appBuilder,
       routerConfig: _router,
     );
   }

@@ -4,7 +4,9 @@ import 'dart:ui';
 abstract final class AppLocalization {
   static const String translationsPath = 'assets/locales';
 
-  static const Locale fallbackLocale = Locale('en');
+  static const Locale defaultLocale = Locale('ar');
 
-  static const List<Locale> supportedLocales = [Locale('en'), Locale('ar')];
+  static const Locale fallbackLocale = Locale('ar');
+
+  static const List<Locale> supportedLocales = [Locale('ar'), Locale('en')];
 }

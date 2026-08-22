@@ -7,6 +7,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:younis_app/app/app.dart';
 import 'package:younis_app/app/localization/app_localization.dart';
+import 'package:younis_app/app/localization/locale_keys.g.dart';
+import 'package:younis_app/app/styles/app_durations.dart';
 
 /// Loads translations straight from disk in a single synchronous read.
 ///
@@ -38,9 +40,21 @@ Future<void> pumpLocalizedApp(WidgetTester tester) async {
       supportedLocales: AppLocalization.supportedLocales,
       path: AppLocalization.translationsPath,
       fallbackLocale: AppLocalization.fallbackLocale,
+      startLocale: AppLocalization.defaultLocale,
       assetLoader: const _TestFileAssetLoader(),
       child: YounisApp(),
     ),
   );
+  await tester.pumpAndSettle();
+}
+
+/// Walks the real entry flow (splash timer -> welcome -> Start Now) so tests
+/// land on the main application shell exactly like a user would.
+Future<void> enterMainApp(WidgetTester tester) async {
+  // Fires the splash Timer in fake time; no real waiting.
+  await tester.pump(AppDurations.splash);
+  await tester.pumpAndSettle();
+
+  await tester.tap(find.text(LocaleKeys.welcome_startNow.tr()));
   await tester.pumpAndSettle();
 }

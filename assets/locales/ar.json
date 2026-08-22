@@ -13,6 +13,11 @@
     "search": "البحث",
     "profile": "حسابي"
   },
+  "welcome": {
+    "title": "احجز استشارتك النفسية الآن",
+    "subtitle": "من جميع أنحاء العالم",
+    "startNow": "ابدأ الآن"
+  },
   "placeholders": {
     "homeTabContent": "محتوى تبويب الرئيسية",
     "searchTabContent": "محتوى تبويب البحث",

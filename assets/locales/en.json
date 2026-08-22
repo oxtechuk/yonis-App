@@ -13,6 +13,11 @@
     "search": "Search",
     "profile": "Profile"
   },
+  "welcome": {
+    "title": "Book your psychological consultation now",
+    "subtitle": "from anywhere in the world",
+    "startNow": "Start Now"
+  },
   "placeholders": {
     "homeTabContent": "Home tab content",
     "searchTabContent": "Search tab content",

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../features/app_entry/presentation/pages/splash_page.dart';
+import '../../features/app_entry/presentation/pages/welcome_page.dart';
 import '../../features/home/presentation/pages/home_item_detail_page.dart';
 import '../../features/home/presentation/pages/home_page.dart';
 import '../../features/profile/presentation/pages/profile_page.dart';
@@ -16,8 +18,19 @@ import 'app_routes.dart';
 /// requested destination" (see route_access.dart).
 GoRouter createAppRouter() {
   return GoRouter(
-    initialLocation: AppRoutes.home,
+    initialLocation: AppRoutes.splash,
     routes: [
+      // Entry flow — outside the navigation shell (no bottom bar).
+      GoRoute(
+        path: AppRoutes.splash,
+        builder: (BuildContext context, GoRouterState state) =>
+            const SplashPage(),
+      ),
+      GoRoute(
+        path: AppRoutes.welcome,
+        builder: (BuildContext context, GoRouterState state) =>
+            const WelcomePage(),
+      ),
       StatefulShellRoute.indexedStack(
         builder:
             (

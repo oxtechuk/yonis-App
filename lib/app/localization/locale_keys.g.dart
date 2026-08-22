@@ -15,6 +15,10 @@ abstract class LocaleKeys {
   static const navigation_search = 'navigation.search';
   static const navigation_profile = 'navigation.profile';
   static const navigation = 'navigation';
+  static const welcome_title = 'welcome.title';
+  static const welcome_subtitle = 'welcome.subtitle';
+  static const welcome_startNow = 'welcome.startNow';
+  static const welcome = 'welcome';
   static const placeholders_homeTabContent = 'placeholders.homeTabContent';
   static const placeholders_searchTabContent = 'placeholders.searchTabContent';
   static const placeholders_profileTabContent =
