@@ -7,6 +7,7 @@ import '../../../../app/styles/app_colors.dart';
 import '../../../../app/styles/app_radius.dart';
 import '../../../../app/styles/app_spacing.dart';
 import '../../../../app/styles/app_text_styles.dart';
+import '../../../../app/widgets/app_text_field.dart';
 
 /// White card containing card number, expiry/CVV row and save-card toggle.
 class PaymentCardForm extends StatelessWidget {
@@ -46,15 +47,18 @@ class PaymentCardForm extends StatelessWidget {
             ),
           ),
           const SizedBox(height: AppSpacing.sm),
-          _CardField(
+          AppTextField(
             controller: cardNumberController,
-            hintText: '1234 1234 1234 1234',
+            hint: '1234 1234 1234 1234',
             keyboardType: TextInputType.number,
+            textDirection: ui.TextDirection.ltr,
+            fillColor: AppColors.white,
+            height: 56,
             inputFormatters: [
               FilteringTextInputFormatter.digitsOnly,
               _CardNumberFormatter(),
             ],
-            suffixIcon: const Icon(
+            suffixWidget: const Icon(
               Icons.credit_card_outlined,
               color: AppColors.textSecondary,
             ),
@@ -94,11 +98,14 @@ class PaymentCardForm extends StatelessWidget {
                       ],
                     ),
                     const SizedBox(height: AppSpacing.sm),
-                    _CardField(
+                    AppTextField(
                       controller: cvvController,
-                      hintText: '1234',
+                      hint: '1234',
                       keyboardType: TextInputType.number,
+                      textDirection: ui.TextDirection.ltr,
                       obscureText: true,
+                      fillColor: AppColors.white,
+                      height: 56,
                       inputFormatters: [
                         FilteringTextInputFormatter.digitsOnly,
                         LengthLimitingTextInputFormatter(4),
@@ -126,10 +133,13 @@ class PaymentCardForm extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: AppSpacing.sm),
-                    _CardField(
+                    AppTextField(
                       controller: expiryController,
-                      hintText: 'MM/YY',
+                      hint: 'MM/YY',
                       keyboardType: TextInputType.number,
+                      textDirection: ui.TextDirection.ltr,
+                      fillColor: AppColors.white,
+                      height: 56,
                       inputFormatters: [
                         FilteringTextInputFormatter.digitsOnly,
                         _ExpiryFormatter(),
@@ -166,90 +176,21 @@ class PaymentCardForm extends StatelessWidget {
                   width: 24,
                   height: 24,
                   decoration: BoxDecoration(
-                    color:
-                        saveCard ? AppColors.primary : AppColors.white,
+                    color: saveCard ? AppColors.primary : AppColors.white,
                     borderRadius: BorderRadius.circular(6),
                     border: Border.all(
-                      color: saveCard
-                          ? AppColors.primary
-                          : AppColors.border,
+                      color: saveCard ? AppColors.primary : AppColors.border,
                       width: 2,
                     ),
                   ),
                   child: saveCard
-                      ? const Icon(
-                          Icons.check,
-                          color: AppColors.white,
-                          size: 16,
-                        )
+                      ? const Icon(Icons.check, color: AppColors.white, size: 16)
                       : null,
                 ),
               ),
             ],
           ),
         ],
-      ),
-    );
-  }
-}
-
-class _CardField extends StatelessWidget {
-  const _CardField({
-    required this.controller,
-    required this.hintText,
-    this.keyboardType,
-    this.inputFormatters,
-    this.suffixIcon,
-    this.obscureText = false,
-    this.validator,
-  });
-
-  final TextEditingController controller;
-  final String hintText;
-  final TextInputType? keyboardType;
-  final List<TextInputFormatter>? inputFormatters;
-  final Widget? suffixIcon;
-  final bool obscureText;
-  final FormFieldValidator<String>? validator;
-
-  @override
-  Widget build(BuildContext context) {
-    final border = OutlineInputBorder(
-      borderRadius: AppRadius.allLg,
-      borderSide: const BorderSide(color: AppColors.border),
-    );
-    return TextFormField(
-      controller: controller,
-      keyboardType: keyboardType,
-      inputFormatters: inputFormatters,
-      obscureText: obscureText,
-      textDirection: ui.TextDirection.ltr,
-      validator: validator,
-      decoration: InputDecoration(
-        hintText: hintText,
-        hintStyle:
-            AppTextStyles.body.copyWith(color: AppColors.textSecondary),
-        filled: true,
-        fillColor: AppColors.white,
-        contentPadding: const EdgeInsets.symmetric(
-          horizontal: AppSpacing.md,
-          vertical: AppSpacing.md,
-        ),
-        border: border,
-        enabledBorder: border,
-        focusedBorder: border.copyWith(
-          borderSide:
-              const BorderSide(color: AppColors.primary, width: 1.5),
-        ),
-        errorBorder: border.copyWith(
-          borderSide:
-              const BorderSide(color: AppColors.error, width: 1.5),
-        ),
-        focusedErrorBorder: border.copyWith(
-          borderSide:
-              const BorderSide(color: AppColors.error, width: 1.5),
-        ),
-        suffixIcon: suffixIcon,
       ),
     );
   }
