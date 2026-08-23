@@ -13,6 +13,19 @@
     "search": "Search",
     "profile": "Profile"
   },
+  "auth": {
+    "noAccountTitle": "Don't have an account?",
+    "noAccountDesc": "After you book your sessions, the app will create your personal account",
+    "startSessions": "Start Your Sessions Now",
+    "loginTitle": "Register Your Account",
+    "phoneLabel": "WhatsApp number for contact",
+    "phonePlaceholder": "051 234 5678",
+    "passwordLabel": "Password",
+    "passwordPlaceholder": "Password",
+    "loginButton": "Sign In",
+    "phoneRequired": "Enter your phone number",
+    "passwordRequired": "Enter your password"
+  },
   "welcome": {
     "title": "Book your psychological consultation now",
     "subtitle": "from anywhere in the world",

@@ -13,6 +13,19 @@
     "search": "البحث",
     "profile": "حسابي"
   },
+  "auth": {
+    "noAccountTitle": "هل ليس لديك حساب ؟",
+    "noAccountDesc": "بعد ان تقوم بحجز جلساتك  يقوم اتطبيق بانشاء الحساب الخاص بك",
+    "startSessions": "ابدأ جلساتك الان",
+    "loginTitle": "تسجيل حسابك",
+    "phoneLabel": "رقم الوتساب لتواصل",
+    "phonePlaceholder": "051 234 5678",
+    "passwordLabel": "كلمة المرور",
+    "passwordPlaceholder": "كلمة المرور",
+    "loginButton": "تسجيل الدخول",
+    "phoneRequired": "أدخل رقم الهاتف",
+    "passwordRequired": "أدخل كلمة المرور"
+  },
   "welcome": {
     "title": "احجز استشارتك النفسية الآن",
     "subtitle": "من جميع أنحاء العالم",

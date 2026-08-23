@@ -7,6 +7,8 @@ import '../../../../app/localization/locale_keys.g.dart';
 import '../../../../app/styles/app_colors.dart';
 import '../../../../app/styles/app_spacing.dart';
 import '../../../../app/styles/app_text_styles.dart';
+import '../../../auth/domain/auth_state.dart';
+import '../../../auth/presentation/pages/login_page.dart';
 import 'service_option_card.dart';
 
 /// Bottom sheet shown when the user taps "Book Your Consultation".
@@ -29,6 +31,20 @@ class BookServiceBottomSheet extends StatelessWidget {
   // Both sides of the title get an equal-width slot so it stays
   // optically centered regardless of the button's internal metrics.
   static const double _headerSlotWidth = 40;
+
+  /// Called when any service option is tapped.
+  /// Closes this sheet and shows auth prompt if not logged in.
+  void _onServiceTap(BuildContext context) {
+    Navigator.of(context, rootNavigator: true).pop();
+    if (!AuthState.instance.isLoggedIn) {
+      final rootCtx = Navigator.of(context, rootNavigator: true).context;
+      LoginPage.show(
+        rootCtx,
+        onGuestBooking: () => BookServiceBottomSheet.show(rootCtx),
+      );
+    }
+    // TODO: else navigate to booking flow
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -94,7 +110,7 @@ class BookServiceBottomSheet extends StatelessWidget {
               title: LocaleKeys.home_bookService_clinicTitle.tr(),
               description: LocaleKeys.home_bookService_clinicDesc.tr(),
               price: LocaleKeys.home_bookService_clinicPrice.tr(),
-              onTap: () {},
+              onTap: () => _onServiceTap(context),
             ),
             const SizedBox(height: AppSpacing.md),
 
@@ -103,7 +119,7 @@ class BookServiceBottomSheet extends StatelessWidget {
               title: LocaleKeys.home_bookService_onlineTitle.tr(),
               description: LocaleKeys.home_bookService_onlineDesc.tr(),
               price: LocaleKeys.home_bookService_onlinePrice.tr(),
-              onTap: () {},
+              onTap: () => _onServiceTap(context),
             ),
           ],
         ),
