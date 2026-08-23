@@ -13,6 +13,14 @@ abstract final class AppColors {
   /// Brand primary (drives the Material color scheme seed).
   static const Color primary = Color(0xFF4055A5);
 
+  /// Linear gradient used on splash and welcome backgrounds.
+  static const LinearGradient primaryGradient = LinearGradient(
+    begin: Alignment.topCenter,
+    end: Alignment.bottomCenter,
+    colors: [Color(0xFF4055A5), Color(0xFF4055A5)],
+    stops: [0.0, 1.0],
+  );
+
   /// Brand secondary accent (gold) — part of the official brand palette.
   static const Color secondary = Color(0xFFCCA830);
 

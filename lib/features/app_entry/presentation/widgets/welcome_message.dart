@@ -26,7 +26,7 @@ class WelcomeMessage extends StatelessWidget {
           Text(
             LocaleKeys.welcome_subtitle.tr(),
             textAlign: TextAlign.center,
-            style: AppTextStyles.title.copyWith(color: AppColors.white),
+            style: AppTextStyles.headline.copyWith(color: AppColors.white),
           ),
         ],
       ),

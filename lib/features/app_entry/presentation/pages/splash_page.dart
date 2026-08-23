@@ -44,8 +44,10 @@ class _SplashPageState extends State<SplashPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.primary,
-      body: SafeArea(child: SplashFadeIn(child: const SplashLogo())),
+      body: Container(
+        decoration: const BoxDecoration(gradient: AppColors.primaryGradient),
+        child: SafeArea(child: SplashFadeIn(child: const SplashLogo())),
+      ),
     );
   }
 }

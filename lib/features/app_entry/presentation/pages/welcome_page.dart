@@ -21,8 +21,9 @@ class WelcomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.primary,
-      body: LayoutBuilder(
+      body: Container(
+        decoration: const BoxDecoration(gradient: AppColors.primaryGradient),
+        child: LayoutBuilder(
         builder: (context, constraints) {
           final screenH = constraints.maxHeight;
           final screenW = constraints.maxWidth;
@@ -38,6 +39,15 @@ class WelcomePage extends StatelessWidget {
 
           return Stack(
             children: [
+              // White fill covering everything above the circle's centre so
+              // no blue corners can ever show on any screen size / ratio.
+              Positioned(
+                top: 0,
+                left: 0,
+                right: 0,
+                height: circleBotEdge - circleDiameter * 0.5,
+                child: const ColoredBox(color: AppColors.white),
+              ),
               Positioned(
                 top: circleTopEdge,
                 left: (screenW - circleDiameter) / 2,
@@ -53,7 +63,7 @@ class WelcomePage extends StatelessWidget {
                 child: WelcomeLogo(width: screenW * 0.60),
               ),
               Positioned(
-                top: circleBotEdge,
+                top: 300,
                 left: 0,
                 right: 0,
                 bottom: 0,
@@ -74,6 +84,7 @@ class WelcomePage extends StatelessWidget {
             ],
           );
         },
+      ),
       ),
     );
   }

@@ -23,7 +23,7 @@ abstract final class AppTextStyles {
   static const TextStyle headline = TextStyle(
     fontFamily: fontFamily,
     fontSize: 24,
-    fontWeight: FontWeight.w700,
+    fontWeight: FontWeight.w900,
     height: 1.25,
   );
 
