@@ -9,22 +9,24 @@ import '../../../../app/styles/app_text_styles.dart';
 class HomeTestimonialsSection extends StatelessWidget {
   const HomeTestimonialsSection({super.key});
 
-  /// Add your testimonial image paths here.
-  static const _images = <String>[
-    // 'assets/images/testimonial_1.png',
-    // 'assets/images/testimonial_2.png',
-  ];
+  static const _images = <String>[];
 
   @override
   Widget build(BuildContext context) {
     final isRtl = context.locale.languageCode == 'ar';
+    // Card width ~60% of screen, height by ratio; capped for tablets
+    final cardWidth =
+        (MediaQuery.sizeOf(context).width * 0.60).clamp(180.0, 320.0);
+    final cardHeight = cardWidth * 0.75;
+
     return Directionality(
       textDirection: isRtl ? TextDirection.rtl : TextDirection.ltr,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+            padding:
+                const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
             child: Text(
               LocaleKeys.home_testimonialsTitle.tr(),
               style: AppTextStyles.title.copyWith(
@@ -35,20 +37,24 @@ class HomeTestimonialsSection extends StatelessWidget {
           ),
           const SizedBox(height: AppSpacing.md),
           SizedBox(
-            height: 200,
+            height: cardHeight,
             child: _images.isEmpty
-                ? _buildPlaceholderList(reverse: isRtl)
+                ? _buildPlaceholderList(
+                    reverse: isRtl,
+                    cardWidth: cardWidth,
+                  )
                 : ListView.separated(
                     scrollDirection: Axis.horizontal,
                     reverse: isRtl,
                     padding: const EdgeInsets.symmetric(
-                      horizontal: AppSpacing.lg,
-                    ),
+                        horizontal: AppSpacing.lg),
                     itemCount: _images.length,
-                    separatorBuilder: (_, _) =>
+                    separatorBuilder: (_, __) =>
                         const SizedBox(width: AppSpacing.md),
-                    itemBuilder: (_, i) =>
-                        _TestimonialCard(imagePath: _images[i]),
+                    itemBuilder: (_, i) => _TestimonialCard(
+                      imagePath: _images[i],
+                      width: cardWidth,
+                    ),
                   ),
           ),
         ],
@@ -56,29 +62,32 @@ class HomeTestimonialsSection extends StatelessWidget {
     );
   }
 
-  Widget _buildPlaceholderList({required bool reverse}) {
+  Widget _buildPlaceholderList(
+      {required bool reverse, required double cardWidth}) {
     return ListView.separated(
       scrollDirection: Axis.horizontal,
       reverse: reverse,
-      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+      padding:
+          const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
       itemCount: 4,
-      separatorBuilder: (_, _) => const SizedBox(width: AppSpacing.md),
-      itemBuilder: (_, _) => const _TestimonialCard(imagePath: null),
+      separatorBuilder: (_, __) => const SizedBox(width: AppSpacing.md),
+      itemBuilder: (_, __) =>
+          _TestimonialCard(imagePath: null, width: cardWidth),
     );
   }
 }
 
 class _TestimonialCard extends StatelessWidget {
-  const _TestimonialCard({required this.imagePath});
+  const _TestimonialCard({required this.imagePath, required this.width});
   final String? imagePath;
+  final double width;
 
   @override
   Widget build(BuildContext context) {
     return ClipRRect(
       borderRadius: BorderRadius.circular(16),
       child: SizedBox(
-        width: 220,
-        height: 200,
+        width: width,
         child: imagePath != null
             ? Image.asset(imagePath!, fit: BoxFit.cover)
             : Container(

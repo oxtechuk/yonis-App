@@ -65,12 +65,12 @@ class _Chip extends StatelessWidget {
           ),
         ],
       ),
+      // Use bodySmall from design tokens — no fontSize override
       child: Text(
         label,
         style: AppTextStyles.bodySmall.copyWith(
           color: AppColors.textPrimary,
           fontWeight: FontWeight.w500,
-          fontSize: 13,
         ),
       ),
     );

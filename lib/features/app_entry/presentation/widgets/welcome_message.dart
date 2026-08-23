@@ -6,7 +6,6 @@ import '../../../../app/styles/app_colors.dart';
 import '../../../../app/styles/app_spacing.dart';
 import '../../../../app/styles/app_text_styles.dart';
 
-/// The two-line welcome message shown on the blue area.
 class WelcomeMessage extends StatelessWidget {
   const WelcomeMessage({super.key});
 
@@ -20,10 +19,8 @@ class WelcomeMessage extends StatelessWidget {
           Text(
             LocaleKeys.welcome_title.tr(),
             textAlign: TextAlign.center,
-            style: AppTextStyles.headline.copyWith(
-              color: AppColors.white,
-              fontSize: 26,
-            ),
+            // Use headline token directly — no fontSize override
+            style: AppTextStyles.headline.copyWith(color: AppColors.white),
           ),
           const SizedBox(height: AppSpacing.sm),
           Text(

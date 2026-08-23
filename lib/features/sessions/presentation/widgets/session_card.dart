@@ -8,7 +8,8 @@ import '../models/session.dart';
 
 const _cardRadius = 16.0;
 const _buttonRadius = BorderRadius.all(Radius.circular(AppRadius.lg));
-const _buttonPadding = EdgeInsets.symmetric(vertical: 14);
+// Use vertical padding from AppSpacing instead of a magic number
+const _buttonPadding = EdgeInsets.symmetric(vertical: AppSpacing.sm + 2);
 
 class SessionCard extends StatelessWidget {
   const SessionCard({

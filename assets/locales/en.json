@@ -26,6 +26,16 @@
     "heroSubtitle": "We help you overcome psychological difficulties\nand reach a balanced, mindful life.",
     "bookConsultation": "Book Your Consultation",
     "getToKnowYounis": "Get to Know Yonis",
+    "bookService": {
+      "sheetTitle": "How would you like to request the service?",
+      "clinicTitle": "In-Clinic Consultation",
+      "clinicDesc": "Request your sessions via a text chat that supports written and voice messages, as well as sending images and documents",
+      "clinicPrice": "Starting from 100 SAR",
+      "onlineTitle": "Online Consultation (Chat - Voice - Video)",
+      "onlineDesc": "Connect with a doctor via instant voice call and ask questions on a specific topic. Session duration starts from 15 minutes",
+      "onlinePrice": "100 SAR",
+      "startNow": "← Start Your Sessions Now"
+    },
     "reelsTitle": "Follow Us on Social Media",
     "reelStress": "🧠 Psychological Pressure",
     "reelTrustInGod": "🔔 Put Your Trust in God",

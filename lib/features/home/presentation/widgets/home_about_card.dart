@@ -6,7 +6,6 @@ import '../../../../app/styles/app_colors.dart';
 import '../../../../app/styles/app_spacing.dart';
 import '../../../../app/styles/app_text_styles.dart';
 
-/// "نبذة عني" card with bio text.
 class HomeAboutCard extends StatelessWidget {
   const HomeAboutCard({super.key});
 
@@ -31,18 +30,17 @@ class HomeAboutCard extends StatelessWidget {
         child: IntrinsicHeight(
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.stretch,
-            textDirection: TextDirection.ltr, // force LTR so bar is on left
+            textDirection: TextDirection.ltr,
             children: [
-              // Card content (direction follows the active locale)
               Expanded(
                 child: Directionality(
-                  textDirection: isRtl ? TextDirection.rtl : TextDirection.ltr,
+                  textDirection:
+                      isRtl ? TextDirection.rtl : TextDirection.ltr,
                   child: Padding(
                     padding: const EdgeInsets.all(AppSpacing.md),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        // Header — icon to the left of text in RTL
                         Row(
                           children: [
                             const Icon(
@@ -61,14 +59,13 @@ class HomeAboutCard extends StatelessWidget {
                           ],
                         ),
                         const SizedBox(height: AppSpacing.sm),
-                        // Bio text
                         Text(
                           LocaleKeys.home_aboutBio.tr(),
                           textAlign: TextAlign.center,
+                          // Use body style without overriding font size
                           style: AppTextStyles.body.copyWith(
                             color: AppColors.textSecondary,
                             height: 1.8,
-                            fontSize: 15,
                           ),
                         ),
                       ],
@@ -76,7 +73,6 @@ class HomeAboutCard extends StatelessWidget {
                   ),
                 ),
               ),
-              // Blue accent bar on the right (visually, left in LTR Row)
               Container(width: 6, color: AppColors.primary),
             ],
           ),

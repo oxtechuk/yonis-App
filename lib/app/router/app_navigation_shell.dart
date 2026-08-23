@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../styles/app_colors.dart';
+import '../styles/app_sizes.dart';
+import '../styles/app_spacing.dart';
 import '../styles/app_text_styles.dart';
 
 class AppNavigationShell extends StatelessWidget {
@@ -23,17 +25,18 @@ class AppNavigationShell extends StatelessWidget {
     return Scaffold(
       body: navigationShell,
       bottomNavigationBar: Directionality(
-        // RTL so items order matches the design: الرئيسية on the right
         textDirection: TextDirection.rtl,
         child: Container(
           decoration: const BoxDecoration(
             color: AppColors.white,
-            border: Border(top: BorderSide(color: Color(0xFFE5E7EB), width: 1)),
+            border:
+                Border(top: BorderSide(color: Color(0xFFE5E7EB), width: 1)),
           ),
           child: SafeArea(
             top: false,
             child: SizedBox(
-              height: 64,
+              // Use design token instead of hardcoded 64
+              height: AppSizes.bottomBarHeight,
               child: Row(
                 children: [
                   _NavItem(
@@ -91,7 +94,8 @@ class _NavItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color = selected ? AppColors.primary : const Color(0xFFADB5BD);
+    final color =
+        selected ? AppColors.primary : const Color(0xFFADB5BD);
 
     return Expanded(
       child: InkWell(
@@ -101,8 +105,12 @@ class _NavItem extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(selected ? activeIcon : icon, color: color, size: 26),
-            const SizedBox(height: 4),
+            Icon(
+              selected ? activeIcon : icon,
+              color: color,
+              size: AppSizes.iconMd,
+            ),
+            const SizedBox(height: AppSpacing.xs),
             Text(
               label,
               style: AppTextStyles.caption.copyWith(

@@ -4,11 +4,10 @@ import 'package:flutter/material.dart';
 import '../../../../app/localization/locale_keys.g.dart';
 import '../../../../app/styles/app_colors.dart';
 import '../../../../app/styles/app_images.dart';
+import '../../../../app/styles/app_sizes.dart';
 import '../../../../app/styles/app_spacing.dart';
 import '../../../../app/styles/app_text_styles.dart';
 
-/// Full-width hero image with the primary CTA button straddling its
-/// bottom edge (half inside the image, half outside).
 class HomeHeroSection extends StatelessWidget {
   const HomeHeroSection({
     super.key,
@@ -19,19 +18,19 @@ class HomeHeroSection extends StatelessWidget {
   final VoidCallback? onBookTap;
   final VoidCallback? onAboutTap;
 
-  static const double _btnHeight = 56.0;
-
   @override
   Widget build(BuildContext context) {
-    final imageHeight = MediaQuery.sizeOf(context).height * 0.52;
+    final size = MediaQuery.sizeOf(context);
+    // Hero image: 52% of screen height on phones, capped for tablets
+    final imageHeight = (size.height * 0.52).clamp(260.0, 480.0);
+    // Button height from design token
+    final btnHeight = AppSizes.buttonHeight;
 
     return Column(
       children: [
-        // ── Image + straddling button ─────────────────────────────────
         Stack(
           clipBehavior: Clip.none,
           children: [
-            // Hero image — extra bottom padding so button doesn't cover text
             ClipRRect(
               borderRadius: const BorderRadius.vertical(
                 bottom: Radius.circular(28),
@@ -59,11 +58,10 @@ class HomeHeroSection extends StatelessWidget {
                       ),
                     ),
                   ),
-                  // Title + subtitle — bottom offset leaves room for button
                   Positioned(
                     left: AppSpacing.lg,
                     right: AppSpacing.lg,
-                    bottom: _btnHeight / 2 + AppSpacing.lg,
+                    bottom: btnHeight / 2 + AppSpacing.lg,
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
@@ -89,42 +87,35 @@ class HomeHeroSection extends StatelessWidget {
                 ],
               ),
             ),
-            // Button centered on the image bottom edge
             Positioned(
               left: AppSpacing.lg,
               right: AppSpacing.lg,
-              bottom: -_btnHeight / 2,
-              height: _btnHeight,
+              bottom: -btnHeight / 2,
+              height: btnHeight,
               child: FilledButton.icon(
                 onPressed: onBookTap,
                 style: FilledButton.styleFrom(
                   backgroundColor: AppColors.primary,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(50),
-                  ),
+                  shape: const StadiumBorder(),
                 ),
-                icon: const Icon(Icons.calendar_month_outlined, size: 20),
+                icon: const Icon(Icons.calendar_month_outlined,
+                    size: AppSizes.iconMd),
                 label: Text(
                   LocaleKeys.home_bookConsultation.tr(),
-                  style: AppTextStyles.button.copyWith(
-                    color: AppColors.white,
-                    fontSize: 16,
-                  ),
+                  style: AppTextStyles.button.copyWith(color: AppColors.white),
                 ),
               ),
             ),
           ],
         ),
 
-        // Space for the half of the button that hangs below the image
-        const SizedBox(height: _btnHeight / 2 + AppSpacing.sm),
+        SizedBox(height: btnHeight / 2 + AppSpacing.sm),
 
-        // ── Secondary button ──────────────────────────────────────────
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
           child: SizedBox(
             width: double.infinity,
-            height: _btnHeight,
+            height: btnHeight,
             child: ElevatedButton.icon(
               onPressed: onAboutTap,
               style: ElevatedButton.styleFrom(
@@ -132,17 +123,12 @@ class HomeHeroSection extends StatelessWidget {
                 foregroundColor: AppColors.primary,
                 elevation: 2,
                 shadowColor: Colors.black12,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(50),
-                ),
+                shape: const StadiumBorder(),
               ),
-              icon: const Icon(Icons.person_outline, size: 20),
+              icon: const Icon(Icons.person_outline, size: AppSizes.iconMd),
               label: Text(
                 LocaleKeys.home_getToKnowYounis.tr(),
-                style: AppTextStyles.button.copyWith(
-                  color: AppColors.primary,
-                  fontSize: 16,
-                ),
+                style: AppTextStyles.button.copyWith(color: AppColors.primary),
               ),
             ),
           ),

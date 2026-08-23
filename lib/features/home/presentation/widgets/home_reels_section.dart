@@ -6,8 +6,6 @@ import '../../../../app/styles/app_colors.dart';
 import '../../../../app/styles/app_spacing.dart';
 import '../../../../app/styles/app_text_styles.dart';
 
-/// Placeholder reel model — replace with real data from your API.
-/// [titleKey] is a localization key resolved via `.tr()` at render time.
 class _Reel {
   const _Reel({required this.titleKey, required this.views});
   final String titleKey;
@@ -28,6 +26,12 @@ class HomeReelsSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isRtl = context.locale.languageCode == 'ar';
+    // Card width: ~35% of screen width, capped for tablets
+    final cardWidth =
+        (MediaQuery.sizeOf(context).width * 0.35).clamp(120.0, 180.0);
+    // Card height: ~1.7 ratio to width
+    final cardHeight = cardWidth * 1.7;
+
     return Directionality(
       textDirection: isRtl ? TextDirection.rtl : TextDirection.ltr,
       child: Column(
@@ -45,17 +49,17 @@ class HomeReelsSection extends StatelessWidget {
           ),
           const SizedBox(height: AppSpacing.md),
           SizedBox(
-            height: 220,
+            height: cardHeight,
             child: ListView.separated(
               scrollDirection: Axis.horizontal,
-              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
-              // RTL list scrolls from right; reverse so first item is rightmost
+              padding:
+                  const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
               reverse: isRtl,
               itemCount: _reels.length,
-              separatorBuilder: (_, _) =>
+              separatorBuilder: (_, __) =>
                   const SizedBox(width: AppSpacing.sm),
               itemBuilder: (context, index) =>
-                  _ReelCard(reel: _reels[index]),
+                  _ReelCard(reel: _reels[index], width: cardWidth),
             ),
           ),
         ],
@@ -65,23 +69,20 @@ class HomeReelsSection extends StatelessWidget {
 }
 
 class _ReelCard extends StatelessWidget {
-  const _ReelCard({required this.reel});
+  const _ReelCard({required this.reel, required this.width});
   final _Reel reel;
+  final double width;
 
   @override
   Widget build(BuildContext context) {
     return ClipRRect(
       borderRadius: BorderRadius.circular(12),
       child: SizedBox(
-        width: 130,
-        height: 220,
+        width: width,
         child: Stack(
           fit: StackFit.expand,
           children: [
-            // Placeholder background (replace with real thumbnail)
             Container(color: const Color(0xFF2C2C2C)),
-
-            // Gradient overlay at bottom
             Positioned.fill(
               child: DecoratedBox(
                 decoration: BoxDecoration(
@@ -97,8 +98,6 @@ class _ReelCard extends StatelessWidget {
                 ),
               ),
             ),
-
-            // Title badge (TikTok-style)
             Positioned(
               top: AppSpacing.sm,
               right: AppSpacing.sm,
@@ -108,13 +107,15 @@ class _ReelCard extends StatelessWidget {
                 child: Container(
                   padding: const EdgeInsets.symmetric(
                     horizontal: AppSpacing.sm,
-                    vertical: 4,
+                    vertical: AppSpacing.xs,
                   ),
                   decoration: const BoxDecoration(
                     color: Colors.black,
                     border: Border(
-                      bottom: BorderSide(color: Color(0xFF00E5FF), width: 3),
-                      left: BorderSide(color: Color(0xFFFF1744), width: 3),
+                      bottom:
+                          BorderSide(color: Color(0xFF00E5FF), width: 3),
+                      left:
+                          BorderSide(color: Color(0xFFFF1744), width: 3),
                     ),
                   ),
                   child: Text(
@@ -129,8 +130,6 @@ class _ReelCard extends StatelessWidget {
                 ),
               ),
             ),
-
-            // Views count at bottom
             Positioned(
               bottom: AppSpacing.sm,
               left: AppSpacing.sm,
@@ -143,7 +142,7 @@ class _ReelCard extends StatelessWidget {
                       fontWeight: FontWeight.w600,
                     ),
                   ),
-                  const SizedBox(width: 4),
+                  const SizedBox(width: AppSpacing.xs),
                   const Icon(
                     Icons.play_arrow_rounded,
                     color: AppColors.white,
