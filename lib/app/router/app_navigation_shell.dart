@@ -1,51 +1,118 @@
-import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
-import '../localization/locale_keys.g.dart';
+import '../styles/app_colors.dart';
+import '../styles/app_text_styles.dart';
 
-/// The ONE persistent navigation shell of the application.
-///
-/// Hosted by `StatefulShellRoute.indexedStack`: every bottom-navigation tab
-/// owns its own navigation stack that survives tab switches. There is
-/// exactly one shell — never one wrapper copy per tab.
 class AppNavigationShell extends StatelessWidget {
   const AppNavigationShell({super.key, required this.navigationShell});
 
   final StatefulNavigationShell navigationShell;
 
-  void _onDestinationSelected(int index) {
+  void _onTap(int index) {
     navigationShell.goBranch(
       index,
-      // Tapping the already-active tab pops its branch back to its root.
       initialLocation: index == navigationShell.currentIndex,
     );
   }
 
   @override
   Widget build(BuildContext context) {
+    final current = navigationShell.currentIndex;
+
     return Scaffold(
       body: navigationShell,
-      bottomNavigationBar: NavigationBar(
-        selectedIndex: navigationShell.currentIndex,
-        onDestinationSelected: _onDestinationSelected,
-        destinations: [
-          NavigationDestination(
-            icon: const Icon(Icons.home_outlined),
-            selectedIcon: const Icon(Icons.home),
-            label: LocaleKeys.navigation_home.tr(),
+      bottomNavigationBar: Directionality(
+        // RTL so items order matches the design: الرئيسية on the right
+        textDirection: TextDirection.rtl,
+        child: Container(
+          decoration: const BoxDecoration(
+            color: AppColors.white,
+            border: Border(top: BorderSide(color: Color(0xFFE5E7EB), width: 1)),
           ),
-          NavigationDestination(
-            icon: const Icon(Icons.search_outlined),
-            selectedIcon: const Icon(Icons.search),
-            label: LocaleKeys.navigation_search.tr(),
+          child: SafeArea(
+            top: false,
+            child: SizedBox(
+              height: 64,
+              child: Row(
+                children: [
+                  _NavItem(
+                    icon: Icons.home_outlined,
+                    activeIcon: Icons.home,
+                    label: 'الرئيسية',
+                    selected: current == 0,
+                    onTap: () => _onTap(0),
+                  ),
+                  _NavItem(
+                    icon: Icons.content_paste_outlined,
+                    activeIcon: Icons.content_paste,
+                    label: 'خدمتنا',
+                    selected: current == 1,
+                    onTap: () => _onTap(1),
+                  ),
+                  _NavItem(
+                    icon: Icons.calendar_month_outlined,
+                    activeIcon: Icons.calendar_month,
+                    label: 'جلساتي',
+                    selected: current == 2,
+                    onTap: () => _onTap(2),
+                  ),
+                  _NavItem(
+                    icon: Icons.person_outline,
+                    activeIcon: Icons.person,
+                    label: 'حسابي',
+                    selected: current == 3,
+                    onTap: () => _onTap(3),
+                  ),
+                ],
+              ),
+            ),
           ),
-          NavigationDestination(
-            icon: const Icon(Icons.person_outline),
-            selectedIcon: const Icon(Icons.person),
-            label: LocaleKeys.navigation_profile.tr(),
-          ),
-        ],
+        ),
+      ),
+    );
+  }
+}
+
+class _NavItem extends StatelessWidget {
+  const _NavItem({
+    required this.icon,
+    required this.activeIcon,
+    required this.label,
+    required this.selected,
+    required this.onTap,
+  });
+
+  final IconData icon;
+  final IconData activeIcon;
+  final String label;
+  final bool selected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final color = selected ? AppColors.primary : const Color(0xFFADB5BD);
+
+    return Expanded(
+      child: InkWell(
+        onTap: onTap,
+        splashColor: Colors.transparent,
+        highlightColor: Colors.transparent,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(selected ? activeIcon : icon, color: color, size: 26),
+            const SizedBox(height: 4),
+            Text(
+              label,
+              style: AppTextStyles.caption.copyWith(
+                color: color,
+                fontWeight:
+                    selected ? FontWeight.w700 : FontWeight.w400,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

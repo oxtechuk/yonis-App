@@ -18,6 +18,34 @@
     "subtitle": "من جميع أنحاء العالم",
     "startNow": "ابدأ الآن"
   },
+  "home": {
+    "testimonialsTitle": "آراء العملاء",
+    "aboutTitle": "نبذة عني",
+    "aboutBio": "معالج نفسي مرخص بخبرة تزيد عن 10 سنوات في تقديم الاستشارات النفسية الفردية والزوجية. أعتمد على العلاج المعرفي السلوكي وأساليب الوعي التام لمساعدة الأفراد (CBT) على فهم ذواتهم بشكل أعمق وتطوير آليات صحية للتعامل مع ضغوط الحياة. أؤمن بتوفير بيئة آمنة وخالية من الأحكام لدعم رحلتك نحو التعافي.",
+    "heroTitle": "المعالج النفسي\nيونس المرشد",
+    "heroSubtitle": "نساعدك على تجاوز الصعوبات النفسية والوصول\nإلى حياة متوازنة وواعية.",
+    "bookConsultation": "احجز استشارتك",
+    "getToKnowYounis": "تعرف على يونس",
+    "reelsTitle": "تبعانا عبر منصات التواصل",
+    "reelStress": "🧠 الضغط النفسي",
+    "reelTrustInGod": "🔔 توكل على الله",
+    "reelGriefStages": "🔈 مراحل الحزن",
+    "specialties": {
+      "administrativeCases": "قضايا إدارية",
+      "anxietyDisorder": "اضطراب القلق",
+      "awareness": "وعي",
+      "addiction": "إدمان",
+      "generalRights": "حقوق وعامة",
+      "medicalErrors": "الأخطاء الطبية",
+      "labor": "عمالية",
+      "commercial": "تجارية",
+      "hyperactivity": "فرط حركة",
+      "traffic": "مرورية",
+      "realEstate": "عقارية",
+      "enforcementCases": "قضايا التنفيذ",
+      "semiJudicialCommittees": "اللجان شبه القضائية"
+    }
+  },
   "placeholders": {
     "homeTabContent": "محتوى تبويب الرئيسية",
     "searchTabContent": "محتوى تبويب البحث",

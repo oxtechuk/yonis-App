@@ -18,6 +18,34 @@
     "subtitle": "from anywhere in the world",
     "startNow": "Start Now"
   },
+  "home": {
+    "testimonialsTitle": "Customer Testimonials",
+    "aboutTitle": "About Me",
+    "aboutBio": "A licensed psychotherapist with over 10 years of experience providing individual and couples counseling. I rely on cognitive behavioral therapy (CBT) and mindfulness techniques to help individuals understand themselves more deeply and develop healthy ways of coping with life's pressures. I believe in offering a safe, judgment-free environment to support your journey toward recovery.",
+    "heroTitle": "Psychotherapist\nYounis Al-Murshid",
+    "heroSubtitle": "We help you overcome psychological difficulties\nand reach a balanced, mindful life.",
+    "bookConsultation": "Book Your Consultation",
+    "getToKnowYounis": "Get to Know Yonis",
+    "reelsTitle": "Follow Us on Social Media",
+    "reelStress": "🧠 Psychological Pressure",
+    "reelTrustInGod": "🔔 Put Your Trust in God",
+    "reelGriefStages": "🔈 Stages of Grief",
+    "specialties": {
+      "administrativeCases": "Administrative Cases",
+      "anxietyDisorder": "Anxiety Disorder",
+      "awareness": "Awareness",
+      "addiction": "Addiction",
+      "generalRights": "General & Civil Rights",
+      "medicalErrors": "Medical Errors",
+      "labor": "Labor",
+      "commercial": "Commercial",
+      "hyperactivity": "Hyperactivity",
+      "traffic": "Traffic",
+      "realEstate": "Real Estate",
+      "enforcementCases": "Enforcement Cases",
+      "semiJudicialCommittees": "Semi-Judicial Committees"
+    }
+  },
   "placeholders": {
     "homeTabContent": "Home tab content",
     "searchTabContent": "Search tab content",

@@ -2,7 +2,7 @@
 
 // ignore_for_file: constant_identifier_names
 
-abstract class LocaleKeys {
+abstract class  LocaleKeys {
   static const appName = 'appName';
   static const common_ok = 'common.ok';
   static const common_cancel = 'common.cancel';
@@ -19,10 +19,35 @@ abstract class LocaleKeys {
   static const welcome_subtitle = 'welcome.subtitle';
   static const welcome_startNow = 'welcome.startNow';
   static const welcome = 'welcome';
+  static const home_testimonialsTitle = 'home.testimonialsTitle';
+  static const home_aboutTitle = 'home.aboutTitle';
+  static const home_aboutBio = 'home.aboutBio';
+  static const home_heroTitle = 'home.heroTitle';
+  static const home_heroSubtitle = 'home.heroSubtitle';
+  static const home_bookConsultation = 'home.bookConsultation';
+  static const home_getToKnowYounis = 'home.getToKnowYounis';
+  static const home_reelsTitle = 'home.reelsTitle';
+  static const home_reelStress = 'home.reelStress';
+  static const home_reelTrustInGod = 'home.reelTrustInGod';
+  static const home_reelGriefStages = 'home.reelGriefStages';
+  static const home_specialties_administrativeCases = 'home.specialties.administrativeCases';
+  static const home_specialties_anxietyDisorder = 'home.specialties.anxietyDisorder';
+  static const home_specialties_awareness = 'home.specialties.awareness';
+  static const home_specialties_addiction = 'home.specialties.addiction';
+  static const home_specialties_generalRights = 'home.specialties.generalRights';
+  static const home_specialties_medicalErrors = 'home.specialties.medicalErrors';
+  static const home_specialties_labor = 'home.specialties.labor';
+  static const home_specialties_commercial = 'home.specialties.commercial';
+  static const home_specialties_hyperactivity = 'home.specialties.hyperactivity';
+  static const home_specialties_traffic = 'home.specialties.traffic';
+  static const home_specialties_realEstate = 'home.specialties.realEstate';
+  static const home_specialties_enforcementCases = 'home.specialties.enforcementCases';
+  static const home_specialties_semiJudicialCommittees = 'home.specialties.semiJudicialCommittees';
+  static const home_specialties = 'home.specialties';
+  static const home = 'home';
   static const placeholders_homeTabContent = 'placeholders.homeTabContent';
   static const placeholders_searchTabContent = 'placeholders.searchTabContent';
-  static const placeholders_profileTabContent =
-      'placeholders.profileTabContent';
+  static const placeholders_profileTabContent = 'placeholders.profileTabContent';
   static const placeholders_increment = 'placeholders.increment';
   static const placeholders_counterValue = 'placeholders.counterValue';
   static const placeholders_openItemDetails = 'placeholders.openItemDetails';
@@ -41,4 +66,5 @@ abstract class LocaleKeys {
   static const errors = 'errors';
   static const validation_required = 'validation.required';
   static const validation = 'validation';
+
 }
