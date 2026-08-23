@@ -10,4 +10,10 @@ abstract final class AppRoutes {
 
   static const String homeItemDetail = '/home/items/:itemId';
   static String homeItemDetailLocation(String itemId) => '/home/items/$itemId';
+
+  static const String login = '/login';
+  static const String booking = '/booking';
+  static const String bookingStep2 = '/booking/step2';
+  static const String payment = '/booking/payment';
+  static const String paymentSuccess = '/booking/payment/success';
 }

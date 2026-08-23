@@ -6,7 +6,7 @@ import '../../../../app/styles/app_colors.dart';
 import '../../../../app/styles/app_sizes.dart';
 import '../../../../app/styles/app_spacing.dart';
 import '../../../../app/styles/app_text_styles.dart';
-import 'login_primary_button.dart';
+import '../../../../app/widgets/primary_button.dart';
 
 /// Screen-local card tint and corner radius (not part of the shared palette).
 const Color _cardColor = Color(0xFFEAECF8);
@@ -67,7 +67,7 @@ class LoginNoAccountCard extends StatelessWidget {
             ),
           ),
           const SizedBox(height: AppSpacing.md),
-          LoginPrimaryButton(
+          PrimaryButton(
             label: LocaleKeys.auth_startSessions.tr(),
             onPressed: onTap,
           ),

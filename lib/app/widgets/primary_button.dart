@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 
-import '../../../../app/styles/app_colors.dart';
-import '../../../../app/styles/app_sizes.dart';
-import '../../../../app/styles/app_text_styles.dart';
+import '../styles/app_colors.dart';
+import '../styles/app_sizes.dart';
+import '../styles/app_text_styles.dart';
 
-/// Pill-shaped primary CTA shared by the login screen sections.
-class LoginPrimaryButton extends StatelessWidget {
-  const LoginPrimaryButton({super.key, required this.label, this.onPressed});
+/// Pill-shaped brand-primary CTA shared across features.
+class PrimaryButton extends StatelessWidget {
+  const PrimaryButton({super.key, required this.label, this.onPressed});
 
   final String label;
   final VoidCallback? onPressed;

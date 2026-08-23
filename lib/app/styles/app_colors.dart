@@ -35,4 +35,10 @@ abstract final class AppColors {
   static const Color error = Color(0xFFDC2626);
 
   static const Color border = Color(0xFFE5E7EB);
+
+  /// Tinted fill behind filled text fields (light mode).
+  static const Color fieldFill = Color(0xFFF3F4F6);
+
+  /// Soft indigo tint used by informational cards (light mode).
+  static const Color cardTint = Color(0xFFEAECF8);
 }

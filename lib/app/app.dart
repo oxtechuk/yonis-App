@@ -6,24 +6,23 @@ import 'localization/locale_keys.g.dart';
 import 'router/app_router.dart';
 import 'theme/app_theme.dart';
 
-class YounisApp extends StatelessWidget {
-  YounisApp({super.key, this.appBuilder});
+class YounisApp extends StatefulWidget {
+  const YounisApp({super.key, this.appBuilder});
 
-  /// Optional wrapper applied around the whole app (e.g. DevicePreview's
-  /// appBuilder). Kept out of the default constructor so widget tests pump a
-  /// clean tree; bootstrap injects it only in non-release modes.
   final TransitionBuilder? appBuilder;
 
-  final GoRouter _router = createAppRouter();
+  @override
+  State<YounisApp> createState() => _YounisAppState();
+}
+
+class _YounisAppState extends State<YounisApp> {
+  // Created once and kept alive for the lifetime of the app.
+  // Must live in State, not in the widget, so rebuilds never recreate it.
+  late final GoRouter _router = createAppRouter();
 
   @override
   Widget build(BuildContext context) {
-    // Reading the locale registers a dependency on easy_localization's
-    // provider; keying by it forces a full rebuild of the navigation tree so
-    // widgets that render via `.tr()` pick up the new translations.
-    final locale = context.locale;
     return MaterialApp.router(
-      key: ValueKey<Locale>(locale),
       onGenerateTitle: (context) => LocaleKeys.appName.tr(),
       localizationsDelegates: context.localizationDelegates,
       supportedLocales: context.supportedLocales,
@@ -32,7 +31,7 @@ class YounisApp extends StatelessWidget {
       theme: AppTheme.light(),
       darkTheme: AppTheme.dark(),
       themeMode: ThemeMode.system,
-      builder: appBuilder,
+      builder: widget.appBuilder,
       routerConfig: _router,
     );
   }

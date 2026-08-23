@@ -2,29 +2,34 @@ import 'dart:ui' as ui;
 
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../../app/localization/locale_keys.g.dart';
+import '../../../../app/router/app_routes.dart';
 import '../../../../app/styles/app_colors.dart';
 import '../../../../app/styles/app_spacing.dart';
 import '../../../../app/styles/app_text_styles.dart';
 import '../../../auth/domain/auth_state.dart';
-import '../../../auth/presentation/pages/login_page.dart';
 import 'service_option_card.dart';
 
 /// Bottom sheet shown when the user taps "Book Your Consultation".
 /// Matches the design: two option cards (clinic & online) each with a
 /// title, description, price, and a CTA button.
 class BookServiceBottomSheet extends StatelessWidget {
-  const BookServiceBottomSheet({super.key});
+  const BookServiceBottomSheet({super.key, required this.router});
+
+  final GoRouter router;
 
   static void show(BuildContext context) {
+    // Capture the router from the calling context (which has GoRouter as ancestor)
+    // before showing the sheet, since useRootNavigator: true would lose it.
+    final router = GoRouter.of(context);
     showModalBottomSheet<void>(
       context: context,
-      useRootNavigator: true,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       barrierColor: AppColors.primary.withValues(alpha: 0.31),
-      builder: (_) => const BookServiceBottomSheet(),
+      builder: (_) => BookServiceBottomSheet(router: router),
     );
   }
 
@@ -33,17 +38,16 @@ class BookServiceBottomSheet extends StatelessWidget {
   static const double _headerSlotWidth = 40;
 
   /// Called when any service option is tapped.
-  /// Closes this sheet and shows auth prompt if not logged in.
+  /// Closes this sheet then either:
+  ///  - opens the booking flow directly (logged-in user), or
+  ///  - shows the login page with a guest-booking option.
   void _onServiceTap(BuildContext context) {
-    Navigator.of(context, rootNavigator: true).pop();
-    if (!AuthState.instance.isLoggedIn) {
-      final rootCtx = Navigator.of(context, rootNavigator: true).context;
-      LoginPage.show(
-        rootCtx,
-        onGuestBooking: () => BookServiceBottomSheet.show(rootCtx),
-      );
+    Navigator.of(context).pop();
+    if (AuthState.instance.isLoggedIn) {
+      router.push(AppRoutes.booking);
+    } else {
+      router.push(AppRoutes.login, extra: () => router.push(AppRoutes.booking));
     }
-    // TODO: else navigate to booking flow
   }
 
   @override

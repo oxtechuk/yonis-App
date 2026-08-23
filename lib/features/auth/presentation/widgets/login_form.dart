@@ -10,11 +10,9 @@ import '../../../../app/styles/app_radius.dart';
 import '../../../../app/styles/app_sizes.dart';
 import '../../../../app/styles/app_spacing.dart';
 import '../../../../app/styles/app_text_styles.dart';
+import '../../../../app/widgets/primary_button.dart';
+import '../../../../app/widgets/saudi_phone_prefix.dart';
 import '../../domain/auth_state.dart';
-import 'login_primary_button.dart';
-
-/// Screen-local input fill tint (not part of the shared palette).
-const Color _fieldFill = Color(0xFFF3F4F6);
 
 class LoginForm extends StatefulWidget {
   const LoginForm({super.key});
@@ -67,7 +65,7 @@ class _LoginFormState extends State<LoginForm> {
             inputFormatters: [FilteringTextInputFormatter.digitsOnly],
             decoration: _inputDecoration(
               hintText: LocaleKeys.auth_phonePlaceholder.tr(),
-              prefix: const _PhonePrefix(),
+              prefix: const SaudiPhonePrefix(),
             ),
             validator: (v) => (v == null || v.trim().isEmpty)
                 ? LocaleKeys.auth_phoneRequired.tr()
@@ -118,7 +116,7 @@ class _LoginFormState extends State<LoginForm> {
           const SizedBox(height: AppSpacing.xl),
 
           // ── Submit ─────────────────────────────────────────────────
-          LoginPrimaryButton(
+          PrimaryButton(
             label: LocaleKeys.auth_loginButton.tr(),
             onPressed: _submit,
           ),
@@ -141,7 +139,7 @@ class _LoginFormState extends State<LoginForm> {
       hintText: hintText,
       hintStyle: AppTextStyles.body.copyWith(color: AppColors.textSecondary),
       filled: true,
-      fillColor: _fieldFill,
+      fillColor: AppColors.fieldFill,
       contentPadding: const EdgeInsets.symmetric(
         horizontal: AppSpacing.md,
         vertical: AppSpacing.sm,
@@ -159,36 +157,6 @@ class _LoginFormState extends State<LoginForm> {
       ),
       prefixIcon: prefix,
       suffixIcon: suffix,
-    );
-  }
-}
-
-/// Country-code adornment (🇸🇦 +966) shown before the phone digits.
-class _PhonePrefix extends StatelessWidget {
-  const _PhonePrefix();
-
-  @override
-  Widget build(BuildContext context) {
-    return Directionality(
-      textDirection: ui.TextDirection.ltr,
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          const SizedBox(width: AppSpacing.sm),
-          const Text('🇸🇦', style: TextStyle(fontSize: 20)),
-          const SizedBox(width: AppSpacing.xs),
-          Text(
-            '+966',
-            style: AppTextStyles.body.copyWith(
-              color: AppColors.textPrimary,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-          const SizedBox(width: AppSpacing.xs),
-          Container(width: 1, height: 24, color: AppColors.border),
-          const SizedBox(width: AppSpacing.xs),
-        ],
-      ),
     );
   }
 }

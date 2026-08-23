@@ -2,8 +2,10 @@ import 'dart:ui' as ui;
 
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../../app/localization/locale_keys.g.dart';
+import '../../../../app/router/app_routes.dart';
 import '../../../../app/styles/app_colors.dart';
 import '../../../../app/styles/app_images.dart';
 import '../../../../app/styles/app_spacing.dart';
@@ -21,15 +23,15 @@ class LoginPage extends StatelessWidget {
     BuildContext context, {
     VoidCallback? onGuestBooking,
   }) {
-    Navigator.of(context, rootNavigator: true).push(
-      MaterialPageRoute<void>(
-        builder: (_) => LoginPage(onGuestBooking: onGuestBooking),
-      ),
+    // Capture router before any potential pop that deactivates context
+    final router = GoRouter.of(context);
+    router.push(
+      AppRoutes.login,
+      extra: onGuestBooking,
     );
   }
 
-  void _pop(BuildContext context) =>
-      Navigator.of(context, rootNavigator: true).pop();
+  void _pop(BuildContext context) => context.pop();
 
   @override
   Widget build(BuildContext context) {
