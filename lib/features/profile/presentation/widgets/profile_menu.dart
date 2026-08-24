@@ -36,7 +36,7 @@ class ProfileMenu extends StatelessWidget {
           const _MenuDivider(),
           _MenuItem(
             icon: Icons.language_rounded,
-            label: LocaleKeys.settings_language.tr(),
+            label: context.tr(LocaleKeys.settings_language),
             onTap: () => showLanguageSwitcherSheet(context),
           ),
           const _MenuDivider(),

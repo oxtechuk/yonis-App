@@ -36,7 +36,7 @@ class HomeSpecialtiesSection extends StatelessWidget {
           spacing: AppSpacing.sm,
           runSpacing: AppSpacing.sm,
           children:
-              _specialtyKeys.map((key) => _Chip(label: key.tr())).toList(),
+              _specialtyKeys.map((key) => _Chip(label: context.tr(key))).toList(),
         ),
       ),
     );

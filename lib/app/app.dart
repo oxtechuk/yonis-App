@@ -23,7 +23,7 @@ class _YounisAppState extends State<YounisApp> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp.router(
-      onGenerateTitle: (context) => LocaleKeys.appName.tr(),
+      onGenerateTitle: (context) => context.tr(LocaleKeys.appName),
       localizationsDelegates: context.localizationDelegates,
       supportedLocales: context.supportedLocales,
       locale: context.locale,

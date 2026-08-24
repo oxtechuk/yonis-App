@@ -13,6 +13,8 @@ abstract class  LocaleKeys {
   static const common = 'common';
   static const navigation_home = 'navigation.home';
   static const navigation_search = 'navigation.search';
+  static const navigation_services = 'navigation.services';
+  static const navigation_sessions = 'navigation.sessions';
   static const navigation_profile = 'navigation.profile';
   static const navigation = 'navigation';
   static const auth_noAccountTitle = 'auth.noAccountTitle';

@@ -7,7 +7,11 @@ import '../../../../app/styles/app_spacing.dart';
 import '../../../../app/styles/app_text_styles.dart';
 
 class HomeAboutCard extends StatelessWidget {
-  const HomeAboutCard({super.key});
+  const HomeAboutCard({super.key, this.bio});
+
+  /// Doctor bio from the profile API. Falls back to the localized
+  /// placeholder while loading or when the API provides none.
+  final String? bio;
 
   @override
   Widget build(BuildContext context) {
@@ -49,7 +53,7 @@ class HomeAboutCard extends StatelessWidget {
                             ),
                             const SizedBox(width: AppSpacing.xs),
                             Text(
-                              LocaleKeys.home_aboutTitle.tr(),
+                              context.tr(LocaleKeys.home_aboutTitle),
                               style: AppTextStyles.title.copyWith(
                                 color: AppColors.textPrimary,
                                 fontWeight: FontWeight.w700,
@@ -59,7 +63,7 @@ class HomeAboutCard extends StatelessWidget {
                         ),
                         const SizedBox(height: AppSpacing.sm),
                         Text(
-                          LocaleKeys.home_aboutBio.tr(),
+                          bio ?? context.tr(LocaleKeys.home_aboutBio),
                           textAlign: TextAlign.center,
                           // Use body style without overriding font size
                           style: AppTextStyles.body.copyWith(

@@ -50,7 +50,7 @@ class LoginPage extends StatelessWidget {
                 const _Logo(),
                 const SizedBox(height: AppSpacing.xl),
                 Text(
-                  LocaleKeys.auth_loginTitle.tr(),
+                  context.tr(LocaleKeys.auth_loginTitle),
                   textAlign: TextAlign.right,
                   style: AppTextStyles.display.copyWith(
                     color: AppColors.textPrimary,

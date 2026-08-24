@@ -39,7 +39,7 @@ class _LanguageOptionList extends StatelessWidget {
               AppSpacing.sm,
             ),
             child: Text(
-              LocaleKeys.settings_language.tr(),
+              context.tr(LocaleKeys.settings_language),
               textAlign: TextAlign.center,
               style: AppTextStyles.title.copyWith(
                 color: AppColors.textPrimary,
@@ -86,8 +86,8 @@ class _LanguageOption extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final label = locale.languageCode == 'ar'
-        ? LocaleKeys.settings_arabic.tr()
-        : LocaleKeys.settings_english.tr();
+        ? context.tr(LocaleKeys.settings_arabic)
+        : context.tr(LocaleKeys.settings_english);
 
     return InkWell(
       onTap: onTap,

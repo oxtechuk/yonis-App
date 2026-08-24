@@ -11,6 +11,8 @@
   "navigation": {
     "home": "الرئيسية",
     "search": "البحث",
+    "services": "خدمتنا",
+    "sessions": "جلساتي",
     "profile": "حسابي"
   },
   "auth": {

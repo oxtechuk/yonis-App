@@ -40,7 +40,7 @@ class HomeReelsSection extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
             child: Text(
-              LocaleKeys.home_reelsTitle.tr(),
+              context.tr(LocaleKeys.home_reelsTitle),
               style: AppTextStyles.title.copyWith(
                 color: AppColors.textPrimary,
                 fontWeight: FontWeight.w700,
@@ -119,7 +119,7 @@ class _ReelCard extends StatelessWidget {
                     ),
                   ),
                   child: Text(
-                    reel.titleKey.tr(),
+                    context.tr(reel.titleKey),
                     style: AppTextStyles.bodySmall.copyWith(
                       color: AppColors.white,
                       fontWeight: FontWeight.w700,

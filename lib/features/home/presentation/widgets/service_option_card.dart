@@ -93,7 +93,7 @@ class ServiceOptionCard extends StatelessWidget {
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               Text(
-                                LocaleKeys.home_bookService_startNow.tr(),
+                                context.tr(LocaleKeys.home_bookService_startNow),
                                 style: AppTextStyles.button
                                     .copyWith(color: AppColors.white),
                               ),

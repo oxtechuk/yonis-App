@@ -33,7 +33,7 @@ class WelcomeStartButton extends StatelessWidget {
             shape: const StadiumBorder(),
             textStyle: AppTextStyles.button.copyWith(fontSize: 16),
           ),
-          child: Text(LocaleKeys.welcome_startNow.tr()),
+          child: Text(context.tr(LocaleKeys.welcome_startNow)),
         ),
       ),
     );

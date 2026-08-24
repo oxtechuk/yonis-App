@@ -4,6 +4,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:younis_app/app/localization/locale_keys.g.dart';
+import 'package:younis_app/app/router/app_navigation_shell.dart';
 import 'package:younis_app/app/styles/app_durations.dart';
 import 'package:younis_app/features/app_entry/presentation/pages/splash_page.dart';
 import 'package:younis_app/features/app_entry/presentation/pages/welcome_page.dart';
@@ -76,7 +77,7 @@ void main() {
     await tester.pumpAndSettle();
 
     // Main shell with bottom navigation — not login.
-    expect(find.byType(NavigationBar), findsOneWidget);
+    expect(find.byType(AppNavigationShell), findsOneWidget);
     expect(find.byType(WelcomePage), findsNothing);
   });
 }

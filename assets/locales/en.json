@@ -11,6 +11,8 @@
   "navigation": {
     "home": "Home",
     "search": "Search",
+    "services": "Services",
+    "sessions": "Sessions",
     "profile": "Profile"
   },
   "auth": {

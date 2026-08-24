@@ -75,7 +75,7 @@ class HomeHeroSection extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
                         Text(
-                          LocaleKeys.home_heroTitle.tr(),
+                          context.tr(LocaleKeys.home_heroTitle),
                           textAlign: TextAlign.center,
                           style: AppTextStyles.display.copyWith(
                             color: AppColors.white,
@@ -85,7 +85,7 @@ class HomeHeroSection extends StatelessWidget {
                         ),
                         const SizedBox(height: AppSpacing.sm),
                         Text(
-                          LocaleKeys.home_heroSubtitle.tr(),
+                          context.tr(LocaleKeys.home_heroSubtitle),
                           textAlign: TextAlign.center,
                           style: AppTextStyles.body.copyWith(
                             color: AppColors.white.withValues(alpha: 0.88),
@@ -113,7 +113,7 @@ class HomeHeroSection extends StatelessWidget {
                   size: AppSizes.iconMd,
                 ),
                 label: Text(
-                  LocaleKeys.home_bookConsultation.tr(),
+                  context.tr(LocaleKeys.home_bookConsultation),
                   style: AppTextStyles.button.copyWith(color: AppColors.white),
                 ),
               ),
@@ -139,7 +139,7 @@ class HomeHeroSection extends StatelessWidget {
               ),
               icon: const Icon(Icons.person_outline, size: AppSizes.iconMd),
               label: Text(
-                LocaleKeys.home_getToKnowYounis.tr(),
+                context.tr(LocaleKeys.home_getToKnowYounis),
                 style: AppTextStyles.button.copyWith(color: AppColors.primary),
               ),
             ),

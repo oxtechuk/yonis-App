@@ -96,7 +96,7 @@ class BookServiceBottomSheet extends StatelessWidget {
                 ),
                 Expanded(
                   child: Text(
-                    LocaleKeys.home_bookService_sheetTitle.tr(),
+                    context.tr(LocaleKeys.home_bookService_sheetTitle),
                     textAlign: TextAlign.center,
                     style: AppTextStyles.title.copyWith(
                       color: AppColors.textPrimary,
@@ -111,18 +111,18 @@ class BookServiceBottomSheet extends StatelessWidget {
 
             // Clinic card
             ServiceOptionCard.clinic(
-              title: LocaleKeys.home_bookService_clinicTitle.tr(),
-              description: LocaleKeys.home_bookService_clinicDesc.tr(),
-              price: LocaleKeys.home_bookService_clinicPrice.tr(),
+              title: context.tr(LocaleKeys.home_bookService_clinicTitle),
+              description: context.tr(LocaleKeys.home_bookService_clinicDesc),
+              price: context.tr(LocaleKeys.home_bookService_clinicPrice),
               onTap: () => _onServiceTap(context),
             ),
             const SizedBox(height: AppSpacing.md),
 
             // Online card
             ServiceOptionCard.online(
-              title: LocaleKeys.home_bookService_onlineTitle.tr(),
-              description: LocaleKeys.home_bookService_onlineDesc.tr(),
-              price: LocaleKeys.home_bookService_onlinePrice.tr(),
+              title: context.tr(LocaleKeys.home_bookService_onlineTitle),
+              description: context.tr(LocaleKeys.home_bookService_onlineDesc),
+              price: context.tr(LocaleKeys.home_bookService_onlinePrice),
               onTap: () => _onServiceTap(context),
             ),
           ],

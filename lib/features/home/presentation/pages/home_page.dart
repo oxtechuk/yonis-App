@@ -28,8 +28,9 @@ class HomePage extends StatelessWidget {
                 children: [
                   BlocBuilder<DoctorProfileCubit, DoctorProfileState>(
                     builder: (context, state) {
-                      final profile =
-                          state is DoctorProfileLoaded ? state.profile : null;
+                      final profile = state is DoctorProfileLoaded
+                          ? state.profile
+                          : null;
                       return HomeHeroSection(
                         heroImageUrl: profile?.heroImage,
                         onBookTap: () =>
@@ -41,7 +42,14 @@ class HomePage extends StatelessWidget {
                     },
                   ),
                   const SizedBox(height: AppSpacing.lg),
-                  const HomeAboutCard(),
+                  BlocBuilder<DoctorProfileCubit, DoctorProfileState>(
+                    builder: (context, state) {
+                      final profile = state is DoctorProfileLoaded
+                          ? state.profile
+                          : null;
+                      return HomeAboutCard(bio: profile?.bio);
+                    },
+                  ),
                   const SizedBox(height: AppSpacing.lg),
                   const HomeSpecialtiesSection(),
                   const SizedBox(height: AppSpacing.lg),

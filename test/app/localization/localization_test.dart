@@ -5,7 +5,6 @@ import 'dart:ui' as ui;
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:younis_app/app/localization/locale_keys.g.dart';
 
 import '../../support/pump_app.dart';
 
@@ -65,9 +64,9 @@ void main() {
     await pumpLocalizedApp(tester);
     await enterMainApp(tester);
 
-    expect(find.text(LocaleKeys.navigation_home.tr()), findsOneWidget);
     expect(find.text('الرئيسية'), findsOneWidget);
-    expect(find.text('البحث'), findsOneWidget);
+    expect(find.text('خدمتنا'), findsOneWidget);
+    expect(find.text('جلساتي'), findsOneWidget);
     expect(find.text('حسابي'), findsOneWidget);
   });
 
@@ -77,18 +76,22 @@ void main() {
     await pumpLocalizedApp(tester);
     await enterMainApp(tester);
 
-    final context = tester.element(find.byType(NavigationBar));
+    final context = tester.element(find.byType(Scaffold).first);
     await context.setLocale(const Locale('en'));
     await tester.pumpAndSettle();
 
     // Translated bottom-navigation labels.
     expect(find.text('Home'), findsOneWidget);
-    expect(find.text('Search'), findsOneWidget);
+    expect(find.text('Services'), findsOneWidget);
+    expect(find.text('Sessions'), findsOneWidget);
     expect(find.text('Profile'), findsOneWidget);
     expect(find.text('الرئيسية'), findsNothing);
 
-    // Placeholder content translated too.
-    expect(find.text('Home tab content'), findsOneWidget);
+    // Home content translated too.
+    expect(
+      find.text('Psychotherapist\nYounis Al-Murshid'),
+      findsOneWidget,
+    );
 
     // LTR applied at the app root.
     final directionality = tester.widget<Directionality>(

@@ -47,7 +47,7 @@ class LoginNoAccountCard extends StatelessWidget {
               const SizedBox(width: AppSpacing.sm),
               Expanded(
                 child: Text(
-                  LocaleKeys.auth_noAccountTitle.tr(),
+                  context.tr(LocaleKeys.auth_noAccountTitle),
                   textAlign: TextAlign.right,
                   style: AppTextStyles.title.copyWith(
                     color: AppColors.textPrimary,
@@ -59,7 +59,7 @@ class LoginNoAccountCard extends StatelessWidget {
           ),
           const SizedBox(height: AppSpacing.sm),
           Text(
-            LocaleKeys.auth_noAccountDesc.tr(),
+            context.tr(LocaleKeys.auth_noAccountDesc),
             textAlign: TextAlign.center,
             style: AppTextStyles.body.copyWith(
               color: AppColors.textSecondary,
@@ -68,7 +68,7 @@ class LoginNoAccountCard extends StatelessWidget {
           ),
           const SizedBox(height: AppSpacing.md),
           PrimaryButton(
-            label: LocaleKeys.auth_startSessions.tr(),
+            label: context.tr(LocaleKeys.auth_startSessions),
             onPressed: onTap,
           ),
         ],

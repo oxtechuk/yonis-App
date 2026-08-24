@@ -17,14 +17,14 @@ class WelcomeMessage extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           Text(
-            LocaleKeys.welcome_title.tr(),
+            context.tr(LocaleKeys.welcome_title),
             textAlign: TextAlign.center,
             // Use headline token directly — no fontSize override
             style: AppTextStyles.headline.copyWith(color: AppColors.white),
           ),
           const SizedBox(height: AppSpacing.sm),
           Text(
-            LocaleKeys.welcome_subtitle.tr(),
+            context.tr(LocaleKeys.welcome_subtitle),
             textAlign: TextAlign.center,
             style: AppTextStyles.headline.copyWith(color: AppColors.white),
           ),

@@ -10,6 +10,6 @@ class SearchPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Center(child: Text(LocaleKeys.placeholders_searchTabContent.tr()));
+    return Center(child: Text(context.tr(LocaleKeys.placeholders_searchTabContent)));
   }
 }

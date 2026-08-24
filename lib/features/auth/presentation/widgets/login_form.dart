@@ -52,7 +52,7 @@ class _LoginFormState extends State<LoginForm> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Text(
-            LocaleKeys.auth_phoneLabel.tr(),
+            context.tr(LocaleKeys.auth_phoneLabel),
             style: AppTextStyles.body.copyWith(
               color: AppColors.textSecondary,
               fontWeight: FontWeight.w500,
@@ -65,20 +65,20 @@ class _LoginFormState extends State<LoginForm> {
             textDirection: ui.TextDirection.ltr,
             textAlign: TextAlign.right,
             inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-            hint: LocaleKeys.auth_phonePlaceholder.tr(),
+            hint: context.tr(LocaleKeys.auth_phonePlaceholder),
             height: 56,
             prefixWidget: PhoneCountryPicker(
               selected: _country,
               onChanged: (c) => setState(() => _country = c),
             ),
             validator: (v) => (v == null || v.trim().isEmpty)
-                ? LocaleKeys.auth_phoneRequired.tr()
+                ? context.tr(LocaleKeys.auth_phoneRequired)
                 : null,
           ),
           const SizedBox(height: AppSpacing.lg),
 
           Text(
-            LocaleKeys.auth_passwordLabel.tr(),
+            context.tr(LocaleKeys.auth_passwordLabel),
             style: AppTextStyles.body.copyWith(
               color: AppColors.textSecondary,
               fontWeight: FontWeight.w500,
@@ -89,7 +89,7 @@ class _LoginFormState extends State<LoginForm> {
             controller: _passwordController,
             obscureText: _obscurePassword,
             textDirection: ui.TextDirection.ltr,
-            hint: LocaleKeys.auth_passwordPlaceholder.tr(),
+            hint: context.tr(LocaleKeys.auth_passwordPlaceholder),
             height: 56,
             prefixWidget: Padding(
               padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
@@ -111,13 +111,13 @@ class _LoginFormState extends State<LoginForm> {
                   setState(() => _obscurePassword = !_obscurePassword),
             ),
             validator: (v) => (v == null || v.trim().isEmpty)
-                ? LocaleKeys.auth_passwordRequired.tr()
+                ? context.tr(LocaleKeys.auth_passwordRequired)
                 : null,
           ),
           const SizedBox(height: AppSpacing.xl),
 
           PrimaryButton(
-            label: LocaleKeys.auth_loginButton.tr(),
+            label: context.tr(LocaleKeys.auth_loginButton),
             onPressed: _submit,
           ),
         ],

@@ -17,10 +17,11 @@ class HomeItemDetailPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text(LocaleKeys.placeholders_itemDetailTitle.tr())),
+      appBar: AppBar(title: Text(context.tr(LocaleKeys.placeholders_itemDetailTitle))),
       body: Center(
         child: Text(
-          LocaleKeys.placeholders_itemDetailOf.tr(
+          context.tr(
+            LocaleKeys.placeholders_itemDetailOf,
             namedArgs: {'itemId': itemId},
           ),
         ),

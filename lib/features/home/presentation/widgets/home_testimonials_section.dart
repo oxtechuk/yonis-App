@@ -28,7 +28,7 @@ class HomeTestimonialsSection extends StatelessWidget {
             padding:
                 const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
             child: Text(
-              LocaleKeys.home_testimonialsTitle.tr(),
+              context.tr(LocaleKeys.home_testimonialsTitle),
               style: AppTextStyles.title.copyWith(
                 color: AppColors.textPrimary,
                 fontWeight: FontWeight.w700,
