@@ -6,6 +6,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:younis_app/app/app.dart';
+import 'package:younis_app/app/config/app_config.dart';
+import 'package:younis_app/app/di/dependency_injection.dart';
+import 'package:younis_app/app/config/app_environment.dart';
 import 'package:younis_app/app/localization/app_localization.dart';
 import 'package:younis_app/app/localization/locale_keys.g.dart';
 import 'package:younis_app/app/styles/app_durations.dart';
@@ -35,6 +38,16 @@ Future<void> pumpLocalizedApp(WidgetTester tester) async {
   TestWidgetsFlutterBinding.ensureInitialized();
   SharedPreferences.setMockInitialValues(<String, Object>{});
   await EasyLocalization.ensureInitialized();
+
+  // get_it is process-global and outlives individual test cases, so the
+  // composition root is configured once for the whole test run.
+  if (!getIt.isRegistered<AppConfig>()) {
+    configureDependencies(
+      environment: AppEnvironment.development,
+      sharedPreferences: await SharedPreferences.getInstance(),
+    );
+  }
+
   await tester.pumpWidget(
     EasyLocalization(
       supportedLocales: AppLocalization.supportedLocales,

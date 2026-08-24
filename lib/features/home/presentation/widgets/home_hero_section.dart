@@ -13,10 +13,12 @@ class HomeHeroSection extends StatelessWidget {
     super.key,
     this.onBookTap,
     this.onAboutTap,
+    this.heroImageUrl,
   });
 
   final VoidCallback? onBookTap;
   final VoidCallback? onAboutTap;
+  final String? heroImageUrl;
 
   @override
   Widget build(BuildContext context) {
@@ -37,12 +39,19 @@ class HomeHeroSection extends StatelessWidget {
               ),
               child: Stack(
                 children: [
-                  Image.asset(
-                    AppImages.homeHero,
-                    width: double.infinity,
-                    height: imageHeight,
-                    fit: BoxFit.cover,
-                  ),
+                  heroImageUrl != null
+                      ? Image.network(
+                          heroImageUrl!,
+                          width: double.infinity,
+                          height: imageHeight,
+                          fit: BoxFit.cover,
+                        )
+                      : Image.asset(
+                          AppImages.homeHero,
+                          width: double.infinity,
+                          height: imageHeight,
+                          fit: BoxFit.cover,
+                        ),
                   Positioned.fill(
                     child: DecoratedBox(
                       decoration: BoxDecoration(
@@ -70,6 +79,7 @@ class HomeHeroSection extends StatelessWidget {
                           textAlign: TextAlign.center,
                           style: AppTextStyles.display.copyWith(
                             color: AppColors.white,
+                            fontWeight: FontWeight.bold,
                             height: 1.3,
                           ),
                         ),
@@ -98,8 +108,10 @@ class HomeHeroSection extends StatelessWidget {
                   backgroundColor: AppColors.primary,
                   shape: const StadiumBorder(),
                 ),
-                icon: const Icon(Icons.calendar_month_outlined,
-                    size: AppSizes.iconMd),
+                icon: const Icon(
+                  Icons.calendar_month_outlined,
+                  size: AppSizes.iconMd,
+                ),
                 label: Text(
                   LocaleKeys.home_bookConsultation.tr(),
                   style: AppTextStyles.button.copyWith(color: AppColors.white),

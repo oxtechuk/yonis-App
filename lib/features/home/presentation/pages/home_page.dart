@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../../app/di/dependency_injection.dart';
 import '../../../../app/styles/app_colors.dart';
 import '../../../../app/styles/app_spacing.dart';
+import '../cubit/doctor_profile_cubit.dart';
 import '../widgets/book_service_bottom_sheet.dart';
 import '../widgets/home_about_card.dart';
 import '../widgets/home_hero_section.dart';
@@ -14,29 +17,40 @@ class HomePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.background,
-      body: SafeArea(
-        child: Builder(
-          builder: (innerContext) => SingleChildScrollView(
-            child: Column(
-              children: [
-                HomeHeroSection(
-                  onBookTap: () => BookServiceBottomSheet.show(innerContext),
-                  onAboutTap: () {
-                    // TODO: navigate to about
-                  },
-                ),
-                const SizedBox(height: AppSpacing.lg),
-                const HomeAboutCard(),
-                const SizedBox(height: AppSpacing.lg),
-                const HomeSpecialtiesSection(),
-                const SizedBox(height: AppSpacing.lg),
-                const HomeReelsSection(),
-                const SizedBox(height: AppSpacing.lg),
-                const HomeTestimonialsSection(),
-                const SizedBox(height: AppSpacing.xl),
-              ],
+    return BlocProvider<DoctorProfileCubit>(
+      create: (_) => getIt<DoctorProfileCubit>()..load(),
+      child: Scaffold(
+        backgroundColor: AppColors.background,
+        body: SafeArea(
+          child: Builder(
+            builder: (innerContext) => SingleChildScrollView(
+              child: Column(
+                children: [
+                  BlocBuilder<DoctorProfileCubit, DoctorProfileState>(
+                    builder: (context, state) {
+                      final profile =
+                          state is DoctorProfileLoaded ? state.profile : null;
+                      return HomeHeroSection(
+                        heroImageUrl: profile?.heroImage,
+                        onBookTap: () =>
+                            BookServiceBottomSheet.show(innerContext),
+                        onAboutTap: () {
+                          // TODO: navigate to about
+                        },
+                      );
+                    },
+                  ),
+                  const SizedBox(height: AppSpacing.lg),
+                  const HomeAboutCard(),
+                  const SizedBox(height: AppSpacing.lg),
+                  const HomeSpecialtiesSection(),
+                  const SizedBox(height: AppSpacing.lg),
+                  const HomeReelsSection(),
+                  const SizedBox(height: AppSpacing.lg),
+                  const HomeTestimonialsSection(),
+                  const SizedBox(height: AppSpacing.xl),
+                ],
+              ),
             ),
           ),
         ),
