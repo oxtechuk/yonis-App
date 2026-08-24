@@ -87,5 +87,9 @@ abstract class  LocaleKeys {
   static const errors = 'errors';
   static const validation_required = 'validation.required';
   static const validation = 'validation';
+  static const settings_language = 'settings.language';
+  static const settings_arabic = 'settings.arabic';
+  static const settings_english = 'settings.english';
+  static const settings = 'settings';
 
 }

@@ -1,8 +1,11 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 
+import '../../../../app/localization/locale_keys.g.dart';
 import '../../../../app/styles/app_colors.dart';
 import '../../../../app/styles/app_spacing.dart';
 import '../../../../app/styles/app_text_styles.dart';
+import 'language_switcher_sheet.dart';
 
 class ProfileMenu extends StatelessWidget {
   const ProfileMenu({super.key});
@@ -29,6 +32,12 @@ class ProfileMenu extends StatelessWidget {
             icon: Icons.menu_book_outlined,
             label: 'خصوصية البيانات',
             onTap: () {},
+          ),
+          const _MenuDivider(),
+          _MenuItem(
+            icon: Icons.language_rounded,
+            label: LocaleKeys.settings_language.tr(),
+            onTap: () => showLanguageSwitcherSheet(context),
           ),
           const _MenuDivider(),
           _MenuItem(

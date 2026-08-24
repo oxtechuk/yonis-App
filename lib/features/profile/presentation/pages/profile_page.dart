@@ -10,18 +10,15 @@ class ProfilePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Directionality(
-      textDirection: TextDirection.rtl,
-      child: Scaffold(
-        backgroundColor: AppColors.background,
-        body: SafeArea(
-          child: Column(
-            children: [
-              const ProfileHeader(),
-              const SizedBox(height: AppSpacing.sm),
-              const ProfileMenu(),
-            ],
-          ),
+    return Scaffold(
+      backgroundColor: AppColors.background,
+      body: SafeArea(
+        child: Column(
+          children: [
+            const ProfileHeader(),
+            const SizedBox(height: AppSpacing.sm),
+            const ProfileMenu(),
+          ],
         ),
       ),
     );

@@ -34,8 +34,7 @@ class HomeAboutCard extends StatelessWidget {
             children: [
               Expanded(
                 child: Directionality(
-                  textDirection:
-                      isRtl ? TextDirection.rtl : TextDirection.ltr,
+                  textDirection: isRtl ? TextDirection.rtl : TextDirection.ltr,
                   child: Padding(
                     padding: const EdgeInsets.all(AppSpacing.md),
                     child: Column(

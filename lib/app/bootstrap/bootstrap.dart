@@ -5,6 +5,7 @@ import 'package:flutter/widgets.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../core/logging/app_logger.dart';
+import '../../core/storage/preferences_storage.dart';
 import '../app.dart';
 import '../config/app_environment.dart';
 import '../di/dependency_injection.dart';
@@ -44,6 +45,10 @@ Future<void> bootstrap() async {
 
   logger.i('Starting app in ${environment.name} environment');
 
+  final startLocale = AppLocalization.localeFromSavedCode(
+    sharedPreferences.getString(PreferencesKeys.languageCode),
+  );
+
   // Device preview (device frames, sizes, dark-mode toggle) is a development
   // aid: it is compiled out of release builds and never wraps the app in
   // widget tests.
@@ -59,7 +64,7 @@ Future<void> bootstrap() async {
       supportedLocales: AppLocalization.supportedLocales,
       path: AppLocalization.translationsPath,
       fallbackLocale: AppLocalization.fallbackLocale,
-      startLocale: AppLocalization.defaultLocale,
+      startLocale: startLocale,
       child: app,
     ),
   );

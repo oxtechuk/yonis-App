@@ -92,5 +92,10 @@
   },
   "validation": {
     "required": "هذا الحقل مطلوب"
+  },
+  "settings": {
+    "language": "اللغة",
+    "arabic": "العربية",
+    "english": "English"
   }
 }
