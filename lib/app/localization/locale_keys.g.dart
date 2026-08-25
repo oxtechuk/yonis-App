@@ -43,10 +43,9 @@ abstract class  LocaleKeys {
   static const home_bookService_sheetTitle = 'home.bookService.sheetTitle';
   static const home_bookService_clinicTitle = 'home.bookService.clinicTitle';
   static const home_bookService_clinicDesc = 'home.bookService.clinicDesc';
-  static const home_bookService_clinicPrice = 'home.bookService.clinicPrice';
   static const home_bookService_onlineTitle = 'home.bookService.onlineTitle';
   static const home_bookService_onlineDesc = 'home.bookService.onlineDesc';
-  static const home_bookService_onlinePrice = 'home.bookService.onlinePrice';
+  static const home_bookService_priceFrom = 'home.bookService.priceFrom';
   static const home_bookService_startNow = 'home.bookService.startNow';
   static const home_bookService = 'home.bookService';
   static const home_reelsTitle = 'home.reelsTitle';

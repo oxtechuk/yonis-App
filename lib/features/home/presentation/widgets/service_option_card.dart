@@ -10,27 +10,20 @@ import '../../../../app/styles/app_spacing.dart';
 import '../../../../app/styles/app_text_styles.dart';
 
 class ServiceOptionCard extends StatelessWidget {
-  const ServiceOptionCard.clinic({
+  const ServiceOptionCard({
     required this.title,
     required this.description,
     required this.price,
     required this.onTap,
+    this.iconType = ServiceOptionIconType.clinic,
     super.key,
-  }) : _iconType = _IconType.clinic;
-
-  const ServiceOptionCard.online({
-    required this.title,
-    required this.description,
-    required this.price,
-    required this.onTap,
-    super.key,
-  }) : _iconType = _IconType.online;
+  });
 
   final String title;
   final String description;
   final String price;
   final VoidCallback onTap;
-  final _IconType _iconType;
+  final ServiceOptionIconType iconType;
 
   @override
   Widget build(BuildContext context) {
@@ -92,11 +85,19 @@ class ServiceOptionCard extends StatelessWidget {
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              Text(
-                                context.tr(LocaleKeys.home_bookService_startNow),
-                                style: AppTextStyles.button
-                                    .copyWith(color: AppColors.white),
+                              Flexible(
+                                child: Text(
+                                  context.tr(
+                                    LocaleKeys.home_bookService_startNow,
+                                  ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: AppTextStyles.button
+                                      .copyWith(color: AppColors.white),
+                                ),
                               ),
+                              const SizedBox(width: AppSpacing.xs),
+                              const _AnimatedStartArrow(),
                             ],
                           ),
                         ),
@@ -121,7 +122,7 @@ class ServiceOptionCard extends StatelessWidget {
   }
 
   Widget _buildIcon(double size) {
-    if (_iconType == _IconType.clinic) {
+    if (iconType == ServiceOptionIconType.clinic) {
       return Container(
         width: size,
         height: size,
@@ -155,4 +156,45 @@ class ServiceOptionCard extends StatelessWidget {
   }
 }
 
-enum _IconType { clinic, online }
+enum ServiceOptionIconType { clinic, online }
+
+/// Forward-pointing arrow for the "start" CTA. In this RTL layout the
+/// forward direction is left, so it gently nudges toward the left edge
+/// to invite the tap.
+class _AnimatedStartArrow extends StatefulWidget {
+  const _AnimatedStartArrow();
+
+  @override
+  State<_AnimatedStartArrow> createState() => _AnimatedStartArrowState();
+}
+
+class _AnimatedStartArrowState extends State<_AnimatedStartArrow>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 900),
+  )..repeat(reverse: true);
+
+  late final Animation<Offset> _nudge = Tween<Offset>(
+    begin: Offset.zero,
+    end: const Offset(-0.3, 0),
+  ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut));
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return SlideTransition(
+      position: _nudge,
+      child: const Icon(
+        Icons.arrow_back_rounded,
+        size: 16,
+        color: AppColors.white,
+      ),
+    );
+  }
+}
