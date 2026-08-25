@@ -3,6 +3,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../config/app_config.dart';
 import '../config/app_environment.dart';
+import 'auth_dependencies.dart';
 import 'core_dependencies.dart';
 import 'home_dependencies.dart';
 
@@ -30,4 +31,6 @@ void configureDependencies({
   );
 
   registerHomeDependencies(getIt);
+
+  registerAuthDependencies(getIt);
 }

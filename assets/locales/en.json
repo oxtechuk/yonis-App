@@ -6,7 +6,8 @@
     "save": "Save",
     "continue": "Continue",
     "retry": "Retry",
-    "back": "Back"
+    "back": "Back",
+    "searchCountry": "Search country..."
   },
   "navigation": {
     "home": "Home",
@@ -99,5 +100,31 @@
     "language": "Language",
     "arabic": "العربية",
     "english": "English"
+  },
+  "countries": {
+    "SA": "Saudi Arabia",
+    "AE": "United Arab Emirates",
+    "KW": "Kuwait",
+    "BH": "Bahrain",
+    "QA": "Qatar",
+    "OM": "Oman",
+    "JO": "Jordan",
+    "EG": "Egypt",
+    "IQ": "Iraq",
+    "LB": "Lebanon",
+    "SY": "Syria",
+    "YE": "Yemen",
+    "LY": "Libya",
+    "TN": "Tunisia",
+    "DZ": "Algeria",
+    "MA": "Morocco",
+    "SD": "Sudan",
+    "TR": "Turkey",
+    "PK": "Pakistan",
+    "IN": "India",
+    "GB": "United Kingdom",
+    "US": "United States",
+    "DE": "Germany",
+    "FR": "France"
   }
 }

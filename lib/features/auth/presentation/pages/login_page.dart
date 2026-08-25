@@ -45,7 +45,6 @@ class LoginPage extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                const SizedBox(height: AppSpacing.md),
                 _BackButton(onTap: () => _pop(context)),
                 const _Logo(),
                 const SizedBox(height: AppSpacing.xl),
@@ -78,15 +77,19 @@ class _BackButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Back arrow — aligned to the leading edge (right in RTL).
+    // Back arrow follows reading direction: points away (left) in Arabic,
+    // right in English — same rule as the booking bottom sheet.
+    final isArabic = context.locale.languageCode == 'ar';
     return Align(
       alignment: Alignment.centerRight,
       child: IconButton(
         onPressed: onTap,
-        icon: const Icon(
-          Icons.arrow_forward,
+        icon: Icon(
+          isArabic ? Icons.arrow_back : Icons.arrow_forward,
           color: AppColors.textPrimary,
         ),
+        padding: EdgeInsets.zero,
+        constraints: const BoxConstraints(),
       ),
     );
   }

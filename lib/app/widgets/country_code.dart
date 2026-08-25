@@ -1,3 +1,6 @@
+import 'package:easy_localization/easy_localization.dart';
+import 'package:flutter/widgets.dart';
+
 /// Lightweight country-code data — no external package required.
 class CountryCode {
   const CountryCode({
@@ -11,6 +14,13 @@ class CountryCode {
   final String flag;
   final String dialCode;
   final String isoCode;
+
+  /// Country display name following the current app locale
+  /// (falls back to the English [name] if a translation is missing).
+  String localizedName(BuildContext context) {
+    final key = 'countries.$isoCode';
+    return trExists(key, context: context) ? context.tr(key) : name;
+  }
 
   @override
   String toString() => dialCode;

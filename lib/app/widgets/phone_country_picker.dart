@@ -1,5 +1,6 @@
 import 'dart:ui' as ui;
 
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 
 import '../styles/app_colors.dart';
@@ -95,7 +96,8 @@ class _CountryPickerSheetState extends State<_CountryPickerSheet> {
       _filtered = kCountryCodes
           .where((c) =>
               c.name.toLowerCase().contains(lower) ||
-              c.dialCode.contains(lower))
+              c.dialCode.contains(lower) ||
+              c.localizedName(context).toLowerCase().contains(lower))
           .toList();
     });
   }
@@ -138,7 +140,7 @@ class _CountryPickerSheetState extends State<_CountryPickerSheet> {
                 controller: _search,
                 onChanged: _filter,
                 decoration: InputDecoration(
-                  hintText: 'Search country...',
+                  hintText: 'common.searchCountry'.tr(),
                   hintStyle: AppTextStyles.body
                       .copyWith(color: AppColors.textSecondary),
                   prefixIcon: const Icon(Icons.search,
@@ -175,7 +177,8 @@ class _CountryPickerSheetState extends State<_CountryPickerSheet> {
                   return ListTile(
                     leading: Text(c.flag,
                         style: const TextStyle(fontSize: 24)),
-                    title: Text(c.name, style: AppTextStyles.body),
+                    title: Text(c.localizedName(context),
+                        style: AppTextStyles.body),
                     trailing: Text(
                       c.dialCode,
                       style: AppTextStyles.body.copyWith(
