@@ -53,6 +53,7 @@ abstract class  LocaleKeys {
   static const home_reelStress = 'home.reelStress';
   static const home_reelTrustInGod = 'home.reelTrustInGod';
   static const home_reelGriefStages = 'home.reelGriefStages';
+  static const home_specialtiesTitle = 'home.specialtiesTitle';
   static const home_specialties_administrativeCases = 'home.specialties.administrativeCases';
   static const home_specialties_anxietyDisorder = 'home.specialties.anxietyDisorder';
   static const home_specialties_awareness = 'home.specialties.awareness';

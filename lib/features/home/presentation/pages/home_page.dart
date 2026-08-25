@@ -31,27 +31,26 @@ class HomePage extends StatelessWidget {
                       final profile = state is DoctorProfileLoaded
                           ? state.profile
                           : null;
-                      return HomeHeroSection(
-                        heroImageUrl: profile?.heroImage,
-                        onBookTap: () =>
-                            BookServiceBottomSheet.show(innerContext),
-                        onAboutTap: () {
-                          // TODO: navigate to about
-                        },
+                      return Column(
+                        children: [
+                          HomeHeroSection(
+                            heroImageUrl: profile?.heroImage,
+                            onBookTap: () =>
+                                BookServiceBottomSheet.show(innerContext),
+                            onAboutTap: () {
+                              // TODO: navigate to about
+                            },
+                          ),
+                          const SizedBox(height: AppSpacing.lg),
+                          HomeAboutCard(bio: profile?.bio),
+                          const SizedBox(height: AppSpacing.lg),
+                          HomeSpecialtiesSection(
+                            specialties: profile?.specialties,
+                          ),
+                        ],
                       );
                     },
                   ),
-                  const SizedBox(height: AppSpacing.lg),
-                  BlocBuilder<DoctorProfileCubit, DoctorProfileState>(
-                    builder: (context, state) {
-                      final profile = state is DoctorProfileLoaded
-                          ? state.profile
-                          : null;
-                      return HomeAboutCard(bio: profile?.bio);
-                    },
-                  ),
-                  const SizedBox(height: AppSpacing.lg),
-                  const HomeSpecialtiesSection(),
                   const SizedBox(height: AppSpacing.lg),
                   const HomeReelsSection(),
                   const SizedBox(height: AppSpacing.lg),

@@ -55,14 +55,16 @@ class HomeHeroSection extends StatelessWidget {
                   Positioned.fill(
                     child: DecoratedBox(
                       decoration: BoxDecoration(
+                        // Full-image dark scrim so white title/subtitle
+                        // stay readable on any photo from the API.
                         gradient: LinearGradient(
                           begin: Alignment.topCenter,
                           end: Alignment.bottomCenter,
                           colors: [
-                            Colors.transparent,
-                            Colors.black.withValues(alpha: 0.65),
+                            Colors.black.withValues(alpha: 0.10),
+                            Colors.black.withValues(alpha: 0.40),
                           ],
-                          stops: const [0.45, 1.0],
+                          stops: const [0.0, 1.0],
                         ),
                       ),
                     ),
@@ -102,19 +104,27 @@ class HomeHeroSection extends StatelessWidget {
               right: AppSpacing.lg,
               bottom: -btnHeight / 2,
               height: btnHeight,
-              child: FilledButton.icon(
+              child: FilledButton(
                 onPressed: onBookTap,
                 style: FilledButton.styleFrom(
                   backgroundColor: AppColors.primary,
                   shape: const StadiumBorder(),
                 ),
-                icon: const Icon(
-                  Icons.calendar_month_outlined,
-                  size: AppSizes.iconMd,
-                ),
-                label: Text(
-                  context.tr(LocaleKeys.home_bookConsultation),
-                  style: AppTextStyles.button.copyWith(color: AppColors.white),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      context.tr(LocaleKeys.home_bookConsultation),
+                      style: AppTextStyles.button.copyWith(
+                        color: AppColors.white,
+                      ),
+                    ),
+                    const SizedBox(width: AppSpacing.sm),
+                    const Icon(
+                      Icons.calendar_month_outlined,
+                      size: AppSizes.iconMd,
+                    ),
+                  ],
                 ),
               ),
             ),
@@ -128,7 +138,7 @@ class HomeHeroSection extends StatelessWidget {
           child: SizedBox(
             width: double.infinity,
             height: btnHeight,
-            child: ElevatedButton.icon(
+            child: ElevatedButton(
               onPressed: onAboutTap,
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.white,
@@ -137,10 +147,18 @@ class HomeHeroSection extends StatelessWidget {
                 shadowColor: Colors.black12,
                 shape: const StadiumBorder(),
               ),
-              icon: const Icon(Icons.person_outline, size: AppSizes.iconMd),
-              label: Text(
-                context.tr(LocaleKeys.home_getToKnowYounis),
-                style: AppTextStyles.button.copyWith(color: AppColors.primary),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    context.tr(LocaleKeys.home_getToKnowYounis),
+                    style: AppTextStyles.button.copyWith(
+                      color: AppColors.primary,
+                    ),
+                  ),
+                  const SizedBox(width: AppSpacing.sm),
+                  const Icon(Icons.person_outline, size: AppSizes.iconMd),
+                ],
               ),
             ),
           ),

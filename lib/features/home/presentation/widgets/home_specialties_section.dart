@@ -7,9 +7,13 @@ import '../../../../app/styles/app_spacing.dart';
 import '../../../../app/styles/app_text_styles.dart';
 
 class HomeSpecialtiesSection extends StatelessWidget {
-  const HomeSpecialtiesSection({super.key});
+  const HomeSpecialtiesSection({super.key, this.specialties});
 
-  static const _specialtyKeys = [
+  /// Specialties from the doctor profile API. Falls back to the localized
+  /// placeholder chips while loading or when the API provides none.
+  final List<String>? specialties;
+
+  static const _fallbackKeys = [
     LocaleKeys.home_specialties_administrativeCases,
     LocaleKeys.home_specialties_anxietyDisorder,
     LocaleKeys.home_specialties_awareness,
@@ -28,15 +32,31 @@ class HomeSpecialtiesSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isRtl = context.locale.languageCode == 'ar';
+    final labels = (specialties != null && specialties!.isNotEmpty)
+        ? specialties!
+        : _fallbackKeys.map(context.tr).toList();
+
     return Directionality(
       textDirection: isRtl ? TextDirection.rtl : TextDirection.ltr,
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
-        child: Wrap(
-          spacing: AppSpacing.sm,
-          runSpacing: AppSpacing.sm,
-          children:
-              _specialtyKeys.map((key) => _Chip(label: context.tr(key))).toList(),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              context.tr(LocaleKeys.home_specialtiesTitle),
+              style: AppTextStyles.title.copyWith(
+                color: AppColors.textPrimary,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+            const SizedBox(height: AppSpacing.md),
+            Wrap(
+              spacing: AppSpacing.sm,
+              runSpacing: AppSpacing.sm,
+              children: labels.map((label) => _Chip(label: label)).toList(),
+            ),
+          ],
         ),
       ),
     );
@@ -55,7 +75,7 @@ class _Chip extends StatelessWidget {
         vertical: AppSpacing.sm,
       ),
       decoration: BoxDecoration(
-        color: AppColors.white,
+        color: AppColors.fieldFill,
         borderRadius: BorderRadius.circular(50),
         boxShadow: [
           BoxShadow(
@@ -69,8 +89,8 @@ class _Chip extends StatelessWidget {
       child: Text(
         label,
         style: AppTextStyles.bodySmall.copyWith(
-          color: AppColors.textPrimary,
-          fontWeight: FontWeight.w500,
+          color: AppColors.textSecondary,
+          fontWeight: FontWeight.bold,
         ),
       ),
     );

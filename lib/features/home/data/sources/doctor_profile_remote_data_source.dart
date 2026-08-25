@@ -8,7 +8,7 @@ abstract interface class DoctorProfileRemoteDataSource {
 class ApiDoctorProfileRemoteDataSource implements DoctorProfileRemoteDataSource {
   const ApiDoctorProfileRemoteDataSource(this._apiClient);
 
-  static const String _profilePath = 'api/doctor/profile';
+  static const String _profilePath = '/api/doctor/profile';
 
   final ApiClient _apiClient;
 

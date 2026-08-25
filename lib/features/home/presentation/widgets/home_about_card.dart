@@ -21,6 +21,7 @@ class HomeAboutCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: AppColors.white,
         borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppColors.primary),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.06),
@@ -55,8 +56,8 @@ class HomeAboutCard extends StatelessWidget {
                             Text(
                               context.tr(LocaleKeys.home_aboutTitle),
                               style: AppTextStyles.title.copyWith(
-                                color: AppColors.textPrimary,
-                                fontWeight: FontWeight.w700,
+                                color: AppColors.primary,
+                                fontWeight: FontWeight.bold,
                               ),
                             ),
                           ],
