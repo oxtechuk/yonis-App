@@ -53,25 +53,28 @@ class _CreateAccountSectionState extends State<CreateAccountSection> {
 
         // Name
         const _FieldLabel(label: 'أكتب اسمك بالكامل'),
-        const SizedBox(height: AppSpacing.xs),
+        const SizedBox(height: AppSpacing.sm),
         AppTextField(
           controller: widget.nameController,
           hint: 'الاسم الكامل',
           textDirection: ui.TextDirection.rtl,
           height: 56,
-          prefixWidget: Icon(
-            Icons.person_outline,
-            color: AppColors.textSecondary,
-            size: AppSizes.iconMd,
+          prefixWidget: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
+            child: Icon(
+              Icons.person_outline,
+              color: AppColors.textSecondary,
+              size: AppSizes.iconMd,
+            ),
           ),
           validator: (v) =>
               (v == null || v.trim().isEmpty) ? 'أدخل اسمك الكامل' : null,
         ),
-        const SizedBox(height: AppSpacing.md),
+        const SizedBox(height: AppSpacing.sm),
 
         // Phone
         const _FieldLabel(label: 'رقم الوتساب لتواصل'),
-        const SizedBox(height: AppSpacing.xs),
+        const SizedBox(height: AppSpacing.sm),
         AppTextField(
           controller: widget.phoneController,
           hint: '051 234 5678',
@@ -80,27 +83,30 @@ class _CreateAccountSectionState extends State<CreateAccountSection> {
           textAlign: TextAlign.right,
           inputFormatters: [FilteringTextInputFormatter.digitsOnly],
           height: 56,
-          prefixWidget: PhoneCountryPicker(
+          suffixWidget: PhoneCountryPicker(
             selected: _country,
             onChanged: (c) => setState(() => _country = c),
           ),
           validator: (v) =>
               (v == null || v.trim().isEmpty) ? 'أدخل رقم الهاتف' : null,
         ),
-        const SizedBox(height: AppSpacing.md),
+        const SizedBox(height: AppSpacing.sm),
 
         // Password
         const _FieldLabel(label: 'كلمة المرور'),
-        const SizedBox(height: AppSpacing.xs),
+        const SizedBox(height: AppSpacing.sm),
         AppTextField(
           controller: widget.passwordController,
           hint: 'كلمة المرور',
           obscureText: widget.obscurePassword,
           height: 56,
-          prefixWidget: Icon(
-            Icons.mail_outline,
-            color: AppColors.textSecondary,
-            size: AppSizes.iconMd,
+          prefixWidget: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
+            child: Icon(
+              Icons.mail_outline,
+              color: AppColors.textSecondary,
+              size: AppSizes.iconMd,
+            ),
           ),
           suffixWidget: IconButton(
             icon: Icon(
@@ -168,7 +174,7 @@ class RememberAccountCard extends StatelessWidget {
           const SizedBox(width: AppSpacing.sm),
           Expanded(
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   'لا تنسا حاسبك لدخول مرة اخرة',

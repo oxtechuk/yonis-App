@@ -22,8 +22,14 @@ void registerCoreDependencies({
     () => AppLogger(verboseEnabled: !config.isProduction),
   );
 
+  getIt.registerLazySingleton<SecureStorage>(() => FlutterSecureStorageImpl());
+
   getIt.registerLazySingleton<DioFactory>(
-    () => DioFactory(config, getIt<AppLogger>()),
+    () => DioFactory(
+      config,
+      getIt<AppLogger>(),
+      secureStorage: getIt<SecureStorage>(),
+    ),
   );
 
   getIt.registerLazySingleton<Dio>(() => getIt<DioFactory>().create());
@@ -39,8 +45,6 @@ void registerCoreDependencies({
       reachabilityUrl: Uri.parse(config.reachabilityCheckUrl),
     ),
   );
-
-  getIt.registerLazySingleton<SecureStorage>(() => FlutterSecureStorageImpl());
 
   getIt.registerSingleton<PreferencesStorage>(
     SharedPreferencesStorage(sharedPreferences),

@@ -30,6 +30,10 @@ class ServiceDto {
     required this.type,
     required this.price,
     this.duration,
+    this.clinicPrice,
+    this.chatPrice,
+    this.voicePrice,
+    this.videoPrice,
     this.isActive = true,
   });
 
@@ -41,6 +45,10 @@ class ServiceDto {
       type: _readString(json, 'type') ?? 'both',
       price: _readDouble(json, 'price') ?? 0,
       duration: (json['duration'] as num?)?.toInt(),
+      clinicPrice: _readDouble(json, 'clinic_price'),
+      chatPrice: _readDouble(json, 'chat_price'),
+      voicePrice: _readDouble(json, 'voice_price'),
+      videoPrice: _readDouble(json, 'video_price'),
       isActive: json['is_active'] as bool? ?? true,
     );
   }
@@ -72,6 +80,10 @@ class ServiceDto {
   final String type;
   final double price;
   final int? duration;
+  final double? clinicPrice;
+  final double? chatPrice;
+  final double? voicePrice;
+  final double? videoPrice;
   final bool isActive;
 
   Service toEntity() => Service(
@@ -81,6 +93,10 @@ class ServiceDto {
         type: type,
         price: price,
         duration: duration,
+        clinicPrice: clinicPrice,
+        chatPrice: chatPrice,
+        voicePrice: voicePrice,
+        videoPrice: videoPrice,
         isActive: isActive,
       );
 }

@@ -56,16 +56,21 @@ class BookServiceBottomSheet extends StatelessWidget {
     caseSensitive: false,
   );
 
-  /// Called when any service option is tapped.
+  /// Called when a service option is tapped.
   /// Closes this sheet then either:
   ///  - opens the booking flow directly (logged-in user), or
   ///  - shows the login page with a guest-booking option.
-  void _onServiceTap(BuildContext context) {
+  /// The selected [service] is forwarded so the booking page renders its
+  /// backend data (title, per-channel prices, duration).
+  void _onServiceTap(BuildContext context, Service service) {
     Navigator.of(context).pop();
     if (AuthState.instance.isLoggedIn) {
-      router.push(AppRoutes.booking);
+      router.push(AppRoutes.booking, extra: service);
     } else {
-      router.push(AppRoutes.login, extra: () => router.push(AppRoutes.booking));
+      router.push(
+        AppRoutes.login,
+        extra: () => router.push(AppRoutes.booking, extra: service),
+      );
     }
   }
 
@@ -90,7 +95,7 @@ class BookServiceBottomSheet extends StatelessWidget {
             LocaleKeys.home_bookService_priceFrom,
             namedArgs: {'price': service.displayPrice},
           ),
-          onTap: () => _onServiceTap(context),
+          onTap: () => _onServiceTap(context, service),
         );
       },
     );

@@ -8,6 +8,7 @@ import '../../../../app/styles/app_colors.dart';
 import '../../../../app/styles/app_spacing.dart';
 import '../../../../app/styles/app_text_styles.dart';
 import '../../../../app/widgets/primary_button.dart';
+import '../../../home/domain/entities/service.dart';
 import '../models/booking_models.dart';
 import '../widgets/booking_app_bar.dart';
 import '../widgets/outlined_card_field.dart';
@@ -16,7 +17,11 @@ import '../widgets/price_summary.dart';
 import '../widgets/session_type_selector.dart';
 
 class BookingPage extends StatefulWidget {
-  const BookingPage({super.key});
+  const BookingPage({super.key, this.service});
+
+  /// The backend service selected in the booking sheet. Null when the page
+  /// is opened without one (legacy/deep-link) — fallback pricing is used.
+  final Service? service;
 
   static void show(BuildContext context) {
     context.push(AppRoutes.booking);
@@ -29,11 +34,16 @@ class BookingPage extends StatefulWidget {
 class _BookingPageState extends State<BookingPage> {
   final _formKey = GlobalKey<FormState>();
 
-  SessionType _sessionType = SessionType.chat;
+  late final List<ConsultationOption> _options =
+      ConsultationOptions.fromService(widget.service);
+  int _selectedOptionIndex = 0;
+
   PaymentMethod _paymentMethod = PaymentMethod.card;
 
   final _titleController = TextEditingController();
   final _detailsController = TextEditingController();
+
+  ConsultationOption get _selectedOption => _options[_selectedOptionIndex];
 
   @override
   void dispose() {
@@ -53,14 +63,13 @@ class _BookingPageState extends State<BookingPage> {
     return Directionality(
       textDirection: ui.TextDirection.rtl,
       child: Scaffold(
-        backgroundColor: AppColors.background,
         body: SafeArea(
           child: Form(
             key: _formKey,
             child: Column(
               children: [
                 BookingAppBar(
-                  title: 'جلسة فورية',
+                  title: widget.service?.title ?? 'جلسة فورية',
                   onBack: () => context.pop(),
                 ),
                 Expanded(
@@ -76,8 +85,10 @@ class _BookingPageState extends State<BookingPage> {
                         const _SectionTitle(title: 'مدة الاستشارة'),
                         const SizedBox(height: AppSpacing.sm),
                         SessionTypeSelector(
-                          selected: _sessionType,
-                          onChanged: (t) => setState(() => _sessionType = t),
+                          options: _options,
+                          selectedIndex: _selectedOptionIndex,
+                          onChanged: (i) =>
+                              setState(() => _selectedOptionIndex = i),
                         ),
 
                         // Consultation title
@@ -99,8 +110,7 @@ class _BookingPageState extends State<BookingPage> {
                         const SizedBox(height: AppSpacing.sm),
                         OutlinedCardField(
                           controller: _detailsController,
-                          hintText:
-                              '* فضلاً اكتب التفاصيل بشكل واضح، وباختصار',
+                          hintText: '* فضلاً اكتب التفاصيل بشكل واضح، وباختصار',
                           maxLines: 5,
                           validator: (v) => (v == null || v.trim().isEmpty)
                               ? 'أدخل تفاصيل الطلب'
@@ -113,23 +123,19 @@ class _BookingPageState extends State<BookingPage> {
                         const SizedBox(height: AppSpacing.sm),
                         PaymentMethodSelector(
                           selected: _paymentMethod,
-                          onChanged: (m) =>
-                              setState(() => _paymentMethod = m),
+                          onChanged: (m) => setState(() => _paymentMethod = m),
                         ),
 
                         // Price summary
                         const SizedBox(height: AppSpacing.lg),
-                        PriceSummary(sessionType: _sessionType),
+                        PriceSummary(option: _selectedOption),
 
                         const SizedBox(height: AppSpacing.xl),
                       ],
                     ),
                   ),
                 ),
-                _BottomBar(
-                  sessionType: _sessionType,
-                  onConfirm: _submit,
-                ),
+                _BottomBar(option: _selectedOption, onConfirm: _submit),
               ],
             ),
           ),
@@ -157,8 +163,8 @@ class _SectionTitle extends StatelessWidget {
 }
 
 class _BottomBar extends StatelessWidget {
-  const _BottomBar({required this.sessionType, required this.onConfirm});
-  final SessionType sessionType;
+  const _BottomBar({required this.option, required this.onConfirm});
+  final ConsultationOption option;
   final VoidCallback onConfirm;
 
   @override
@@ -171,24 +177,24 @@ class _BottomBar extends StatelessWidget {
         bottom: MediaQuery.viewInsetsOf(context).bottom + AppSpacing.md,
       ),
       decoration: const BoxDecoration(
-        color: AppColors.white,
         border: Border(top: BorderSide(color: AppColors.border)),
       ),
-      child: Row(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
                 'اجمالي الطلب',
                 style: AppTextStyles.body.copyWith(
                   color: AppColors.textPrimary,
-                  fontWeight: FontWeight.w700,
+                  fontWeight: FontWeight.bold,
                 ),
               ),
               Text(
-                '${sessionType.price} ر.س',
+                '${option.displayPrice} ر.س',
                 style: AppTextStyles.title.copyWith(
                   color: AppColors.primary,
                   fontWeight: FontWeight.w700,
@@ -196,10 +202,8 @@ class _BottomBar extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(width: AppSpacing.md),
-          Expanded(
-            child: PrimaryButton(label: 'التالي', onPressed: onConfirm),
-          ),
+          const SizedBox(height: AppSpacing.sm),
+          PrimaryButton(label: 'التالي', onPressed: onConfirm),
         ],
       ),
     );

@@ -7,13 +7,13 @@ import '../models/booking_models.dart';
 
 /// Session price + total due, shown above the sticky bottom bar.
 class PriceSummary extends StatelessWidget {
-  const PriceSummary({super.key, required this.sessionType});
+  const PriceSummary({super.key, required this.option});
 
-  final SessionType sessionType;
+  final ConsultationOption option;
 
   @override
   Widget build(BuildContext context) {
-    final price = sessionType.price;
+    final price = option.displayPrice;
     return Column(
       children: [
         _SummaryRow(label: 'قيمة الجلسة:', value: '$price ر.س', bold: false),

@@ -2,15 +2,19 @@ import 'package:dio/dio.dart';
 
 import '../../app/config/app_config.dart';
 import '../logging/app_logger.dart';
+import '../storage/secure_storage.dart';
+import 'interceptors/auth_interceptor.dart';
 import 'interceptors/logging_interceptor.dart';
 
 /// Builds the single, environment-configured Dio instance of the app.
 ///
 /// Timeouts, headers and logging policy live here — never scattered across
-/// features. Authentication headers/interceptors will be added here once
-/// the authentication feature exists.
+/// features. When a [SecureStorage] is supplied, an [AuthInterceptor] is
+/// attached so every request carries `Authorization: Bearer <token>`
+/// whenever a token is persisted.
 class DioFactory {
-  const DioFactory(this._config, this._logger);
+  const DioFactory(this._config, this._logger, {SecureStorage? secureStorage})
+    : _secureStorage = secureStorage;
 
   static const Duration _connectTimeout = Duration(seconds: 15);
   static const Duration _receiveTimeout = Duration(seconds: 20);
@@ -18,6 +22,7 @@ class DioFactory {
 
   final AppConfig _config;
   final AppLogger _logger;
+  final SecureStorage? _secureStorage;
 
   Dio create() {
     final dio = Dio(
@@ -30,6 +35,12 @@ class DioFactory {
         headers: <String, String>{'Accept': 'application/json'},
       ),
     );
+
+    // Registered before the logging interceptor so dev logs show whether
+    // the Authorization header was attached (its value stays redacted).
+    if (_secureStorage != null) {
+      dio.interceptors.add(AuthInterceptor(secureStorage: _secureStorage));
+    }
 
     if (_config.enableNetworkLogs) {
       dio.interceptors.add(

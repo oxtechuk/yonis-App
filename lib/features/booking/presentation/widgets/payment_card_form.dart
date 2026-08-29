@@ -52,15 +52,19 @@ class PaymentCardForm extends StatelessWidget {
             hint: '1234 1234 1234 1234',
             keyboardType: TextInputType.number,
             textDirection: ui.TextDirection.ltr,
+            textAlign: TextAlign.right,
             fillColor: AppColors.white,
             height: 56,
             inputFormatters: [
               FilteringTextInputFormatter.digitsOnly,
               _CardNumberFormatter(),
             ],
-            suffixWidget: const Icon(
-              Icons.credit_card_outlined,
-              color: AppColors.textSecondary,
+            suffixWidget: const Padding(
+              padding: EdgeInsets.symmetric(horizontal: AppSpacing.sm),
+              child: Icon(
+                Icons.credit_card_outlined,
+                color: AppColors.textSecondary,
+              ),
             ),
             validator: (v) {
               final digits = v?.replaceAll(' ', '') ?? '';
@@ -75,27 +79,70 @@ class PaymentCardForm extends StatelessWidget {
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // CVV — right side (RTL)
+              // Expiry — right side (RTL first)
               Expanded(
                 child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    Row(
-                      children: [
-                        const Icon(
-                          Icons.help,
-                          size: 16,
+                    SizedBox(
+                      height: 20,
+                      child: Text(
+                        'تاريخ انتهاء الصلاحية',
+                        textAlign: TextAlign.right,
+                        style: AppTextStyles.body.copyWith(
                           color: AppColors.textPrimary,
+                          fontWeight: FontWeight.w500,
                         ),
-                        const SizedBox(width: 4),
-                        Text(
-                          'CVV',
-                          style: AppTextStyles.body.copyWith(
-                            color: AppColors.textPrimary,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
+                      ),
+                    ),
+                    const SizedBox(height: AppSpacing.sm),
+                    AppTextField(
+                      controller: expiryController,
+                      hint: 'MM/YY',
+                      keyboardType: TextInputType.number,
+                      textDirection: ui.TextDirection.ltr,
+                      textAlign: TextAlign.center,
+                      fillColor: AppColors.white,
+                      height: 56,
+                      inputFormatters: [
+                        FilteringTextInputFormatter.digitsOnly,
+                        _ExpiryFormatter(),
                       ],
+                      validator: (v) {
+                        if ((v?.length ?? 0) < 5) return 'تاريخ غير صحيح';
+                        return null;
+                      },
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: AppSpacing.sm),
+
+              // CVV — left side (RTL second)
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    SizedBox(
+                      height: 20,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          Text(
+                            'CVV',
+                            style: AppTextStyles.body.copyWith(
+                              color: AppColors.textPrimary,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                          const SizedBox(width: 4),
+                          const Icon(
+                            Icons.help,
+                            size: 16,
+                            color: AppColors.textPrimary,
+                          ),
+                        ],
+                      ),
                     ),
                     const SizedBox(height: AppSpacing.sm),
                     AppTextField(
@@ -103,6 +150,7 @@ class PaymentCardForm extends StatelessWidget {
                       hint: '1234',
                       keyboardType: TextInputType.number,
                       textDirection: ui.TextDirection.ltr,
+                      textAlign: TextAlign.center,
                       obscureText: true,
                       fillColor: AppColors.white,
                       height: 56,
@@ -112,40 +160,6 @@ class PaymentCardForm extends StatelessWidget {
                       ],
                       validator: (v) {
                         if ((v?.length ?? 0) < 3) return 'CVV غير صحيح';
-                        return null;
-                      },
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(width: AppSpacing.sm),
-
-              // Expiry — left side (RTL)
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'تاريخ انتهاء الصلاحية',
-                      style: AppTextStyles.body.copyWith(
-                        color: AppColors.textPrimary,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                    const SizedBox(height: AppSpacing.sm),
-                    AppTextField(
-                      controller: expiryController,
-                      hint: 'MM/YY',
-                      keyboardType: TextInputType.number,
-                      textDirection: ui.TextDirection.ltr,
-                      fillColor: AppColors.white,
-                      height: 56,
-                      inputFormatters: [
-                        FilteringTextInputFormatter.digitsOnly,
-                        _ExpiryFormatter(),
-                      ],
-                      validator: (v) {
-                        if ((v?.length ?? 0) < 5) return 'تاريخ غير صحيح';
                         return null;
                       },
                     ),
@@ -165,7 +179,7 @@ class PaymentCardForm extends StatelessWidget {
                 'حفظ البطاقة',
                 style: AppTextStyles.body.copyWith(
                   color: AppColors.textPrimary,
-                  fontWeight: FontWeight.w500,
+                  fontWeight: FontWeight.w700,
                 ),
               ),
               const SizedBox(width: AppSpacing.sm),
@@ -173,18 +187,18 @@ class PaymentCardForm extends StatelessWidget {
                 onTap: () => onSaveCardChanged(!saveCard),
                 child: AnimatedContainer(
                   duration: const Duration(milliseconds: 150),
-                  width: 24,
-                  height: 24,
+                  width: 32,
+                  height: 32,
                   decoration: BoxDecoration(
                     color: saveCard ? AppColors.primary : AppColors.white,
-                    borderRadius: BorderRadius.circular(6),
+                    borderRadius: BorderRadius.circular(8),
                     border: Border.all(
                       color: saveCard ? AppColors.primary : AppColors.border,
                       width: 2,
                     ),
                   ),
                   child: saveCard
-                      ? const Icon(Icons.check, color: AppColors.white, size: 16)
+                      ? const Icon(Icons.check, color: AppColors.white, size: 20)
                       : null,
                 ),
               ),

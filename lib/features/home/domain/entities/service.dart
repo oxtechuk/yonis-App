@@ -8,6 +8,10 @@ class Service extends Equatable {
     required this.type,
     required this.price,
     this.duration,
+    this.clinicPrice,
+    this.chatPrice,
+    this.voicePrice,
+    this.videoPrice,
     this.isActive = true,
   });
 
@@ -23,6 +27,14 @@ class Service extends Equatable {
 
   /// Session length in minutes.
   final int? duration;
+
+  /// Per-delivery-channel pricing. Null means the channel is not offered
+  /// for this service.
+  final double? clinicPrice;
+  final double? chatPrice;
+  final double? voicePrice;
+  final double? videoPrice;
+
   final bool isActive;
 
   /// Trims trailing zeros from the API price ("50.00" -> "50").
@@ -44,6 +56,10 @@ class Service extends Equatable {
         type,
         price,
         duration,
+        clinicPrice,
+        chatPrice,
+        voicePrice,
+        videoPrice,
         isActive,
       ];
 }

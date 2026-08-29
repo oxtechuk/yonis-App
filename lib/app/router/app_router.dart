@@ -8,6 +8,7 @@ import '../../features/booking/presentation/pages/booking_page.dart';
 import '../../features/booking/presentation/pages/booking_step2_page.dart';
 import '../../features/booking/presentation/pages/payment_page.dart';
 import '../../features/booking/presentation/pages/payment_success_page.dart';
+import '../../features/home/domain/entities/service.dart';
 import '../../features/home/presentation/pages/home_item_detail_page.dart';
 import '../../features/home/presentation/pages/home_page.dart';
 import '../../features/profile/presentation/pages/profile_page.dart';
@@ -38,7 +39,9 @@ GoRouter createAppRouter() {
       ),
       GoRoute(
         path: AppRoutes.booking,
-        builder: (_, __) => const BookingPage(),
+        builder: (_, state) => BookingPage(
+          service: state.extra is Service ? state.extra as Service : null,
+        ),
       ),
       GoRoute(
         path: AppRoutes.bookingStep2,

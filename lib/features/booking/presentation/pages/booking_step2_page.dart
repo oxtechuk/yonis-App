@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../app/router/app_routes.dart';
 import '../../../../app/styles/app_colors.dart';
 import '../../../../app/styles/app_spacing.dart';
+import '../../../../app/styles/app_text_styles.dart';
 import '../../../../app/widgets/primary_button.dart';
 import '../widgets/booking_app_bar.dart';
 import '../widgets/booking_calendar_card.dart';
@@ -32,8 +33,12 @@ class _BookingStep2PageState extends State<BookingStep2Page> {
 
   // Time slots
   static const _timeSlots = [
-    '09:00 ص', '10:00 ص', '11:30 ص',
-    '01:00 م', '02:30 م', '04:00 م',
+    '09:00 ص',
+    '10:00 ص',
+    '11:30 ص',
+    '01:00 م',
+    '02:30 م',
+    '04:00 م',
   ];
   String? _selectedTime;
 
@@ -87,12 +92,11 @@ class _BookingStep2PageState extends State<BookingStep2Page> {
                   child: SingleChildScrollView(
                     padding: const EdgeInsets.symmetric(
                       horizontal: AppSpacing.md,
+                      vertical: AppSpacing.lg,
                     ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                        const SizedBox(height: AppSpacing.md),
-
                         // ── Calendar ──────────────────────────────────
                         BookingCalendarCard(
                           focusedMonth: _focusedMonth,
@@ -101,14 +105,13 @@ class _BookingStep2PageState extends State<BookingStep2Page> {
                               setState(() => _selectedDate = d),
                         ),
 
-                        const SizedBox(height: AppSpacing.lg),
+                        const SizedBox(height: AppSpacing.xl),
 
                         // ── Time slots ────────────────────────────────
                         BookingTimeSlotsSection(
                           slots: _timeSlots,
                           selected: _selectedTime,
-                          onSelected: (t) =>
-                              setState(() => _selectedTime = t),
+                          onSelected: (t) => setState(() => _selectedTime = t),
                         ),
 
                         const SizedBox(height: AppSpacing.lg),
@@ -158,10 +161,12 @@ class _BottomBar extends StatelessWidget {
         bottom: MediaQuery.viewInsetsOf(context).bottom + AppSpacing.md,
       ),
       decoration: const BoxDecoration(
-        color: AppColors.white,
         border: Border(top: BorderSide(color: AppColors.border)),
       ),
-      child: PrimaryButton(label: 'التالي', onPressed: onConfirm),
+      child: SizedBox(
+        width: double.infinity,
+        child: PrimaryButton(label: 'التالي', onPressed: onConfirm),
+      ),
     );
   }
 }

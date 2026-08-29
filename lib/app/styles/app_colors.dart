@@ -30,7 +30,7 @@ abstract final class AppColors {
   static const Color white = Color(0xFFFFFFFF);
 
   /// Neutral scaffold background (light mode).
-  static const Color background = Color(0xFFF6F7FB);
+  static const Color background = Color(0xFFF5F6F8);
 
   /// Card/sheet surface (light mode).
   static const Color surface = Color(0xFFFFFFFF);

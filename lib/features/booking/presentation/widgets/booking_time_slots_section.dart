@@ -24,22 +24,23 @@ class BookingTimeSlotsSection extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Row(
+          mainAxisAlignment: MainAxisAlignment.start,
           children: [
-            const Spacer(),
-            Text(
-              'الأوقات المتاحة',
-              style: AppTextStyles.title.copyWith(
-                color: AppColors.textPrimary,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-            const SizedBox(width: AppSpacing.sm),
             Container(
               width: 4,
               height: 22,
               decoration: BoxDecoration(
                 color: AppColors.primary,
                 borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+            const SizedBox(width: AppSpacing.sm),
+
+            Text(
+              'الأوقات المتاحة',
+              style: AppTextStyles.title.copyWith(
+                color: AppColors.textPrimary,
+                fontWeight: FontWeight.w700,
               ),
             ),
           ],
