@@ -44,13 +44,13 @@ class HomeHeroSection extends StatelessWidget {
                           heroImageUrl!,
                           width: double.infinity,
                           height: imageHeight,
-                          fit: BoxFit.cover,
+                          fit: BoxFit.contain,
                         )
                       : Image.asset(
                           AppImages.homeHero,
                           width: double.infinity,
                           height: imageHeight,
-                          fit: BoxFit.cover,
+                          fit: BoxFit.contain,
                         ),
                   Positioned.fill(
                     child: DecoratedBox(
@@ -123,6 +123,7 @@ class HomeHeroSection extends StatelessWidget {
                     const Icon(
                       Icons.calendar_month_outlined,
                       size: AppSizes.iconMd,
+                      color: AppColors.white,
                     ),
                   ],
                 ),

@@ -24,57 +24,63 @@ class AppNavigationShell extends StatelessWidget {
 
     return Scaffold(
       body: navigationShell,
-      bottomNavigationBar: Container(
-        decoration: BoxDecoration(
-          color: AppColors.white,
-          borderRadius: const BorderRadius.only(
-            topLeft: Radius.circular(24),
-            topRight: Radius.circular(24),
-          ),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.08),
-              blurRadius: 20,
-              offset: const Offset(0, -4),
+      // ColoredBox fills the transparent pixels of the rounded top
+      // corners with the page background — otherwise the dark surface
+      // behind (system/theme background) shows through at the corners.
+      bottomNavigationBar: ColoredBox(
+        color: AppColors.background,
+        child: Container(
+          decoration: BoxDecoration(
+            color: AppColors.white,
+            borderRadius: const BorderRadius.only(
+              topLeft: Radius.circular(24),
+              topRight: Radius.circular(24),
             ),
-          ],
-        ),
-        child: SafeArea(
-          top: false,
-          bottom: false,
-          child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 8),
-            child: Row(
-              children: [
-                _NavItem(
-                  icon: Icons.home_outlined,
-                  activeIcon: Icons.home,
-                  label: context.tr(LocaleKeys.navigation_home),
-                  selected: current == 0,
-                  onTap: () => _onTap(0),
-                ),
-                _NavItem(
-                  icon: Icons.content_paste_outlined,
-                  activeIcon: Icons.content_paste,
-                  label: context.tr(LocaleKeys.navigation_services),
-                  selected: current == 1,
-                  onTap: () => _onTap(1),
-                ),
-                _NavItem(
-                  icon: Icons.calendar_month_outlined,
-                  activeIcon: Icons.calendar_month,
-                  label: context.tr(LocaleKeys.navigation_sessions),
-                  selected: current == 2,
-                  onTap: () => _onTap(2),
-                ),
-                _NavItem(
-                  icon: Icons.person_outline,
-                  activeIcon: Icons.person,
-                  label: context.tr(LocaleKeys.navigation_profile),
-                  selected: current == 3,
-                  onTap: () => _onTap(3),
-                ),
-              ],
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.08),
+                blurRadius: 20,
+                offset: const Offset(0, -4),
+              ),
+            ],
+          ),
+          child: SafeArea(
+            top: false,
+            bottom: false,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 8),
+              child: Row(
+                children: [
+                  _NavItem(
+                    icon: Icons.home_outlined,
+                    activeIcon: Icons.home,
+                    label: context.tr(LocaleKeys.navigation_home),
+                    selected: current == 0,
+                    onTap: () => _onTap(0),
+                  ),
+                  _NavItem(
+                    icon: Icons.content_paste_outlined,
+                    activeIcon: Icons.content_paste,
+                    label: context.tr(LocaleKeys.navigation_services),
+                    selected: current == 1,
+                    onTap: () => _onTap(1),
+                  ),
+                  _NavItem(
+                    icon: Icons.calendar_month_outlined,
+                    activeIcon: Icons.calendar_month,
+                    label: context.tr(LocaleKeys.navigation_sessions),
+                    selected: current == 2,
+                    onTap: () => _onTap(2),
+                  ),
+                  _NavItem(
+                    icon: Icons.person_outline,
+                    activeIcon: Icons.person,
+                    label: context.tr(LocaleKeys.navigation_profile),
+                    selected: current == 3,
+                    onTap: () => _onTap(3),
+                  ),
+                ],
+              ),
             ),
           ),
         ),
@@ -100,8 +106,7 @@ class _NavItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color =
-        selected ? AppColors.primary : const Color(0xFFADB5BD);
+    final color = selected ? AppColors.primary : const Color(0xFFADB5BD);
 
     return Expanded(
       child: InkWell(
@@ -121,14 +126,9 @@ class _NavItem extends StatelessWidget {
               duration: const Duration(milliseconds: 220),
               style: AppTextStyles.caption.copyWith(
                 color: color,
-                fontWeight:
-                    selected ? FontWeight.w700 : FontWeight.w400,
+                fontWeight: selected ? FontWeight.w700 : FontWeight.w400,
               ),
-              child: Text(
-                label,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
+              child: Text(label, maxLines: 1, overflow: TextOverflow.ellipsis),
             ),
           ],
         ),

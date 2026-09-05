@@ -38,8 +38,17 @@ class BookingPage extends StatefulWidget {
   /// the backend doesn't always set that field consistently.
   final String? selectedBookingType;
 
-  static void show(BuildContext context, {Service? service, String? selectedChannelType}) {
-    context.push(AppRoutes.booking, extra: service != null ? {'service': service, 'channelType': selectedChannelType} : null);
+  static void show(
+    BuildContext context, {
+    Service? service,
+    String? selectedChannelType,
+  }) {
+    context.push(
+      AppRoutes.booking,
+      extra: service != null
+          ? {'service': service, 'channelType': selectedChannelType}
+          : null,
+    );
   }
 
   @override
@@ -49,13 +58,15 @@ class BookingPage extends StatefulWidget {
 class _BookingPageState extends State<BookingPage> {
   final _formKey = GlobalKey<FormState>();
 
-  String? get _bookingType => widget.selectedBookingType ?? widget.service?.bookingType;
+  String? get _bookingType =>
+      widget.selectedBookingType ?? widget.service?.bookingType;
 
-  late final List<ConsultationOption> _options = ConsultationOptions.fromService(
-    widget.service,
-    selectedChannelType: widget.selectedChannelType,
-    bookingTypeOverride: widget.selectedBookingType,
-  );
+  late final List<ConsultationOption> _options =
+      ConsultationOptions.fromService(
+        widget.service,
+        selectedChannelType: widget.selectedChannelType,
+        bookingTypeOverride: widget.selectedBookingType,
+      );
   int _selectedOptionIndex = 0;
 
   PaymentMethod _paymentMethod = PaymentMethod.zaincash;
@@ -89,18 +100,19 @@ class _BookingPageState extends State<BookingPage> {
   }
 
   @override
-
   Widget build(BuildContext context) {
     return Directionality(
       textDirection: ui.TextDirection.rtl,
       child: Scaffold(
+        backgroundColor: AppColors.background,
         body: SafeArea(
           child: Form(
             key: _formKey,
             child: Column(
               children: [
                 BookingAppBar(
-                  title: widget.service?.title ??
+                  title:
+                      widget.service?.title ??
                       context.tr(LocaleKeys.booking_instantSession),
                   onBack: () => context.pop(),
                 ),
@@ -115,7 +127,9 @@ class _BookingPageState extends State<BookingPage> {
                         // Session type (channel selector) — online services only.
                         if (_bookingType != 'clinic') ...[
                           const SizedBox(height: AppSpacing.md),
-                          _SectionTitle(title: context.tr(LocaleKeys.booking_durationTitle)),
+                          _SectionTitle(
+                            title: context.tr(LocaleKeys.booking_durationTitle),
+                          ),
                           const SizedBox(height: AppSpacing.sm),
                           SessionTypeSelector(
                             options: _options,
@@ -127,12 +141,17 @@ class _BookingPageState extends State<BookingPage> {
 
                         // Consultation title
                         const SizedBox(height: AppSpacing.md),
-                        _SectionTitle(title: context.tr(LocaleKeys.booking_consultationTitle)),
+                        _SectionTitle(
+                          title: context.tr(
+                            LocaleKeys.booking_consultationTitle,
+                          ),
+                        ),
                         const SizedBox(height: AppSpacing.sm),
                         OutlinedCardField(
                           controller: _titleController,
-                          hintText:
-                              context.tr(LocaleKeys.booking_consultationTitleHint),
+                          hintText: context.tr(
+                            LocaleKeys.booking_consultationTitleHint,
+                          ),
                           validator: (v) => (v == null || v.trim().isEmpty)
                               ? context.tr(LocaleKeys.booking_enterTitle)
                               : null,
@@ -140,7 +159,9 @@ class _BookingPageState extends State<BookingPage> {
 
                         // Request details
                         const SizedBox(height: AppSpacing.md),
-                        _SectionTitle(title: context.tr(LocaleKeys.booking_detailsTitle)),
+                        _SectionTitle(
+                          title: context.tr(LocaleKeys.booking_detailsTitle),
+                        ),
                         const SizedBox(height: AppSpacing.sm),
                         OutlinedCardField(
                           controller: _detailsController,
@@ -153,7 +174,9 @@ class _BookingPageState extends State<BookingPage> {
 
                         // Payment method
                         const SizedBox(height: AppSpacing.md),
-                        _SectionTitle(title: context.tr(LocaleKeys.booking_paymentTitle)),
+                        _SectionTitle(
+                          title: context.tr(LocaleKeys.booking_paymentTitle),
+                        ),
                         const SizedBox(height: AppSpacing.sm),
                         PaymentMethodSelector(
                           selected: _paymentMethod,
@@ -237,7 +260,10 @@ class _BottomBar extends StatelessWidget {
             ],
           ),
           const SizedBox(height: AppSpacing.sm),
-          PrimaryButton(label: context.tr(LocaleKeys.booking_next), onPressed: onConfirm),
+          PrimaryButton(
+            label: context.tr(LocaleKeys.booking_next),
+            onPressed: onConfirm,
+          ),
         ],
       ),
     );
