@@ -1,8 +1,10 @@
 import 'dart:ui' as ui;
 
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../app/localization/locale_keys.g.dart';
 import '../../../../app/router/app_routes.dart';
 import '../../../../app/styles/app_colors.dart';
 import '../../../../app/styles/app_spacing.dart';
@@ -17,14 +19,27 @@ import '../widgets/price_summary.dart';
 import '../widgets/session_type_selector.dart';
 
 class BookingPage extends StatefulWidget {
-  const BookingPage({super.key, this.service});
+  const BookingPage({
+    super.key,
+    this.service,
+    this.selectedChannelType,
+    this.selectedBookingType,
+  });
 
   /// The backend service selected in the booking sheet. Null when the page
   /// is opened without one (legacy/deep-link) — fallback pricing is used.
   final Service? service;
 
-  static void show(BuildContext context) {
-    context.push(AppRoutes.booking);
+  /// The selected channel type for online services (e.g. 'video', 'voice', 'chat').
+  final String? selectedChannelType;
+
+  /// The clinic/online tab the user picked in the booking sheet. Takes
+  /// precedence over [Service.bookingType] as the source of truth, since
+  /// the backend doesn't always set that field consistently.
+  final String? selectedBookingType;
+
+  static void show(BuildContext context, {Service? service, String? selectedChannelType}) {
+    context.push(AppRoutes.booking, extra: service != null ? {'service': service, 'channelType': selectedChannelType} : null);
   }
 
   @override
@@ -34,11 +49,16 @@ class BookingPage extends StatefulWidget {
 class _BookingPageState extends State<BookingPage> {
   final _formKey = GlobalKey<FormState>();
 
-  late final List<ConsultationOption> _options =
-      ConsultationOptions.fromService(widget.service);
+  String? get _bookingType => widget.selectedBookingType ?? widget.service?.bookingType;
+
+  late final List<ConsultationOption> _options = ConsultationOptions.fromService(
+    widget.service,
+    selectedChannelType: widget.selectedChannelType,
+    bookingTypeOverride: widget.selectedBookingType,
+  );
   int _selectedOptionIndex = 0;
 
-  PaymentMethod _paymentMethod = PaymentMethod.card;
+  PaymentMethod _paymentMethod = PaymentMethod.zaincash;
 
   final _titleController = TextEditingController();
   final _detailsController = TextEditingController();
@@ -54,11 +74,22 @@ class _BookingPageState extends State<BookingPage> {
 
   void _submit() {
     if (_formKey.currentState?.validate() ?? false) {
-      context.push(AppRoutes.bookingStep2);
+      context.push(
+        AppRoutes.bookingStep2,
+        extra: {
+          'serviceId': widget.service?.id,
+          'bookingType': _bookingType,
+          'consultationType': _selectedOption.channel,
+          'paymentMethod': _paymentMethod.name,
+          'title': _titleController.text.trim(),
+          'notes': _detailsController.text.trim(),
+        },
+      );
     }
   }
 
   @override
+
   Widget build(BuildContext context) {
     return Directionality(
       textDirection: ui.TextDirection.rtl,
@@ -69,7 +100,8 @@ class _BookingPageState extends State<BookingPage> {
             child: Column(
               children: [
                 BookingAppBar(
-                  title: widget.service?.title ?? 'جلسة فورية',
+                  title: widget.service?.title ??
+                      context.tr(LocaleKeys.booking_instantSession),
                   onBack: () => context.pop(),
                 ),
                 Expanded(
@@ -80,46 +112,48 @@ class _BookingPageState extends State<BookingPage> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                        // Session type
-                        const SizedBox(height: AppSpacing.md),
-                        const _SectionTitle(title: 'مدة الاستشارة'),
-                        const SizedBox(height: AppSpacing.sm),
-                        SessionTypeSelector(
-                          options: _options,
-                          selectedIndex: _selectedOptionIndex,
-                          onChanged: (i) =>
-                              setState(() => _selectedOptionIndex = i),
-                        ),
+                        // Session type (channel selector) — online services only.
+                        if (_bookingType != 'clinic') ...[
+                          const SizedBox(height: AppSpacing.md),
+                          _SectionTitle(title: context.tr(LocaleKeys.booking_durationTitle)),
+                          const SizedBox(height: AppSpacing.sm),
+                          SessionTypeSelector(
+                            options: _options,
+                            selectedIndex: _selectedOptionIndex,
+                            onChanged: (i) =>
+                                setState(() => _selectedOptionIndex = i),
+                          ),
+                        ],
 
                         // Consultation title
                         const SizedBox(height: AppSpacing.md),
-                        const _SectionTitle(title: 'عنوان الاستشارة'),
+                        _SectionTitle(title: context.tr(LocaleKeys.booking_consultationTitle)),
                         const SizedBox(height: AppSpacing.sm),
                         OutlinedCardField(
                           controller: _titleController,
                           hintText:
-                              '* عنوان الاستشارة (يرجي كتابة موضوع مختصر للطلب)',
+                              context.tr(LocaleKeys.booking_consultationTitleHint),
                           validator: (v) => (v == null || v.trim().isEmpty)
-                              ? 'أدخل عنوان الاستشارة'
+                              ? context.tr(LocaleKeys.booking_enterTitle)
                               : null,
                         ),
 
                         // Request details
                         const SizedBox(height: AppSpacing.md),
-                        const _SectionTitle(title: 'تفاصيل الطلب'),
+                        _SectionTitle(title: context.tr(LocaleKeys.booking_detailsTitle)),
                         const SizedBox(height: AppSpacing.sm),
                         OutlinedCardField(
                           controller: _detailsController,
-                          hintText: '* فضلاً اكتب التفاصيل بشكل واضح، وباختصار',
+                          hintText: context.tr(LocaleKeys.booking_detailsHint),
                           maxLines: 5,
                           validator: (v) => (v == null || v.trim().isEmpty)
-                              ? 'أدخل تفاصيل الطلب'
+                              ? context.tr(LocaleKeys.booking_enterDetails)
                               : null,
                         ),
 
                         // Payment method
                         const SizedBox(height: AppSpacing.md),
-                        const _SectionTitle(title: 'طريقة الدفع'),
+                        _SectionTitle(title: context.tr(LocaleKeys.booking_paymentTitle)),
                         const SizedBox(height: AppSpacing.sm),
                         PaymentMethodSelector(
                           selected: _paymentMethod,
@@ -187,14 +221,14 @@ class _BottomBar extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'اجمالي الطلب',
+                context.tr(LocaleKeys.booking_orderTotal),
                 style: AppTextStyles.body.copyWith(
                   color: AppColors.textPrimary,
                   fontWeight: FontWeight.bold,
                 ),
               ),
               Text(
-                '${option.displayPrice} ر.س',
+                '${option.displayPrice} ${context.tr(LocaleKeys.booking_currency)}',
                 style: AppTextStyles.title.copyWith(
                   color: AppColors.primary,
                   fontWeight: FontWeight.w700,
@@ -203,7 +237,7 @@ class _BottomBar extends StatelessWidget {
             ],
           ),
           const SizedBox(height: AppSpacing.sm),
-          PrimaryButton(label: 'التالي', onPressed: onConfirm),
+          PrimaryButton(label: context.tr(LocaleKeys.booking_next), onPressed: onConfirm),
         ],
       ),
     );

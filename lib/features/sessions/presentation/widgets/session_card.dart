@@ -1,5 +1,7 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 
+import '../../../../app/localization/locale_keys.g.dart';
 import '../../../../app/styles/app_colors.dart';
 import '../../../../app/styles/app_radius.dart';
 import '../../../../app/styles/app_spacing.dart';
@@ -16,10 +18,20 @@ class SessionCard extends StatelessWidget {
     super.key,
     required this.session,
     this.showActions = false,
+    this.isCancelling = false,
+    this.onCancel,
   });
 
   final Session session;
   final bool showActions;
+
+  /// True while this card's booking is being cancelled — the cancel
+  /// button shows a spinner and both actions are disabled.
+  final bool isCancelling;
+
+  /// Invoked when the cancel button is tapped (after the page's own
+  /// confirmation dialog, which the page owns — not the card).
+  final VoidCallback? onCancel;
 
   Color get _statusBackground => switch (session.status) {
         SessionStatus.upcoming => const Color(0xFFFFF8E1),
@@ -87,7 +99,10 @@ class SessionCard extends StatelessWidget {
           _SessionInfoBox(session: session),
           if (showActions) ...[
             const SizedBox(height: AppSpacing.md),
-            const _SessionActions(),
+            _SessionActions(
+              isCancelling: isCancelling,
+              onCancel: onCancel,
+            ),
           ],
         ],
       ),
@@ -147,7 +162,7 @@ class _SessionInfoBox extends StatelessWidget {
           Expanded(
             child: _InfoCell(
               icon: Icons.calendar_today_outlined,
-              label: 'التاريخ',
+              label: context.tr(LocaleKeys.sessions_dateLabel),
               value: Text(
                 session.date,
                 style: AppTextStyles.body.copyWith(
@@ -162,7 +177,7 @@ class _SessionInfoBox extends StatelessWidget {
           Expanded(
             child: _InfoCell(
               icon: Icons.access_time_rounded,
-              label: 'الوقت',
+              label: context.tr(LocaleKeys.sessions_timeLabel),
               value: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -226,23 +241,27 @@ class _InfoCell extends StatelessWidget {
 }
 
 class _SessionActions extends StatelessWidget {
-  const _SessionActions();
+  const _SessionActions({this.isCancelling = false, this.onCancel});
+
+  final bool isCancelling;
+  final VoidCallback? onCancel;
 
   @override
   Widget build(BuildContext context) {
+    final busy = isCancelling || onCancel == null;
     return Row(
       children: [
         // إعادة جدولة on the right, إلغاء on the left
         Expanded(
           child: FilledButton(
-            onPressed: () {},
+            onPressed: busy ? null : () {},
             style: FilledButton.styleFrom(
               backgroundColor: AppColors.primary,
               shape: const RoundedRectangleBorder(borderRadius: _buttonRadius),
               padding: _buttonPadding,
             ),
             child: Text(
-              'إعادة جدولة',
+              context.tr(LocaleKeys.sessions_reschedule),
               style: AppTextStyles.button.copyWith(color: AppColors.white),
             ),
           ),
@@ -250,18 +269,24 @@ class _SessionActions extends StatelessWidget {
         const SizedBox(width: AppSpacing.sm),
         Expanded(
           child: OutlinedButton(
-            onPressed: () {},
+            onPressed: busy ? null : onCancel,
             style: OutlinedButton.styleFrom(
               side: const BorderSide(color: AppColors.border),
               shape: const RoundedRectangleBorder(borderRadius: _buttonRadius),
               padding: _buttonPadding,
             ),
-            child: Text(
-              'إلغاء',
-              style: AppTextStyles.button.copyWith(
-                color: AppColors.textSecondary,
-              ),
-            ),
+            child: isCancelling
+                ? const SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  )
+                : Text(
+                    context.tr(LocaleKeys.sessions_cancel),
+                    style: AppTextStyles.button.copyWith(
+                      color: AppColors.textSecondary,
+                    ),
+                  ),
           ),
         ),
       ],

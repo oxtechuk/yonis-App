@@ -7,5 +7,6 @@ class GetServicesUseCase {
 
   final ServicesRepository _repository;
 
-  Future<Result<List<Service>>> call() => _repository.getServices();
+  Future<Result<List<Service>>> call(String type) =>
+      type == 'clinic' ? _repository.getClinicServices() : _repository.getOnlineServices();
 }

@@ -8,7 +8,9 @@ import '../../../../app/styles/app_text_styles.dart';
 import 'language_switcher_sheet.dart';
 
 class ProfileMenu extends StatelessWidget {
-  const ProfileMenu({super.key});
+  const ProfileMenu({super.key, required this.onLogout});
+
+  final VoidCallback onLogout;
 
   @override
   Widget build(BuildContext context) {
@@ -18,19 +20,19 @@ class ProfileMenu extends StatelessWidget {
         children: [
           _MenuItem(
             icon: Icons.star_border_rounded,
-            label: 'قيّم التطبيق',
+            label: context.tr(LocaleKeys.profile_rateApp),
             onTap: () {},
           ),
           const _MenuDivider(),
           _MenuItem(
             icon: Icons.article_outlined,
-            label: 'سياسة الخصوصية',
+            label: context.tr(LocaleKeys.profile_privacyPolicy),
             onTap: () {},
           ),
           const _MenuDivider(),
           _MenuItem(
             icon: Icons.menu_book_outlined,
-            label: 'خصوصية البيانات',
+            label: context.tr(LocaleKeys.profile_dataPrivacy),
             onTap: () {},
           ),
           const _MenuDivider(),
@@ -42,10 +44,10 @@ class ProfileMenu extends StatelessWidget {
           const _MenuDivider(),
           _MenuItem(
             icon: Icons.logout_rounded,
-            label: 'تسجيل الخروج',
+            label: context.tr(LocaleKeys.profile_logout),
             labelColor: AppColors.error,
             iconColor: AppColors.error,
-            onTap: () {},
+            onTap: onLogout,
           ),
         ],
       ),

@@ -18,9 +18,9 @@ class AppConfig {
       'https://www.gstatic.com/generate_204';
 
   static const Map<AppEnvironment, String> _baseUrls = {
-    AppEnvironment.development: 'https://yonis.oxtech.uk',
-    AppEnvironment.staging: 'https://yonis.oxtech.uk',
-    AppEnvironment.production: 'https://yonis.oxtech.uk',
+    AppEnvironment.development: 'https://younis-almurshid.com',
+    AppEnvironment.staging: 'https://younis-almurshid.com',
+    AppEnvironment.production: 'https://younis-almurshid.com',
   };
 
   final AppEnvironment environment;

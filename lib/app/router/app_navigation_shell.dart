@@ -4,8 +4,6 @@ import 'package:go_router/go_router.dart';
 
 import '../localization/locale_keys.g.dart';
 import '../styles/app_colors.dart';
-import '../styles/app_sizes.dart';
-import '../styles/app_spacing.dart';
 import '../styles/app_text_styles.dart';
 
 class AppNavigationShell extends StatelessWidget {
@@ -27,16 +25,26 @@ class AppNavigationShell extends StatelessWidget {
     return Scaffold(
       body: navigationShell,
       bottomNavigationBar: Container(
-        decoration: const BoxDecoration(
+        decoration: BoxDecoration(
           color: AppColors.white,
-          border:
-              Border(top: BorderSide(color: Color(0xFFE5E7EB), width: 1)),
+          borderRadius: const BorderRadius.only(
+            topLeft: Radius.circular(24),
+            topRight: Radius.circular(24),
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.08),
+              blurRadius: 20,
+              offset: const Offset(0, -4),
+            ),
+          ],
         ),
+        // SafeArea only pads the system gesture inset at the bottom —
+        // the content itself sizes to the icon+label, no extra height.
         child: SafeArea(
           top: false,
-          child: SizedBox(
-            // Use design token instead of hardcoded 64
-            height: AppSizes.bottomBarHeight,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 8),
             child: Row(
               children: [
                 _NavItem(
@@ -102,20 +110,25 @@ class _NavItem extends StatelessWidget {
         splashColor: Colors.transparent,
         highlightColor: Colors.transparent,
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min,
           children: [
             Icon(
               selected ? activeIcon : icon,
               color: color,
-              size: AppSizes.iconMd,
+              size: selected ? 24 : 22,
             ),
-            const SizedBox(height: AppSpacing.xs),
-            Text(
-              label,
+            const SizedBox(height: 4),
+            AnimatedDefaultTextStyle(
+              duration: const Duration(milliseconds: 220),
               style: AppTextStyles.caption.copyWith(
                 color: color,
                 fontWeight:
                     selected ? FontWeight.w700 : FontWeight.w400,
+              ),
+              child: Text(
+                label,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
               ),
             ),
           ],

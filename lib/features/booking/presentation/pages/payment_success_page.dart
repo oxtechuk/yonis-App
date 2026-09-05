@@ -1,8 +1,10 @@
 import 'dart:ui' as ui;
 
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../app/localization/locale_keys.g.dart';
 import '../../../../app/router/app_routes.dart';
 import '../../../../app/styles/app_colors.dart';
 import '../../../../app/styles/app_sizes.dart';
@@ -52,7 +54,7 @@ class PaymentSuccessPage extends StatelessWidget {
 
                       // ── Title ──────────────────────────────────
                       Text(
-                        'تم تأكيد حجزك بنجاح!',
+                        context.tr(LocaleKeys.payment_confirmedTitle),
                         textAlign: TextAlign.center,
                         style: AppTextStyles.headline.copyWith(
                           color: AppColors.primary,
@@ -64,7 +66,7 @@ class PaymentSuccessPage extends StatelessWidget {
 
                       // ── Subtitle ───────────────────────────────
                       Text(
-                        'شكرا لثقتك بنا. تم إرسال تفاصيل الحجز إلى بريدك الإلكتروني.',
+                        context.tr(LocaleKeys.payment_confirmedSubtitle),
                         textAlign: TextAlign.center,
                         style: AppTextStyles.body.copyWith(
                           color: AppColors.textSecondary,
@@ -168,7 +170,7 @@ class _BottomActions extends StatelessWidget {
                 size: 20,
               ),
               label: Text(
-                'ابدا الاستشارة',
+                context.tr(LocaleKeys.payment_startConsultation),
                 style: AppTextStyles.button.copyWith(
                   color: AppColors.white,
                   fontSize: 15,
@@ -195,7 +197,7 @@ class _BottomActions extends StatelessWidget {
                 size: 20,
               ),
               label: Text(
-                'العودة للرئيسية',
+                context.tr(LocaleKeys.payment_backHome),
                 style: AppTextStyles.button.copyWith(
                   color: AppColors.textPrimary,
                   fontSize: 15,

@@ -12,7 +12,14 @@ class Service extends Equatable {
     this.chatPrice,
     this.voicePrice,
     this.videoPrice,
+    this.serviceType,
+    this.channelType,
+    this.channels,
     this.isActive = true,
+    this.location,
+    this.bookingType,
+    this.currency,
+    this.currencySymbol,
   });
 
   final int id;
@@ -35,7 +42,28 @@ class Service extends Equatable {
   final double? voicePrice;
   final double? videoPrice;
 
+  /// The type of service: `clinic`, `online`, or `both`.
+  final String? serviceType;
+
+  /// The channel type for online services: `all`, `video`, etc.
+  final String? channelType;
+
+  /// Available channels for online services (video, voice, chat).
+  final List<ServiceChannel>? channels;
+
   final bool isActive;
+
+  /// Location for clinic services.
+  final String? location;
+
+  /// The booking type from the API.
+  final String? bookingType;
+
+  /// Currency code (e.g. IQD).
+  final String? currency;
+
+  /// Currency symbol (e.g. د.ع).
+  final String? currencySymbol;
 
   /// Trims trailing zeros from the API price ("50.00" -> "50").
   String get displayPrice {
@@ -60,6 +88,33 @@ class Service extends Equatable {
         chatPrice,
         voicePrice,
         videoPrice,
+        serviceType,
+        channelType,
+        channels,
         isActive,
+        location,
+        bookingType,
+        currency,
+        currencySymbol,
       ];
+}
+
+class ServiceChannel {
+  const ServiceChannel({
+    required this.channel,
+    required this.name,
+    required this.price,
+    required this.duration,
+    required this.isEnabled,
+    this.currency,
+    this.currencySymbol,
+  });
+
+  final String channel;
+  final String name;
+  final double price;
+  final int? duration;
+  final bool isEnabled;
+  final String? currency;
+  final String? currencySymbol;
 }

@@ -5,7 +5,10 @@ import '../../../../app/styles/app_spacing.dart';
 import '../../../../app/styles/app_text_styles.dart';
 
 class ProfileHeader extends StatelessWidget {
-  const ProfileHeader({super.key});
+  const ProfileHeader({super.key, required this.name, required this.subtitle});
+
+  final String name;
+  final String subtitle;
 
   @override
   Widget build(BuildContext context) {
@@ -30,7 +33,7 @@ class ProfileHeader extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'احمد الخميسي',
+                name,
                 style: AppTextStyles.title.copyWith(
                   color: AppColors.textPrimary,
                   fontWeight: FontWeight.w700,
@@ -38,7 +41,7 @@ class ProfileHeader extends StatelessWidget {
               ),
               const SizedBox(height: 2),
               Text(
-                'تفاصيل الحساب',
+                subtitle,
                 style: AppTextStyles.bodySmall.copyWith(
                   color: AppColors.textSecondary,
                 ),

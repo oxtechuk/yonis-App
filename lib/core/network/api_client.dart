@@ -74,6 +74,17 @@ class DioApiClient implements ApiClient {
 
   final Dio _dio;
 
+  /// Declares `Content-Type: application/json` only when [data] is
+  /// actually present. A bodyless request (typical GET/DELETE) must never
+  /// carry a JSON content type — some backends stall waiting for body
+  /// bytes that were promised by the header but never sent.
+  Options _withJsonContentType(Options? options, Object? data) {
+    if (data == null) return options ?? Options();
+    return (options ?? Options()).copyWith(
+      contentType: options?.contentType ?? Headers.jsonContentType,
+    );
+  }
+
   @override
   Future<T> get<T>(
     String path, {
@@ -87,7 +98,7 @@ class DioApiClient implements ApiClient {
         path,
         queryParameters: queryParameters,
         data: data,
-        options: options,
+        options: _withJsonContentType(options, data),
         cancelToken: cancelToken,
       ),
     );
@@ -106,7 +117,7 @@ class DioApiClient implements ApiClient {
         path,
         queryParameters: queryParameters,
         data: data,
-        options: options,
+        options: _withJsonContentType(options, data),
         cancelToken: cancelToken,
       ),
     );
@@ -125,7 +136,7 @@ class DioApiClient implements ApiClient {
         path,
         queryParameters: queryParameters,
         data: data,
-        options: options,
+        options: _withJsonContentType(options, data),
         cancelToken: cancelToken,
       ),
     );
@@ -144,7 +155,7 @@ class DioApiClient implements ApiClient {
         path,
         queryParameters: queryParameters,
         data: data,
-        options: options,
+        options: _withJsonContentType(options, data),
         cancelToken: cancelToken,
       ),
     );
@@ -163,7 +174,7 @@ class DioApiClient implements ApiClient {
         path,
         queryParameters: queryParameters,
         data: data,
-        options: options,
+        options: _withJsonContentType(options, data),
         cancelToken: cancelToken,
       ),
     );

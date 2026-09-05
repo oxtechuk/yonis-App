@@ -44,17 +44,25 @@ class ServicesCubit extends Cubit<ServicesState> {
         super(const ServicesInitial());
 
   final GetServicesUseCase _getServicesUseCase;
+  final Map<String, List<Service>> _cache = {};
 
-  /// Loads the services list. Skipped when valid data is already cached
-  /// (the sheet reuses this cubit, so repeated openings render instantly);
-  /// pass [forceRefresh] to refetch.
-  Future<void> load({bool forceRefresh = false}) async {
-    if (!forceRefresh && state is ServicesLoaded) return;
+  /// Loads services for the given type ('clinic' or 'online').
+  /// Skipped when that type was already fetched this session; pass
+  /// [forceRefresh] to refetch and replace the cached entry.
+  Future<void> load(String type, {bool forceRefresh = false}) async {
+    final cached = _cache[type];
+    if (!forceRefresh && cached != null) {
+      emit(ServicesLoaded(cached));
+      return;
+    }
     emit(const ServicesLoading());
-    final result = await _getServicesUseCase.call();
+    final result = await _getServicesUseCase.call(type);
     result.fold(
       onFailure: (failure) => emit(ServicesError(failure)),
-      onSuccess: (services) => emit(ServicesLoaded(services)),
+      onSuccess: (services) {
+        _cache[type] = services;
+        emit(ServicesLoaded(services));
+      },
     );
   }
 }

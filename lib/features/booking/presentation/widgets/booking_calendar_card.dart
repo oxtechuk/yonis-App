@@ -1,5 +1,7 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 
+import '../../../../app/localization/locale_keys.g.dart';
 import '../../../../app/styles/app_colors.dart';
 import '../../../../app/styles/app_radius.dart';
 import '../../../../app/styles/app_spacing.dart';
@@ -20,16 +22,33 @@ class BookingCalendarCard extends StatelessWidget {
   final DateTime? selectedDate;
   final ValueChanged<DateTime> onDaySelected;
 
-  // RTL order: Sunday … Saturday (right → left visually).
-  static const _weekDays = ['أحد', 'إثن', 'ثلا', 'أرب', 'خمي', 'جمع', 'سبت'];
+  List<String> _weekDays(BuildContext context) => [
+        context.tr(LocaleKeys.calendar_sun),
+        context.tr(LocaleKeys.calendar_mon),
+        context.tr(LocaleKeys.calendar_tue),
+        context.tr(LocaleKeys.calendar_wed),
+        context.tr(LocaleKeys.calendar_thu),
+        context.tr(LocaleKeys.calendar_fri),
+        context.tr(LocaleKeys.calendar_sat),
+      ];
 
-  static const _monthNames = [
-    'يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو',
-    'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر',
-  ];
+  String _monthName(BuildContext context, int month) => switch (month) {
+        1 => context.tr(LocaleKeys.calendar_month1),
+        2 => context.tr(LocaleKeys.calendar_month2),
+        3 => context.tr(LocaleKeys.calendar_month3),
+        4 => context.tr(LocaleKeys.calendar_month4),
+        5 => context.tr(LocaleKeys.calendar_month5),
+        6 => context.tr(LocaleKeys.calendar_month6),
+        7 => context.tr(LocaleKeys.calendar_month7),
+        8 => context.tr(LocaleKeys.calendar_month8),
+        9 => context.tr(LocaleKeys.calendar_month9),
+        10 => context.tr(LocaleKeys.calendar_month10),
+        11 => context.tr(LocaleKeys.calendar_month11),
+        _ => context.tr(LocaleKeys.calendar_month12),
+      };
 
-  String _monthLabel() =>
-      '${_monthNames[focusedMonth.month - 1]} ${focusedMonth.year}';
+  String _monthLabel(BuildContext context) =>
+      '${_monthName(context, focusedMonth.month)} ${focusedMonth.year}';
 
   // Build a rectangular 6-row × 7-col grid, padding the edges with
   // trailing/leading days of adjacent months — matching the design.
@@ -108,7 +127,7 @@ class BookingCalendarCard extends StatelessWidget {
       child: Column(
         children: [
           Text(
-            _monthLabel(),
+            _monthLabel(context),
             style: AppTextStyles.headline.copyWith(
               color: AppColors.primary,
               fontWeight: FontWeight.w800,
@@ -116,7 +135,7 @@ class BookingCalendarCard extends StatelessWidget {
           ),
           const SizedBox(height: AppSpacing.lg),
           Row(
-            children: _weekDays
+            children: _weekDays(context)
                 .map(
                   (d) => Expanded(
                     child: Text(

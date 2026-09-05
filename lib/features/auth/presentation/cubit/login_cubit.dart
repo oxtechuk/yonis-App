@@ -59,4 +59,8 @@ class LoginCubit extends Cubit<LoginState> {
       onSuccess: (session) => emit(LoginSuccess(session.user)),
     );
   }
+
+  /// Returns to the pre-login state, e.g. when the user picks a different
+  /// phone number before logging in.
+  void reset() => emit(const LoginInitial());
 }

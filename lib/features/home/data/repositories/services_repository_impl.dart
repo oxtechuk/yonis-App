@@ -13,9 +13,21 @@ class ServicesRepositoryImpl implements ServicesRepository {
   final ServicesRemoteDataSource _remoteDataSource;
 
   @override
-  Future<Result<List<Service>>> getServices() async {
+  Future<Result<List<Service>>> getClinicServices() async {
     try {
-      final dto = await _remoteDataSource.getServices();
+      final dto = await _remoteDataSource.getClinicServices();
+      return Success(
+        dto.services.map((item) => item.toEntity()).toList(growable: false),
+      );
+    } on AppException catch (exception) {
+      return FailureResult(FailureMapper.map(exception));
+    }
+  }
+
+  @override
+  Future<Result<List<Service>>> getOnlineServices() async {
+    try {
+      final dto = await _remoteDataSource.getOnlineServices();
       return Success(
         dto.services.map((item) => item.toEntity()).toList(growable: false),
       );

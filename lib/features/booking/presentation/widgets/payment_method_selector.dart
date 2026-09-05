@@ -47,7 +47,7 @@ class PaymentMethodSelector extends StatelessWidget {
                   _paymentIcon(method),
                   const Spacer(),
                   Text(
-                    method.label,
+                    method.localizedLabel(context),
                     style: AppTextStyles.body.copyWith(
                       color: AppColors.textPrimary,
                       fontWeight: FontWeight.w500,
@@ -66,9 +66,8 @@ class PaymentMethodSelector extends StatelessWidget {
 
   Widget _paymentIcon(PaymentMethod method) {
     return switch (method) {
-      PaymentMethod.applePay => _PayBadge(label: ' Pay', color: Colors.black),
-      PaymentMethod.googlePay => _PayBadge(label: 'G Pay', color: Colors.black),
-      PaymentMethod.card => const _CardIcons(),
+      PaymentMethod.zaincash => _PayBadge(label: 'Zain Cash', color: Colors.green),
+      PaymentMethod.superki => _PayBadge(label: 'SuperKI', color: Colors.blue),
     };
   }
 }

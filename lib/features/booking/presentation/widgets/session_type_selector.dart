@@ -1,5 +1,7 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 
+import '../../../../app/localization/locale_keys.g.dart';
 import '../../../../app/styles/app_colors.dart';
 import '../../../../app/styles/app_radius.dart';
 import '../../../../app/styles/app_spacing.dart';
@@ -19,6 +21,21 @@ class SessionTypeSelector extends StatelessWidget {
   final List<ConsultationOption> options;
   final int selectedIndex;
   final ValueChanged<int> onChanged;
+
+  IconData _iconFor(String? channel) {
+    switch (channel) {
+      case 'chat':
+        return Icons.chat_bubble_outline_rounded;
+      case 'voice':
+        return Icons.mic_none_rounded;
+      case 'video':
+        return Icons.videocam_outlined;
+      case 'clinic':
+        return Icons.local_hospital_outlined;
+      default:
+        return Icons.hourglass_empty_rounded;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -47,7 +64,7 @@ class SessionTypeSelector extends StatelessWidget {
                 child: Row(
                   children: [
                     Text(
-                      '${options[i].displayPrice} ر.س',
+                      '${options[i].displayPrice} ${context.tr(LocaleKeys.booking_currency)}',
                       style: AppTextStyles.body.copyWith(
                         color: AppColors.primary,
                         fontWeight: FontWeight.w600,
@@ -55,15 +72,15 @@ class SessionTypeSelector extends StatelessWidget {
                     ),
                     const Spacer(),
                     Text(
-                      options[i].label,
+                      localizedOptionLabel(context, options[i].label),
                       style: AppTextStyles.title.copyWith(
                         color: AppColors.textPrimary,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
                     const SizedBox(width: AppSpacing.sm),
-                    const Icon(
-                      Icons.hourglass_empty_rounded,
+                    Icon(
+                      _iconFor(options[i].channel),
                       color: AppColors.primary,
                       size: 22,
                     ),

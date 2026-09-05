@@ -1,5 +1,7 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 
+import '../../../../app/localization/locale_keys.g.dart';
 import '../../../../app/styles/app_colors.dart';
 import '../../../../app/styles/app_radius.dart';
 import '../../../../app/styles/app_spacing.dart';
@@ -40,7 +42,7 @@ class SuccessDetailsCard extends StatelessWidget {
       child: Column(
         children: [
           _DetailRow(
-            label: 'رقم المرجع',
+            label: context.tr(LocaleKeys.payment_reference),
             showDivider: true,
             child: Text(
               '#$referenceNumber',
@@ -51,7 +53,7 @@ class SuccessDetailsCard extends StatelessWidget {
             ),
           ),
           _DetailRow(
-            label: 'الخدمة',
+            label: context.tr(LocaleKeys.payment_service),
             showDivider: true,
             child: Text(
               serviceName,
@@ -62,7 +64,7 @@ class SuccessDetailsCard extends StatelessWidget {
             ),
           ),
           _DetailRow(
-            label: 'الموعد',
+            label: context.tr(LocaleKeys.payment_appointment),
             showDivider: true,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -84,7 +86,7 @@ class SuccessDetailsCard extends StatelessWidget {
             ),
           ),
           _DetailRow(
-            label: 'المستشار',
+            label: context.tr(LocaleKeys.payment_consultant),
             showDivider: false,
             child: Row(
               mainAxisSize: MainAxisSize.min,

@@ -1,5 +1,7 @@
 {
   "success": true,
+  "currency": "IQD",
+  "currency_symbol": "د.ع",
   "services": [
     {
       "id": 1,
@@ -12,21 +14,6 @@
       "voice_price": null,
       "video_price": null,
       "duration": 30,
-      "is_active": true,
-      "created_at": "2026-08-13T11:57:16.000000Z",
-      "updated_at": "2026-08-13T11:57:16.000000Z"
-    },
-    {
-      "id": 2,
-      "title": "كشف مستعجل (دون حجز مسبق)",
-      "description": "جلسة كشف عاجلة مخصصة للحالات الطارئة أو الكسور المفاجئة والآلام الحادة التي لا تحتمل الانتظار.",
-      "type": "both",
-      "price": "90.00",
-      "clinic_price": null,
-      "chat_price": null,
-      "voice_price": null,
-      "video_price": null,
-      "duration": 20,
       "is_active": true,
       "created_at": "2026-08-13T11:57:16.000000Z",
       "updated_at": "2026-08-13T11:57:16.000000Z"
@@ -60,6 +47,178 @@
       "is_active": true,
       "created_at": "2026-08-13T11:57:16.000000Z",
       "updated_at": "2026-08-13T11:57:16.000000Z"
+    }
+  ],
+  "clinic_services": [
+    {
+      "id": 1,
+      "title": "استشارة في العيادة (كشف أول مرة)",
+      "description": "كشف أولي دقيق في العيادة لتشخيص آلام المفاصل أو الكسيرات وتشخيصها باستخدام الأشعة، مع وضع خطة علاجية متكاملة.",
+      "duration": 30,
+      "price": 50,
+      "clinic_price": 50,
+      "booking_type": "clinic",
+      "currency": "IQD",
+      "currency_symbol": "د.ع",
+      "type": "both",
+      "location": "مقر العيادة - د. يونس المرشد"
+    },
+    {
+      "id": 3,
+      "title": "استشارة مرئية أونلاين (فيديو)",
+      "description": "جلسة استشارية عن بعد لمدة 30 دقيقة عبر الإنترنت لمناقشة نتائج التحاليل والأشعة وتحديث خطة العلاج والدواء.",
+      "duration": 30,
+      "price": 40,
+      "clinic_price": 40,
+      "booking_type": "clinic",
+      "currency": "IQD",
+      "currency_symbol": "د.ع",
+      "type": "both",
+      "location": "مقر العيادة - د. يونس المرشد"
+    },
+    {
+      "id": 4,
+      "title": "استشارة متابعة (إعادة)",
+      "description": "متابعة دورية لمراقبة تحسن الحالة، والتأكد من نجاح خطة العلاج، أو تغيير الجبائر وإزالة الخيوط الجراحية.",
+      "duration": 15,
+      "price": 20,
+      "clinic_price": 20,
+      "booking_type": "clinic",
+      "currency": "IQD",
+      "currency_symbol": "د.ع",
+      "type": "both",
+      "location": "مقر العيادة - د. يونس المرشد"
+    }
+  ],
+  "online_services": [
+    {
+      "id": 1,
+      "title": "استشارة في العيادة (كشف أول مرة)",
+      "description": "كشف أولي دقيق في العيادة لتشخيص آلام المفاصل أو الكسيرات وتشخيصها باستخدام الأشعة، مع وضع خطة علاجية متكاملة.",
+      "duration": 30,
+      "booking_type": "online",
+      "currency": "IQD",
+      "currency_symbol": "د.ع",
+      "type": "both",
+      "price": 50,
+      "video_price": 50,
+      "voice_price": 45,
+      "chat_price": 37.5,
+      "channels": [
+        {
+          "channel": "video",
+          "name": "مكالمة فيديو أونلاين",
+          "price": 50,
+          "currency": "IQD",
+          "currency_symbol": "د.ع",
+          "duration": 30,
+          "is_enabled": true
+        },
+        {
+          "channel": "voice",
+          "name": "استشارة صوتية",
+          "price": 45,
+          "currency": "IQD",
+          "currency_symbol": "د.ع",
+          "duration": 30,
+          "is_enabled": true
+        },
+        {
+          "channel": "chat",
+          "name": "محادثة نصية (شات)",
+          "price": 37.5,
+          "currency": "IQD",
+          "currency_symbol": "د.ع",
+          "duration": 30,
+          "is_enabled": true
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "title": "استشارة مرئية أونلاين (فيديو)",
+      "description": "جلسة استشارية عن بعد لمدة 30 دقيقة عبر الإنترنت لمناقشة نتائج التحاليل والأشعة وتحديث خطة العلاج والدواء.",
+      "duration": 30,
+      "booking_type": "online",
+      "currency": "IQD",
+      "currency_symbol": "د.ع",
+      "type": "both",
+      "price": 40,
+      "video_price": 40,
+      "voice_price": 36,
+      "chat_price": 30,
+      "channels": [
+        {
+          "channel": "video",
+          "name": "مكالمة فيديو أونلاين",
+          "price": 40,
+          "currency": "IQD",
+          "currency_symbol": "د.ع",
+          "duration": 30,
+          "is_enabled": true
+        },
+        {
+          "channel": "voice",
+          "name": "استشارة صوتية",
+          "price": 36,
+          "currency": "IQD",
+          "currency_symbol": "د.ع",
+          "duration": 30,
+          "is_enabled": true
+        },
+        {
+          "channel": "chat",
+          "name": "محادثة نصية (شات)",
+          "price": 30,
+          "currency": "IQD",
+          "currency_symbol": "د.ع",
+          "duration": 30,
+          "is_enabled": true
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "title": "استشارة متابعة (إعادة)",
+      "description": "متابعة دورية لمراقبة تحسن الحالة، والتأكد من نجاح خطة العلاج، أو تغيير الجبائر وإزالة الخيوط الجراحية.",
+      "duration": 15,
+      "booking_type": "online",
+      "currency": "IQD",
+      "currency_symbol": "د.ع",
+      "type": "both",
+      "price": 20,
+      "video_price": 20,
+      "voice_price": 18,
+      "chat_price": 15,
+      "channels": [
+        {
+          "channel": "video",
+          "name": "مكالمة فيديو أونلاين",
+          "price": 20,
+          "currency": "IQD",
+          "currency_symbol": "د.ع",
+          "duration": 15,
+          "is_enabled": true
+        },
+        {
+          "channel": "voice",
+          "name": "استشارة صوتية",
+          "price": 18,
+          "currency": "IQD",
+          "currency_symbol": "د.ع",
+          "duration": 15,
+          "is_enabled": true
+        },
+        {
+          "channel": "chat",
+          "name": "محادثة نصية (شات)",
+          "price": 15,
+          "currency": "IQD",
+          "currency_symbol": "د.ع",
+          "duration": 15,
+          "is_enabled": true
+        }
+      ]
     }
   ]
 }

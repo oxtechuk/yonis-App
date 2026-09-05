@@ -25,7 +25,6 @@ class BookingAppBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: AppColors.white,
       padding: const EdgeInsets.symmetric(
         horizontal: AppSpacing.md,
         vertical: AppSpacing.sm,
@@ -38,15 +37,18 @@ class BookingAppBar extends StatelessWidget {
             padding: EdgeInsets.zero,
             constraints: const BoxConstraints(),
           ),
-          const Spacer(),
-          Text(
-            title,
-            style: AppTextStyles.title.copyWith(
-              color: AppColors.textPrimary,
-              fontWeight: titleFontWeight,
+          Expanded(
+            child: Text(
+              title,
+              textAlign: TextAlign.center,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: AppTextStyles.title.copyWith(
+                color: AppColors.textPrimary,
+                fontWeight: titleFontWeight,
+              ),
             ),
           ),
-          const Spacer(),
           // Balances the back arrow so the title stays optically centered.
           const SizedBox(width: AppSizes.iconMd),
         ],

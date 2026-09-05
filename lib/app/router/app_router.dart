@@ -6,7 +6,7 @@ import '../../features/app_entry/presentation/pages/welcome_page.dart';
 import '../../features/auth/presentation/pages/login_page.dart';
 import '../../features/booking/presentation/pages/booking_page.dart';
 import '../../features/booking/presentation/pages/booking_step2_page.dart';
-import '../../features/booking/presentation/pages/payment_page.dart';
+import '../../features/booking/presentation/pages/checkout_payment_page.dart';
 import '../../features/booking/presentation/pages/payment_success_page.dart';
 import '../../features/home/domain/entities/service.dart';
 import '../../features/home/presentation/pages/home_item_detail_page.dart';
@@ -39,23 +39,56 @@ GoRouter createAppRouter() {
       ),
       GoRoute(
         path: AppRoutes.booking,
-        builder: (_, state) => BookingPage(
-          service: state.extra is Service ? state.extra as Service : null,
-        ),
+        builder: (_, state) {
+          final extra = state.extra;
+          Service? service;
+          String? channelType;
+          String? bookingType;
+          if (extra is Map) {
+            service = extra['service'] as Service?;
+            channelType = extra['channelType'] as String?;
+            bookingType = extra['bookingType'] as String?;
+          } else if (extra is Service) {
+            service = extra;
+          }
+          return BookingPage(
+            service: service,
+            selectedChannelType: channelType,
+            selectedBookingType: bookingType,
+          );
+        },
       ),
       GoRoute(
         path: AppRoutes.bookingStep2,
-        builder: (_, __) => const BookingStep2Page(),
+        builder: (_, state) {
+          final extra = state.extra;
+          return BookingStep2Page(
+            serviceId: extra is Map ? extra['serviceId'] as int? : null,
+            bookingType: extra is Map ? extra['bookingType'] as String? : null,
+            consultationType:
+                extra is Map ? extra['consultationType'] as String? : null,
+            paymentMethod:
+                extra is Map ? extra['paymentMethod'] as String? : null,
+            title: extra is Map ? extra['title'] as String? : null,
+            notes: extra is Map ? extra['notes'] as String? : null,
+          );
+        },
       ),
       GoRoute(
         path: AppRoutes.payment,
         builder: (_, state) {
           final extra = state.extra as Map<String, dynamic>?;
-          return PaymentPage(
-            merchantName: extra?['merchantName'] as String? ?? 'Baeynh',
-            referenceNumber:
-                extra?['referenceNumber'] as String? ?? '12345',
-            amount: extra?['amount'] as int? ?? 1500,
+          return CheckoutPaymentPage(
+            bookingReference: extra?['bookingReference'] as String? ?? '',
+            serviceTitle: extra?['serviceTitle'] as String? ?? '',
+            date: extra?['date'] as String? ?? '',
+            time: extra?['time'] as String? ?? '',
+            paymentMethod: extra?['paymentMethod'] as String? ?? 'zaincash',
+            amount: extra?['amount'] as num? ?? 0,
+            currencySymbol: extra?['currencySymbol'] as String? ?? 'د.ع',
+            qrCode: extra?['qrCode'] as String?,
+            paymentInstructions: extra?['paymentInstructions'] as String?,
+            whatsappUrl: extra?['whatsappUrl'] as String?,
           );
         },
       ),

@@ -31,7 +31,11 @@ class DioFactory {
         connectTimeout: _connectTimeout,
         receiveTimeout: _receiveTimeout,
         sendTimeout: _sendTimeout,
-        contentType: 'application/json',
+        // No default contentType here: it must only be set on requests that
+        // actually carry a body (see DioApiClient._withJsonContentType).
+        // Declaring `Content-Type: application/json` on a bodyless GET
+        // confuses some backends into waiting for body data that never
+        // arrives, which reads as a hung/slow request client-side.
         headers: <String, String>{'Accept': 'application/json'},
       ),
     );

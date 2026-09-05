@@ -30,6 +30,7 @@ class LoginNoAccountCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Container(
                 width: 48,
@@ -46,25 +47,30 @@ class LoginNoAccountCard extends StatelessWidget {
               ),
               const SizedBox(width: AppSpacing.sm),
               Expanded(
-                child: Text(
-                  context.tr(LocaleKeys.auth_noAccountTitle),
-                  textAlign: TextAlign.right,
-                  style: AppTextStyles.title.copyWith(
-                    color: AppColors.textPrimary,
-                    fontWeight: FontWeight.w800,
-                  ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Text(
+                      context.tr(LocaleKeys.auth_noAccountTitle),
+                      textAlign: TextAlign.right,
+                      style: AppTextStyles.title.copyWith(
+                        color: AppColors.textPrimary,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                    const SizedBox(height: AppSpacing.xs),
+                    Text(
+                      context.tr(LocaleKeys.auth_noAccountDesc),
+                      textAlign: TextAlign.right,
+                      style: AppTextStyles.body.copyWith(
+                        color: AppColors.textSecondary,
+                        height: 1.6,
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ],
-          ),
-          const SizedBox(height: AppSpacing.sm),
-          Text(
-            context.tr(LocaleKeys.auth_noAccountDesc),
-            textAlign: TextAlign.center,
-            style: AppTextStyles.body.copyWith(
-              color: AppColors.textSecondary,
-              height: 1.6,
-            ),
           ),
           const SizedBox(height: AppSpacing.md),
           PrimaryButton(

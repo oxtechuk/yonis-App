@@ -4,8 +4,11 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../config/app_config.dart';
 import '../config/app_environment.dart';
 import 'auth_dependencies.dart';
+import 'booking_dependencies.dart';
 import 'core_dependencies.dart';
 import 'home_dependencies.dart';
+import 'profile_dependencies.dart';
+import 'sessions_dependencies.dart';
 
 /// The ONE composition root of the application.
 ///
@@ -33,4 +36,10 @@ void configureDependencies({
   registerHomeDependencies(getIt);
 
   registerAuthDependencies(getIt);
+
+  registerBookingDependencies(getIt);
+
+  registerSessionsDependencies(getIt);
+
+  registerProfileDependencies(getIt);
 }

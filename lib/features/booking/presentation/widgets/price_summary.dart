@@ -1,6 +1,9 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 
+import '../../../../app/localization/locale_keys.g.dart';
 import '../../../../app/styles/app_colors.dart';
+import '../../../../app/styles/app_radius.dart';
 import '../../../../app/styles/app_spacing.dart';
 import '../../../../app/styles/app_text_styles.dart';
 import '../models/booking_models.dart';
@@ -14,17 +17,27 @@ class PriceSummary extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final price = option.displayPrice;
-    return Column(
-      children: [
-        _SummaryRow(label: 'قيمة الجلسة:', value: '$price ر.س', bold: false),
-        const Divider(height: AppSpacing.lg, color: AppColors.border),
-        _SummaryRow(
-          label: 'المطلوب سداده',
-          value: '$price ر.س',
-          bold: true,
-          valueColor: AppColors.primary,
-        ),
-      ],
+    final currency = context.tr(LocaleKeys.booking_currency);
+    return Container(
+      padding: const EdgeInsets.all(AppSpacing.md),
+      decoration: BoxDecoration(
+        color: AppColors.cardTint,
+        borderRadius: AppRadius.allLg,
+      ),
+      child: Column(
+        children: [
+          _SummaryRow(label: context.tr(LocaleKeys.priceSummary_sessionValue), value: '$price $currency', bold: false),
+          const SizedBox(height: AppSpacing.sm),
+          const Divider(height: 1, color: AppColors.border),
+          const SizedBox(height: AppSpacing.sm),
+          _SummaryRow(
+            label: context.tr(LocaleKeys.priceSummary_totalDue),
+            value: '$price $currency',
+            bold: true,
+            valueColor: AppColors.primary,
+          ),
+        ],
+      ),
     );
   }
 }
@@ -48,15 +61,18 @@ class _SummaryRow extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Text(
-          value,
+          label,
           style: AppTextStyles.body.copyWith(
-            color: valueColor ?? AppColors.textPrimary,
-            fontWeight: bold ? FontWeight.w700 : FontWeight.w400,
+            color: AppColors.textSecondary,
+            fontWeight: bold ? FontWeight.w600 : FontWeight.w400,
           ),
         ),
         Text(
-          label,
-          style: AppTextStyles.body.copyWith(color: AppColors.textSecondary),
+          value,
+          style: (bold ? AppTextStyles.title : AppTextStyles.body).copyWith(
+            color: valueColor ?? AppColors.textPrimary,
+            fontWeight: bold ? FontWeight.w800 : FontWeight.w600,
+          ),
         ),
       ],
     );

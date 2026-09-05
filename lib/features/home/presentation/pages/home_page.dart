@@ -5,6 +5,7 @@ import '../../../../app/di/dependency_injection.dart';
 import '../../../../app/styles/app_colors.dart';
 import '../../../../app/styles/app_spacing.dart';
 import '../cubit/doctor_profile_cubit.dart';
+import '../cubit/reels_cubit.dart';
 import '../cubit/services_cubit.dart';
 import '../widgets/book_service_bottom_sheet.dart';
 import '../widgets/home_about_card.dart';
@@ -18,13 +19,18 @@ class HomePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider<DoctorProfileCubit>(
-      // Prefetch services in the background so the booking sheet opens
-      // with content already rendered when the user taps.
-      create: (_) {
-        getIt<ServicesCubit>().load();
-        return getIt<DoctorProfileCubit>()..load();
-      },
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider<DoctorProfileCubit>(
+          create: (_) => getIt<DoctorProfileCubit>()..load(),
+        ),
+        BlocProvider<ServicesCubit>(
+          create: (_) => getIt<ServicesCubit>()..load('clinic'),
+        ),
+        BlocProvider<ReelsCubit>(
+          create: (_) => getIt<ReelsCubit>()..load(),
+        ),
+      ],
       child: Scaffold(
         backgroundColor: AppColors.background,
         body: SafeArea(

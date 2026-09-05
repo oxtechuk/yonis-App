@@ -14,6 +14,7 @@ abstract final class AppSizes {
   static const double iconMd = 24;
   static const double iconLg = 32;
 
-  /// Height of the persistent bottom navigation bar.
-  static const double bottomBarHeight = 80;
+  /// Height of the persistent bottom navigation bar content
+  /// (system gesture inset is added on top by SafeArea).
+  static const double bottomBarHeight = 56;
 }

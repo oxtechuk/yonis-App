@@ -1,5 +1,7 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 
+import '../../../../app/localization/locale_keys.g.dart';
 import '../../../../app/styles/app_colors.dart';
 import '../../../../app/styles/app_spacing.dart';
 import '../../../../app/styles/app_text_styles.dart';
@@ -21,7 +23,7 @@ class SessionsHeader extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'حجوزات',
+            context.tr(LocaleKeys.sessions_headerTitle),
             style: AppTextStyles.display.copyWith(
               color: AppColors.primary,
               fontWeight: FontWeight.w700,
@@ -29,7 +31,7 @@ class SessionsHeader extends StatelessWidget {
           ),
           const SizedBox(height: AppSpacing.xs),
           Text(
-            'إدارة وتتبع جلساتك القادمة والسابقة.',
+            context.tr(LocaleKeys.sessions_headerSubtitle),
             style: AppTextStyles.body.copyWith(
               color: AppColors.textSecondary,
             ),
