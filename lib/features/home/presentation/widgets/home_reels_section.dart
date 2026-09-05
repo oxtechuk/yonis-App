@@ -6,6 +6,7 @@ import '../../../../app/localization/locale_keys.g.dart';
 import '../../../../app/styles/app_colors.dart';
 import '../../../../app/styles/app_spacing.dart';
 import '../../../../app/styles/app_text_styles.dart';
+import '../../../../app/widgets/app_skeleton.dart';
 import '../cubit/reels_cubit.dart';
 import '../../domain/entities/reel.dart';
 import 'reel_video_player_dialog.dart';
@@ -39,7 +40,7 @@ class HomeReelsSection extends StatelessWidget {
           BlocBuilder<ReelsCubit, ReelsState>(
             builder: (context, state) {
               if (state is ReelsInitial || state is ReelsLoading) {
-                return _buildLoadingShimmer(cardWidth, cardHeight, isRtl);
+                return const ReelsSkeleton();
               }
               if (state is ReelsLoaded) {
                 final reels = state.reels;
@@ -55,20 +56,6 @@ class HomeReelsSection extends StatelessWidget {
             },
           ),
         ],
-      ),
-    );
-  }
-
-  Widget _buildLoadingShimmer(double cardWidth, double cardHeight, bool isRtl) {
-    return SizedBox(
-      height: cardHeight,
-      child: ListView.separated(
-        scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
-        reverse: isRtl,
-        itemCount: 3,
-        separatorBuilder: (_, __) => const SizedBox(width: AppSpacing.sm),
-        itemBuilder: (_, __) => _buildPlaceholderCard(cardWidth, cardHeight),
       ),
     );
   }

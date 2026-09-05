@@ -3,8 +3,6 @@ import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 
 import '../../../../app/styles/app_colors.dart';
-import '../../../../app/styles/app_radius.dart';
-import '../../../../app/styles/app_spacing.dart';
 import '../../../../app/widgets/app_text_field.dart';
 
 /// White card-style outlined text field used by the booking form.

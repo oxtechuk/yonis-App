@@ -9,6 +9,7 @@ import '../../../../app/router/app_routes.dart';
 import '../../../../app/styles/app_colors.dart';
 import '../../../../app/styles/app_spacing.dart';
 import '../../../../app/styles/app_text_styles.dart';
+import '../../../../app/widgets/app_skeleton.dart';
 import '../../../../app/widgets/login_required_view.dart';
 import '../../../../app/widgets/primary_button.dart';
 import '../../../../core/storage/secure_storage.dart';
@@ -103,9 +104,7 @@ class _ProfileViewState extends State<_ProfileView> {
 
   Widget _buildBody() {
     if (_checkingAuth) {
-      return const Center(
-        child: CircularProgressIndicator(color: AppColors.primary),
-      );
+      return const ProfileSkeleton();
     }
     if (!_loggedIn) {
       return LoginRequiredView(
@@ -118,9 +117,7 @@ class _ProfileViewState extends State<_ProfileView> {
     return BlocBuilder<ProfileCubit, ProfileState>(
       builder: (context, state) {
         return switch (state) {
-          ProfileInitial() || ProfileLoading() => const Center(
-              child: CircularProgressIndicator(color: AppColors.primary),
-            ),
+          ProfileInitial() || ProfileLoading() => const ProfileSkeleton(),
           ProfileUnauthorized() => LoginRequiredView(
               icon: Icons.person_outline,
               message: context.tr(LocaleKeys.profile_loginRequired),

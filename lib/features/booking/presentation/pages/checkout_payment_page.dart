@@ -11,6 +11,7 @@ import '../../../../app/styles/app_radius.dart';
 import '../../../../app/styles/app_sizes.dart';
 import '../../../../app/styles/app_spacing.dart';
 import '../../../../app/styles/app_text_styles.dart';
+import '../../../../app/widgets/app_skeleton.dart';
 import '../../../../app/widgets/primary_button.dart';
 import '../widgets/booking_app_bar.dart';
 
@@ -348,11 +349,11 @@ class _QrCodeCard extends StatelessWidget {
               fit: BoxFit.contain,
               loadingBuilder: (context, child, progress) {
                 if (progress == null) return child;
-                return const SizedBox(
-                  width: 220,
-                  height: 220,
-                  child: Center(
-                    child: CircularProgressIndicator(color: AppColors.primary),
+                return const SkeletonPulse(
+                  child: SkeletonBox(
+                    width: 220,
+                    height: 220,
+                    borderRadius: 8,
                   ),
                 );
               },

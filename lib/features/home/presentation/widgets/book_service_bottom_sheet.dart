@@ -13,19 +13,13 @@ import '../../../../app/styles/app_radius.dart';
 import '../../../../app/styles/app_sizes.dart';
 import '../../../../app/styles/app_spacing.dart';
 import '../../../../app/styles/app_text_styles.dart';
+import '../../../../app/widgets/app_skeleton.dart';
 import '../../../auth/domain/auth_state.dart';
 import '../../domain/entities/service.dart';
 import '../cubit/services_cubit.dart';
 import 'service_option_card.dart';
 
 enum ServiceType { clinic, online }
-
-extension ServiceTypeExt on ServiceType {
-  String localizedName(BuildContext context) => switch (this) {
-        ServiceType.clinic => context.tr(LocaleKeys.home_bookService_clinicTab),
-        ServiceType.online => context.tr(LocaleKeys.home_bookService_onlineTab),
-      };
-}
 
 /// Bottom sheet shown when the user taps "Book Your Consultation".
 /// First lets the user choose between clinic and online, then lists
@@ -155,13 +149,8 @@ class _BookServiceBottomSheetState extends State<BookServiceBottomSheet> {
                       builder: (context, state) {
                         return switch (state) {
                           ServicesInitial() || ServicesLoading() =>
-                            const SizedBox(
-                              height: 220,
-                              child: Center(
-                                child: CircularProgressIndicator(
-                                  color: AppColors.primary,
-                                ),
-                              ),
+                            const ServiceListSkeleton(
+                              padding: EdgeInsets.zero,
                             ),
                           ServicesError() => _ErrorRetryBody(
                               onRetry: () {

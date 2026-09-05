@@ -9,6 +9,7 @@ import '../../../../app/router/app_routes.dart';
 import '../../../../app/styles/app_colors.dart';
 import '../../../../app/styles/app_spacing.dart';
 import '../../../../app/styles/app_text_styles.dart';
+import '../../../../app/widgets/app_skeleton.dart';
 import '../../../../app/widgets/app_toast.dart';
 import '../../../../app/widgets/login_required_view.dart';
 import '../../../../app/widgets/primary_button.dart';
@@ -243,9 +244,7 @@ class _SessionsViewState extends State<_SessionsView>
 
   Widget _buildBody() {
     if (_checkingAuth) {
-      return const Center(
-        child: CircularProgressIndicator(color: AppColors.primary),
-      );
+      return const SessionListSkeleton();
     }
     if (!_loggedIn) {
       return LoginRequiredView(
@@ -257,9 +256,8 @@ class _SessionsViewState extends State<_SessionsView>
     return BlocBuilder<SessionsCubit, SessionsState>(
       builder: (context, state) {
         return switch (state) {
-          SessionsInitial() || SessionsLoading() => const Center(
-            child: CircularProgressIndicator(color: AppColors.primary),
-          ),
+          SessionsInitial() || SessionsLoading() =>
+            const SessionListSkeleton(),
           SessionsUnauthorized() => LoginRequiredView(
             message: context.tr(LocaleKeys.sessions_loginRequired),
             loginLabel: context.tr(LocaleKeys.auth_loginButton),

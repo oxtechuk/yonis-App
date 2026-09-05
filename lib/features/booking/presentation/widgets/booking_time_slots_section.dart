@@ -6,6 +6,7 @@ import '../../../../app/styles/app_colors.dart';
 import '../../../../app/styles/app_radius.dart';
 import '../../../../app/styles/app_spacing.dart';
 import '../../../../app/styles/app_text_styles.dart';
+import '../../../../app/widgets/app_skeleton.dart';
 import '../../domain/entities/time_slot.dart';
 
 /// Section label with a primary accent bar + 3-column grid of time chips.
@@ -66,12 +67,7 @@ class BookingTimeSlotsSection extends StatelessWidget {
 
   Widget _buildBody(BuildContext context) {
     if (isLoading) {
-      return const SizedBox(
-        height: 96,
-        child: Center(
-          child: CircularProgressIndicator(color: AppColors.primary),
-        ),
-      );
+      return const TimeSlotsSkeleton();
     }
 
     if (errorMessage != null) {

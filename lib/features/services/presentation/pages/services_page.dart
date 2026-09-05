@@ -9,6 +9,7 @@ import '../../../../app/router/app_routes.dart';
 import '../../../../app/styles/app_colors.dart';
 import '../../../../app/styles/app_spacing.dart';
 import '../../../../app/styles/app_text_styles.dart';
+import '../../../../app/widgets/app_skeleton.dart';
 import '../../../../app/widgets/primary_button.dart';
 import '../../../auth/domain/auth_state.dart';
 import '../../../home/domain/entities/service.dart';
@@ -142,11 +143,8 @@ class _ServicesViewState extends State<_ServicesView>
                 child: BlocBuilder<ServicesCubit, ServicesState>(
                   builder: (context, state) {
                     return switch (state) {
-                      ServicesInitial() || ServicesLoading() => const Center(
-                          child: CircularProgressIndicator(
-                            color: AppColors.primary,
-                          ),
-                        ),
+                      ServicesInitial() || ServicesLoading() =>
+                        const ServiceListSkeleton(),
                       ServicesError(:final failure) => _ServicesErrorView(
                           message: failure.message,
                           onRetry: () =>

@@ -165,27 +165,3 @@ String localizedOptionLabel(BuildContext context, String label) {
     _ => label,
   };
 }
-
-/// Collected data for a booking.
-class BookingData {
-  const BookingData({
-    required this.serviceId,
-    required this.selectedOption,
-    required this.consultationTitle,
-    required this.consultationDetails,
-    required this.paymentMethod,
-    this.guestName,
-    this.guestPhone,
-  });
-
-  /// Backend id of the booked service.
-  final int serviceId;
-  final ConsultationOption selectedOption;
-  final String consultationTitle;
-  final String consultationDetails;
-  final PaymentMethod paymentMethod;
-
-  /// Only filled when the user is booking as a guest.
-  final String? guestName;
-  final String? guestPhone;
-}

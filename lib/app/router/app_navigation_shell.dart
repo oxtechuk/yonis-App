@@ -39,10 +39,9 @@ class AppNavigationShell extends StatelessWidget {
             ),
           ],
         ),
-        // SafeArea only pads the system gesture inset at the bottom —
-        // the content itself sizes to the icon+label, no extra height.
         child: SafeArea(
           top: false,
+          bottom: false,
           child: Padding(
             padding: const EdgeInsets.symmetric(vertical: 8),
             child: Row(
