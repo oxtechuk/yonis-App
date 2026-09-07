@@ -51,7 +51,7 @@ class LoginPage extends StatelessWidget {
                 Text(
                   context.tr(LocaleKeys.auth_loginTitle),
                   textAlign: TextAlign.right,
-                  style: AppTextStyles.display.copyWith(
+                  style: AppTextStyles.headline.copyWith(
                     color: AppColors.textPrimary,
                     fontWeight: FontWeight.w800,
                   ),

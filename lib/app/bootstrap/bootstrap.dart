@@ -6,6 +6,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../core/logging/app_logger.dart';
 import '../../core/storage/preferences_storage.dart';
+import '../../core/storage/secure_storage.dart';
+import '../../features/auth/domain/auth_state.dart';
 import '../app.dart';
 import '../config/app_environment.dart';
 import '../di/dependency_injection.dart';
@@ -28,6 +30,16 @@ Future<void> bootstrap() async {
     environment: environment,
     sharedPreferences: sharedPreferences,
   );
+
+  // Returning user with a persisted login token stays logged in —
+  // every request already carries it via the auth interceptor.
+  try {
+    final storedToken =
+        await getIt<SecureStorage>().read(SecureStorageKeys.accessToken);
+    AuthState.instance.restoreFromToken(storedToken);
+  } catch (_) {
+    // Secure storage unreadable: stay logged out and ask for login.
+  }
 
   final logger = getIt<AppLogger>();
 

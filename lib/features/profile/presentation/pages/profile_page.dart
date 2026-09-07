@@ -145,6 +145,23 @@ class _ProfileViewState extends State<_ProfileView> {
     } catch (_) {}
     AuthState.instance.logout();
     if (!mounted) return;
+    // Leave the account tab: land back on home instead of the login gate.
+    context.go(AppRoutes.home);
+  }
+
+  /// The stored token was rejected (HTTP 401): it is stale (expired,
+  /// revoked, or wiped by a backend reset), so drop it and mark the whole
+  /// app logged out instead of letting other tabs keep acting logged in.
+  Future<void> _clearStaleSession() async {
+    final storage = getIt<SecureStorage>();
+    try {
+      await storage.delete(SecureStorageKeys.accessToken);
+    } catch (_) {}
+    try {
+      await storage.delete(SecureStorageKeys.refreshToken);
+    } catch (_) {}
+    AuthState.instance.logout();
+    if (!mounted) return;
     setState(() => _loggedIn = false);
   }
 
@@ -152,7 +169,14 @@ class _ProfileViewState extends State<_ProfileView> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.background,
-      body: SafeArea(child: _buildBody()),
+      body: SafeArea(
+        child: BlocListener<ProfileCubit, ProfileState>(
+          listener: (context, state) {
+            if (state is ProfileUnauthorized) _clearStaleSession();
+          },
+          child: _buildBody(),
+        ),
+      ),
     );
   }
 
@@ -187,7 +211,14 @@ class _ProfileViewState extends State<_ProfileView> {
               message: failure.message,
               onRetry: () => context.read<ProfileCubit>().load(),
             ),
-          ProfileLoaded(:final user) => _buildProfile(context, user),
+          ProfileLoaded(:final user) => RefreshIndicator(
+            color: AppColors.primary,
+            onRefresh: () => context.read<ProfileCubit>().load(),
+            child: SingleChildScrollView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              child: _buildProfile(context, user),
+            ),
+          ),
         };
       },
     );

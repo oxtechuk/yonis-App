@@ -40,7 +40,11 @@ class HomePage extends StatelessWidget {
         backgroundColor: AppColors.background,
         body: SafeArea(
           child: Builder(
-            builder: (innerContext) => SingleChildScrollView(
+            builder: (innerContext) => RefreshIndicator(
+              color: AppColors.primary,
+              onRefresh: () => _refreshAll(innerContext),
+              child: SingleChildScrollView(
+                physics: const AlwaysScrollableScrollPhysics(),
               child: Column(
                 children: [
                   // Hero is static (localized strings + fallback asset), so it
@@ -97,8 +101,19 @@ class HomePage extends StatelessWidget {
               ),
             ),
           ),
+          ),
         ),
       ),
     );
   }
+}
+
+/// Pull-to-refresh: refetch every home section.
+Future<void> _refreshAll(BuildContext context) {
+  return Future.wait([
+    context.read<DoctorProfileCubit>().load(),
+    context.read<ServicesCubit>().load('clinic', forceRefresh: true),
+    context.read<ReelsCubit>().load(),
+    context.read<TestimonialsCubit>().load(),
+  ]);
 }

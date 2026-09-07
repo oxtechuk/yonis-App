@@ -11,13 +11,12 @@ import '../../../../app/styles/app_spacing.dart';
 import '../../../../app/styles/app_text_styles.dart';
 import '../../../../app/widgets/app_skeleton.dart';
 import '../../../../app/widgets/primary_button.dart';
-import '../../../auth/domain/auth_state.dart';
 import '../../../home/domain/entities/service.dart';
 import '../../../home/presentation/cubit/services_cubit.dart';
 import '../../../home/presentation/widgets/service_option_card.dart';
 
-/// "Our Services" tab: clinic / online services from
-/// `GET /api/services/clinic` and `/api/services/online`,
+/// "Our Services" tab: online / clinic services from
+/// `GET /api/services/online` and `/api/services/clinic`,
 /// rendered with the same cards as the booking sheet.
 class ServicesPage extends StatelessWidget {
   const ServicesPage({super.key});
@@ -42,7 +41,7 @@ class _ServicesView extends StatefulWidget {
 
 class _ServicesViewState extends State<_ServicesView>
     with SingleTickerProviderStateMixin {
-  static const _tabTypes = ['clinic', 'online'];
+  static const _tabTypes = ['online', 'clinic'];
 
   late final TabController _tabController;
 
@@ -66,9 +65,10 @@ class _ServicesViewState extends State<_ServicesView>
     context.read<ServicesCubit>().load(_tabTypes[_tabController.index]);
   }
 
-  /// Same routing contract as the booking sheet: guests go through login
-  /// first, then resume into booking. A service with several channels
-  /// passes no preselected channel — [BookingPage] lists them all.
+  /// Guests go straight into booking — no login gate here. Account
+  /// creation / login happens inside [BookingPage] before payment.
+  /// A service with several channels passes no preselected channel —
+  /// [BookingPage] lists them all.
   void _book(Service service) {
     final bookingType = _tabTypes[_tabController.index];
     final enabled = (service.channels ?? [])
@@ -79,15 +79,7 @@ class _ServicesViewState extends State<_ServicesView>
       'channelType': enabled.length == 1 ? enabled.first.channel : null,
       'bookingType': bookingType,
     };
-    final router = GoRouter.of(context);
-    if (AuthState.instance.isLoggedIn) {
-      router.push(AppRoutes.booking, extra: extra);
-    } else {
-      router.push(
-        AppRoutes.login,
-        extra: () => router.push(AppRoutes.booking, extra: extra),
-      );
-    }
+    GoRouter.of(context).push(AppRoutes.booking, extra: extra);
   }
 
   @override
@@ -129,12 +121,12 @@ class _ServicesViewState extends State<_ServicesView>
                 tabs: [
                   Tab(
                     text: context.tr(
-                      LocaleKeys.home_bookService_clinicTab,
+                      LocaleKeys.home_bookService_onlineTab,
                     ),
                   ),
                   Tab(
                     text: context.tr(
-                      LocaleKeys.home_bookService_onlineTab,
+                      LocaleKeys.home_bookService_clinicTab,
                     ),
                   ),
                 ],

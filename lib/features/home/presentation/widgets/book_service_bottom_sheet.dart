@@ -15,7 +15,6 @@ import '../../../../app/styles/app_sizes.dart';
 import '../../../../app/styles/app_spacing.dart';
 import '../../../../app/styles/app_text_styles.dart';
 import '../../../../app/widgets/app_skeleton.dart';
-import '../../../auth/domain/auth_state.dart';
 import '../../domain/entities/service.dart';
 import '../cubit/services_cubit.dart';
 import 'service_option_card.dart';
@@ -277,14 +276,9 @@ class _BookServiceBottomSheetState extends State<BookServiceBottomSheet> {
       // always set consistently.
       'bookingType': _selectedType == ServiceType.clinic ? 'clinic' : 'online',
     };
-    if (AuthState.instance.isLoggedIn) {
-      widget.router.push(AppRoutes.booking, extra: extra);
-    } else {
-      widget.router.push(
-        AppRoutes.login,
-        extra: () => widget.router.push(AppRoutes.booking, extra: extra),
-      );
-    }
+    // No login gate: guests book as guests — account creation / login
+    // happens inside BookingPage before payment.
+    widget.router.push(AppRoutes.booking, extra: extra);
   }
 }
 

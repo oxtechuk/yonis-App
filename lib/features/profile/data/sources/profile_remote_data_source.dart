@@ -20,12 +20,22 @@ class ApiProfileRemoteDataSource implements ProfileRemoteDataSource {
   @override
   Future<User> getUser() async {
     final json = await _apiClient.get<Map<String, dynamic>>(_path);
+    // Login-style nesting: {"user": {...}}.
     final userJson = json['user'];
-    if (userJson is! Map<String, dynamic>) {
-      throw const SerializationException(
-        message: 'User response is missing the "user" object.',
-      );
+    if (userJson is Map<String, dynamic>) {
+      return UserDto.fromJson(userJson).toEntity();
     }
-    return UserDto.fromJson(userJson).toEntity();
+    // Common API envelope: {"data": {...}}.
+    final dataJson = json['data'];
+    if (dataJson is Map<String, dynamic>) {
+      return UserDto.fromJson(dataJson).toEntity();
+    }
+    // Standard Laravel `GET /api/user` returns the user object directly.
+    if (json.containsKey('id')) {
+      return UserDto.fromJson(json).toEntity();
+    }
+    throw const SerializationException(
+      message: 'User response is missing the "user" object.',
+    );
   }
 }

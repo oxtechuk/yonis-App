@@ -14,7 +14,7 @@ class PaymentMethodSelector extends StatelessWidget {
     required this.onChanged,
   });
 
-  final PaymentMethod selected;
+  final PaymentMethod? selected;
   final ValueChanged<PaymentMethod> onChanged;
 
   @override

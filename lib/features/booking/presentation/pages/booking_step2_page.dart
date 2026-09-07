@@ -23,6 +23,11 @@ import '../widgets/booking_calendar_card.dart';
 import '../widgets/booking_create_account_section.dart';
 import '../widgets/booking_time_slots_section.dart';
 
+/// DEPRECATED: the booking flow is now 2 steps —
+/// [BookingPage] (details + schedule + account) -> [CheckoutPaymentPage]
+/// (payment + ticket). This page is kept only so the old `/booking/step2`
+/// route doesn't crash; nothing navigates here anymore.
+@Deprecated('Use BookingPage -> CheckoutPaymentPage instead')
 class BookingStep2Page extends StatefulWidget {
   const BookingStep2Page({
     super.key,

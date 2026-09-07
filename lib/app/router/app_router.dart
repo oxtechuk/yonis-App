@@ -79,10 +79,28 @@ GoRouter createAppRouter() {
         builder: (_, state) {
           final extra = state.extra as Map<String, dynamic>?;
           return CheckoutPaymentPage(
+            // Booking inputs (new 2-step flow: BookingPage -> here).
+            serviceId: extra?['serviceId'] as int?,
+            service: extra?['service'] as Service?,
+            bookingType: extra?['bookingType'] as String?,
+            consultationType: extra?['consultationType'] as String?,
+            title: extra?['title'] as String?,
+            notes: extra?['notes'] as String?,
+            date: extra?['date'] as String?,
+            startTime: extra?['startTime'] as String?,
+            timeDisplay: (extra?['timeDisplay'] ?? extra?['time']) as String?,
+            serviceTitle: extra?['serviceTitle'] as String?,
+            isRegistered: extra?['isRegistered'] as bool?,
+            name: extra?['name'] as String?,
+            phone: extra?['phone'] as String?,
+            email: extra?['email'] as String?,
+            password: extra?['password'] as String?,
+            optionLabel: extra?['optionLabel'] as String?,
+            optionPrice: (extra?['optionPrice'] as num?)?.toDouble(),
+            optionDuration: extra?['optionDuration'] as int?,
+            optionChannel: extra?['optionChannel'] as String?,
+            // Ticket (post-checkout / legacy).
             bookingReference: extra?['bookingReference'] as String? ?? '',
-            serviceTitle: extra?['serviceTitle'] as String? ?? '',
-            date: extra?['date'] as String? ?? '',
-            time: extra?['time'] as String? ?? '',
             paymentMethod: extra?['paymentMethod'] as String? ?? 'zaincash',
             amount: extra?['amount'] as num? ?? 0,
             currencySymbol: extra?['currencySymbol'] as String? ?? 'د.ع',
