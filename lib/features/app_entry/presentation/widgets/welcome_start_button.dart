@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -15,12 +17,14 @@ class WelcomeStartButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final bottomInset = MediaQuery.paddingOf(context).bottom;
+
     return Padding(
       padding: EdgeInsetsDirectional.fromSTEB(
         AppSpacing.lg,
         AppSpacing.md,
         AppSpacing.lg,
-        AppSpacing.xl,
+        math.max(AppSpacing.xl, bottomInset),
       ),
       child: SizedBox(
         width: double.infinity,

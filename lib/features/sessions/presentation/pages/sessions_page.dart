@@ -51,6 +51,8 @@ class _SessionsViewState extends State<_SessionsView>
   late final TabController _tabController;
   bool _checkingAuth = true;
   bool _loggedIn = false;
+  bool _loginPushing = false;
+  bool _autoLoginAttempted = false;
 
   @override
   void initState() {
@@ -70,6 +72,16 @@ class _SessionsViewState extends State<_SessionsView>
   /// [AuthInterceptor]. Without a token there is nothing to fetch, so the
   /// sign-in gate is shown instead of firing an unauthenticated request.
   Future<void> _checkAuthAndLoad() async {
+    // Fast path: already logged in this run — no storage read, no flash.
+    if (AuthState.instance.isLoggedIn) {
+      if (!mounted) return;
+      setState(() {
+        _checkingAuth = false;
+        _loggedIn = true;
+      });
+      if (mounted) context.read<SessionsCubit>().load();
+      return;
+    }
     String? token;
     try {
       token = await getIt<SecureStorage>().read(SecureStorageKeys.accessToken);
@@ -77,9 +89,7 @@ class _SessionsViewState extends State<_SessionsView>
       token = null;
     }
     if (!mounted) return;
-    final loggedIn =
-        (token != null && token.trim().isNotEmpty) ||
-        AuthState.instance.isLoggedIn;
+    final loggedIn = token != null && token.trim().isNotEmpty;
     setState(() {
       _checkingAuth = false;
       _loggedIn = loggedIn;
@@ -89,14 +99,57 @@ class _SessionsViewState extends State<_SessionsView>
       // sync it so the rest of the app sees the restored session.
       AuthState.instance.login();
       if (mounted) context.read<SessionsCubit>().load();
+    } else if (!_autoLoginAttempted) {
+      // First unauthenticated visit: open login directly from here so we
+      // don't flash the sessions skeleton in _buildBody first.
+      _autoLoginAttempted = true;
+      _redirectToLogin();
     }
   }
 
-  Future<void> _goToLogin() async {
+  Future<void> _goToLogin({bool leaveOnCancel = false}) async {
+    // Push login on top of this tab. On success LoginForm pops back here,
+    // then we re-check auth + reload bookings.
     await context.push(AppRoutes.login);
     if (!mounted) return;
+    // Auto-push was cancelled (back button): pop this gated tab as well so
+    // the user lands back on the screen they came from (home) instead of
+    // an empty gate. Manual logins from the gate button stay put.
+    if (leaveOnCancel && !AuthState.instance.isLoggedIn) {
+      String? token;
+      try {
+        token =
+            await getIt<SecureStorage>().read(SecureStorageKeys.accessToken);
+      } catch (_) {
+        token = null;
+      }
+      if (!mounted) return;
+      if (token == null || token.trim().isEmpty) {
+        context.go(AppRoutes.home);
+        return;
+      }
+    }
     setState(() => _checkingAuth = true);
     await _checkAuthAndLoad();
+  }
+
+  /// Auto login push for the first unauthenticated visit. On cancel it
+  /// leaves this tab (pop back to the previous screen) instead of showing
+  /// the gate.
+  void _redirectToLogin() {
+    if (_loginPushing) return;
+    _loginPushing = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      try {
+        if (!mounted) return;
+        await _goToLogin(leaveOnCancel: true);
+      } finally {
+        // Plain bool (no setState): must reset even when unmounted or on
+        // error, otherwise the next visit sticks on the empty SizedBox
+        // (white page) instead of the gate.
+        _loginPushing = false;
+      }
+    });
   }
 
   List<Session> _toSessions(
@@ -159,8 +212,28 @@ class _SessionsViewState extends State<_SessionsView>
       textDirection: TextDirection.rtl,
       child: Scaffold(
         backgroundColor: AppColors.background,
-        body: SafeArea(
-          child: BlocListener<CancelBookingCubit, CancelBookingState>(
+        // Auth gate here (not inside _buildBody) so the sessions header +
+        // tabs never flash before the login redirect when logged out.
+        body: SafeArea(child: _buildContent()),
+      ),
+    );
+  }
+
+  Widget _buildContent() {
+    if (_checkingAuth) {
+      return const Center(child: CircularProgressIndicator());
+    }
+    if (!_loggedIn) {
+      // The auto-push of the login route (first visit) covers this while
+      // open; if it is dismissed the gate stays visible so the tab never
+      // renders blank.
+      return LoginRequiredView(
+        message: context.tr(LocaleKeys.sessions_loginRequired),
+        loginLabel: context.tr(LocaleKeys.auth_loginButton),
+        onLogin: _goToLogin,
+      );
+    }
+    return BlocListener<CancelBookingCubit, CancelBookingState>(
             listener: (context, state) {
               switch (state) {
                 case CancelBookingSuccess(:final message):
@@ -200,10 +273,7 @@ class _SessionsViewState extends State<_SessionsView>
                 Expanded(child: _buildBody()),
               ],
             ),
-          ),
-        ),
-      ),
-    );
+          );
   }
 
   /// Asks for confirmation, then cancels via
@@ -244,7 +314,9 @@ class _SessionsViewState extends State<_SessionsView>
 
   Widget _buildBody() {
     if (_checkingAuth) {
-      return const SessionListSkeleton();
+      // Token lookup, not sessions loading: neutral loader so it doesn't
+      // look like sessions content flashing before the login redirect.
+      return const Center(child: CircularProgressIndicator());
     }
     if (!_loggedIn) {
       return LoginRequiredView(

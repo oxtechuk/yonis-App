@@ -41,6 +41,8 @@ class _ProfileView extends StatefulWidget {
 class _ProfileViewState extends State<_ProfileView> {
   bool _checkingAuth = true;
   bool _loggedIn = false;
+  bool _loginPushing = false;
+  bool _autoLoginAttempted = false;
 
   @override
   void initState() {
@@ -52,6 +54,16 @@ class _ProfileViewState extends State<_ProfileView> {
   /// nothing `GET /api/user` could return, so the sign-in view is shown
   /// instead of firing an unauthenticated request.
   Future<void> _checkAuthAndLoad() async {
+    // Fast path: already logged in this run — no storage read, no flash.
+    if (AuthState.instance.isLoggedIn) {
+      if (!mounted) return;
+      setState(() {
+        _checkingAuth = false;
+        _loggedIn = true;
+      });
+      if (mounted) context.read<ProfileCubit>().load();
+      return;
+    }
     String? token;
     try {
       token = await getIt<SecureStorage>().read(
@@ -61,9 +73,7 @@ class _ProfileViewState extends State<_ProfileView> {
       token = null;
     }
     if (!mounted) return;
-    final loggedIn =
-        (token != null && token.trim().isNotEmpty) ||
-        AuthState.instance.isLoggedIn;
+    final loggedIn = token != null && token.trim().isNotEmpty;
     setState(() {
       _checkingAuth = false;
       _loggedIn = loggedIn;
@@ -71,14 +81,58 @@ class _ProfileViewState extends State<_ProfileView> {
     if (loggedIn) {
       AuthState.instance.login();
       if (mounted) context.read<ProfileCubit>().load();
+    } else if (!_autoLoginAttempted) {
+      // First unauthenticated visit: open login directly from here so we
+      // don't flash the profile skeleton in _buildBody first.
+      _autoLoginAttempted = true;
+      _redirectToLogin();
     }
   }
 
-  Future<void> _goToLogin() async {
+  Future<void> _goToLogin({bool leaveOnCancel = false}) async {
+    // Push login on top of this tab. On success LoginForm pops back here,
+    // then we re-check auth + reload profile.
     await context.push(AppRoutes.login);
     if (!mounted) return;
+    // Auto-push was cancelled (back button): pop this gated tab as well so
+    // the user lands back on the screen they came from (home) instead of
+    // an empty gate. Manual logins from the gate button stay put.
+    if (leaveOnCancel && !AuthState.instance.isLoggedIn) {
+      String? token;
+      try {
+        token = await getIt<SecureStorage>().read(
+          SecureStorageKeys.accessToken,
+        );
+      } catch (_) {
+        token = null;
+      }
+      if (!mounted) return;
+      if (token == null || token.trim().isEmpty) {
+        context.go(AppRoutes.home);
+        return;
+      }
+    }
     setState(() => _checkingAuth = true);
     await _checkAuthAndLoad();
+  }
+
+  /// Auto login push for the first unauthenticated visit. On cancel it
+  /// leaves this tab (pop back to the previous screen) instead of showing
+  /// the gate.
+  void _redirectToLogin() {
+    if (_loginPushing) return;
+    _loginPushing = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      try {
+        if (!mounted) return;
+        await _goToLogin(leaveOnCancel: true);
+      } finally {
+        // Plain bool (no setState): must reset even when unmounted or on
+        // error, otherwise the next visit sticks on the empty SizedBox
+        // (white page) instead of the gate.
+        _loginPushing = false;
+      }
+    });
   }
 
   Future<void> _logout() async {
@@ -104,9 +158,14 @@ class _ProfileViewState extends State<_ProfileView> {
 
   Widget _buildBody() {
     if (_checkingAuth) {
-      return const ProfileSkeleton();
+      // Token lookup, not profile loading: neutral loader so it doesn't
+      // look like profile content flashing before the login redirect.
+      return const Center(child: CircularProgressIndicator());
     }
     if (!_loggedIn) {
+      // The auto-push of the login route (first visit) covers this while
+      // open; if it is dismissed the gate stays visible so the tab never
+      // renders blank.
       return LoginRequiredView(
         icon: Icons.person_outline,
         message: context.tr(LocaleKeys.profile_loginRequired),
@@ -119,11 +178,11 @@ class _ProfileViewState extends State<_ProfileView> {
         return switch (state) {
           ProfileInitial() || ProfileLoading() => const ProfileSkeleton(),
           ProfileUnauthorized() => LoginRequiredView(
-              icon: Icons.person_outline,
-              message: context.tr(LocaleKeys.profile_loginRequired),
-              loginLabel: context.tr(LocaleKeys.auth_loginButton),
-              onLogin: _goToLogin,
-            ),
+            icon: Icons.person_outline,
+            message: context.tr(LocaleKeys.profile_loginRequired),
+            loginLabel: context.tr(LocaleKeys.auth_loginButton),
+            onLogin: _goToLogin,
+          ),
           ProfileError(:final failure) => _ProfileErrorView(
               message: failure.message,
               onRetry: () => context.read<ProfileCubit>().load(),

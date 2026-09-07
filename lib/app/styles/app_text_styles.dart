@@ -10,7 +10,7 @@ import 'package:flutter/material.dart';
 /// Screen-specific styles (e.g. loginSmallTextStyle) must not be added
 /// here — they belong to their feature.
 abstract final class AppTextStyles {
-  static const String fontFamily = 'Almendra';
+  static const String fontFamily = 'Cairo';
 
   static const TextStyle display = TextStyle(
     fontFamily: fontFamily,

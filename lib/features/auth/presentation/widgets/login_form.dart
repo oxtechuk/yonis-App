@@ -4,6 +4,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../../app/di/dependency_injection.dart';
 import '../../../../app/localization/locale_keys.g.dart';
@@ -58,7 +59,13 @@ class _LoginFormState extends State<LoginForm> {
     switch (state) {
       case LoginSuccess():
         AuthState.instance.login();
-        Navigator.of(context, rootNavigator: true).pop();
+        // Pop back to the login-gated page (sessions/profile) that pushed
+        // us. The caller re-checks auth unconditionally after return.
+        try {
+          GoRouter.of(context).pop(true);
+        } catch (_) {
+          Navigator.of(context, rootNavigator: true).pop(true);
+        }
       case LoginError(:final failure):
         AppToast.show(context, _localizedFailure(context, failure));
       case LoginInitial() || LoginLoading():

@@ -1,3 +1,4 @@
+import 'dart:math' as math;
 import 'dart:ui' as ui;
 
 import 'package:easy_localization/easy_localization.dart';
@@ -79,7 +80,8 @@ class _BookServiceBottomSheetState extends State<BookServiceBottomSheet> {
           left: AppSpacing.md,
           right: AppSpacing.md,
           top: AppSpacing.md,
-          bottom: MediaQuery.viewInsetsOf(context).bottom + AppSpacing.lg,
+          bottom: MediaQuery.viewInsetsOf(context).bottom +
+              math.max(AppSpacing.lg, MediaQuery.paddingOf(context).bottom),
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
