@@ -1,4 +1,5 @@
 import '../../domain/entities/checkout_result.dart';
+import '../../domain/entities/checkout_user.dart';
 
 class CheckoutResultDto {
   const CheckoutResultDto({
@@ -16,6 +17,9 @@ class CheckoutResultDto {
     this.whatsappUrl,
     this.paymentUrl,
     this.redirectUrl,
+    this.token,
+    this.tokenType,
+    this.user,
   });
 
   factory CheckoutResultDto.fromJson(Map<String, dynamic> json) {
@@ -34,6 +38,28 @@ class CheckoutResultDto {
       whatsappUrl: json['whatsapp_url'] as String?,
       paymentUrl: json['payment_url'] as String?,
       redirectUrl: json['redirect_url'] as String?,
+      token: _readString(json['token']),
+      tokenType: _readString(json['token_type']),
+      user: _readUser(json['user']),
+    );
+  }
+
+  static String? _readString(dynamic value) {
+    if (value is String && value.trim().isNotEmpty) return value.trim();
+    return null;
+  }
+
+  static CheckoutUserDto? _readUser(dynamic value) {
+    if (value is! Map<String, dynamic>) return null;
+    final id = value['id'];
+    final name = _readString(value['name']);
+    final phone = _readString(value['phone']);
+    if (id is! num || name == null || phone == null) return null;
+    return CheckoutUserDto(
+      id: id.toInt(),
+      name: name,
+      phone: phone,
+      email: _readString(value['email']),
     );
   }
 
@@ -57,6 +83,9 @@ class CheckoutResultDto {
   final String? whatsappUrl;
   final String? paymentUrl;
   final String? redirectUrl;
+  final String? token;
+  final String? tokenType;
+  final CheckoutUserDto? user;
 
   CheckoutResult toEntity() => CheckoutResult(
         success: success,
@@ -73,5 +102,26 @@ class CheckoutResultDto {
         whatsappUrl: whatsappUrl,
         paymentUrl: paymentUrl,
         redirectUrl: redirectUrl,
+        token: token,
+        tokenType: tokenType,
+        user: user?.toEntity(),
       );
+}
+
+/// Minimal patient profile carried by `/api/checkout/initialize`.
+class CheckoutUserDto {
+  const CheckoutUserDto({
+    required this.id,
+    required this.name,
+    required this.phone,
+    this.email,
+  });
+
+  final int id;
+  final String name;
+  final String phone;
+  final String? email;
+
+  CheckoutUser toEntity() =>
+      CheckoutUser(id: id, name: name, phone: phone, email: email);
 }

@@ -50,7 +50,13 @@ class _ServicesViewState extends State<_ServicesView>
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
     _tabController.addListener(_onTabChanged);
-    context.read<ServicesCubit>().load(_tabTypes[_tabController.index]);
+    final servicesCubit = context.read<ServicesCubit>();
+    servicesCubit.load(_tabTypes[_tabController.index]);
+    // Warm the other tab so switching tabs never shows a skeleton
+    // when the data was already fetched this session.
+    servicesCubit.preload(
+      _tabTypes[(_tabController.index + 1) % _tabTypes.length],
+    );
   }
 
   @override
@@ -211,11 +217,17 @@ class _ServiceList extends StatelessWidget {
             iconType: isOnline
                 ? ServiceOptionIconType.online
                 : ServiceOptionIconType.clinic,
+            bootstrapIcon: service.icon,
+            iconUrl: service.iconUrl,
             title: service.title,
             description: service.description,
             price: context.tr(
               LocaleKeys.home_bookService_priceFrom,
-              namedArgs: {'price': service.displayPrice},
+              namedArgs: {
+                'price': service.displayPrice,
+                'currency': service.currencySymbol ??
+                    context.tr(LocaleKeys.booking_currency),
+              },
             ),
             onTap: () => onBook(service),
           );

@@ -74,6 +74,8 @@ class ServiceDto {
     this.bookingType,
     this.currency,
     this.currencySymbol,
+    this.icon,
+    this.iconUrl,
   });
 
   factory ServiceDto.fromJson(Map<String, dynamic> json) {
@@ -95,6 +97,8 @@ class ServiceDto {
       bookingType: _readString(json, 'booking_type'),
       currency: _readString(json, 'currency'),
       currencySymbol: _readString(json, 'currency_symbol'),
+      icon: _readString(json, 'icon'),
+      iconUrl: _readString(json, 'icon_url'),
     );
   }
 
@@ -143,27 +147,46 @@ class ServiceDto {
   final String? bookingType;
   final String? currency;
   final String? currencySymbol;
+  final String? icon;
+  final String? iconUrl;
 
-  Service toEntity() => Service(
-        id: id,
-        title: title,
-        description: description,
-        type: type,
-        price: price,
-        duration: duration,
-        clinicPrice: clinicPrice,
-        chatPrice: chatPrice,
-        voicePrice: voicePrice,
-        videoPrice: videoPrice,
-        serviceType: type,
-        channelType: channelType,
-        channels: channels?.map((c) => c.toEntity()).toList(),
-        isActive: isActive,
-        location: location,
-        bookingType: bookingType,
-        currency: currency,
-        currencySymbol: currencySymbol,
-      );
+  /// Falls back to the response-level currency when the service item
+  /// (or its channels) omit their own — the backend sends `currency` /
+  /// `currency_symbol` at the top level (e.g. USD/$) and only sometimes
+  /// repeats them per service/channel.
+  Service toEntity({String? fallbackCurrency, String? fallbackCurrencySymbol}) {
+    final resolvedCurrency = currency ?? fallbackCurrency;
+    final resolvedSymbol = currencySymbol ?? fallbackCurrencySymbol;
+    return Service(
+      id: id,
+      title: title,
+      description: description,
+      type: type,
+      price: price,
+      duration: duration,
+      clinicPrice: clinicPrice,
+      chatPrice: chatPrice,
+      voicePrice: voicePrice,
+      videoPrice: videoPrice,
+      serviceType: type,
+      channelType: channelType,
+      channels: channels
+          ?.map(
+            (c) => c.toEntity(
+              fallbackCurrency: resolvedCurrency,
+              fallbackCurrencySymbol: resolvedSymbol,
+            ),
+          )
+          .toList(),
+      isActive: isActive,
+      location: location,
+      bookingType: bookingType,
+      currency: resolvedCurrency,
+      currencySymbol: resolvedSymbol,
+      icon: icon,
+      iconUrl: iconUrl,
+    );
+  }
 
   ServiceDto copyWith({
     int? id,
@@ -183,6 +206,8 @@ class ServiceDto {
     String? bookingType,
     String? currency,
     String? currencySymbol,
+    String? icon,
+    String? iconUrl,
   }) {
     return ServiceDto(
       id: id ?? this.id,
@@ -202,6 +227,8 @@ class ServiceDto {
       bookingType: bookingType ?? this.bookingType,
       currency: currency ?? this.currency,
       currencySymbol: currencySymbol ?? this.currencySymbol,
+      icon: icon ?? this.icon,
+      iconUrl: iconUrl ?? this.iconUrl,
     );
   }
 }
@@ -229,14 +256,16 @@ class ChannelDto {
     );
   }
 
-  ServiceChannel toEntity() => ServiceChannel(
+  ServiceChannel toEntity(
+          {String? fallbackCurrency, String? fallbackCurrencySymbol}) =>
+      ServiceChannel(
         channel: channel,
         name: name,
         price: price,
         duration: duration,
         isEnabled: isEnabled,
-        currency: currency,
-        currencySymbol: currencySymbol,
+        currency: currency ?? fallbackCurrency,
+        currencySymbol: currencySymbol ?? fallbackCurrencySymbol,
       );
 
   static String? _readString(Map<String, dynamic> json, String key) {

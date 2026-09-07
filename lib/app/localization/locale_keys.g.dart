@@ -194,6 +194,9 @@ abstract class  LocaleKeys {
   static const payment_reference = 'payment.reference';
   static const payment_consultant = 'payment.consultant';
   static const payment_zaincashLabel = 'payment.zaincashLabel';
+  static const payment_confirmTitle = 'payment.confirmTitle';
+  static const payment_confirmMessage = 'payment.confirmMessage';
+  static const payment_confirmButton = 'payment.confirmButton';
   static const payment = 'payment';
   static const placeholders_homeTabContent = 'placeholders.homeTabContent';
   static const placeholders_searchTabContent = 'placeholders.searchTabContent';

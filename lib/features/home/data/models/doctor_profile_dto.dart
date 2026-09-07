@@ -37,8 +37,20 @@ class DoctorProfileDto {
         instagram: _readString(linksMap, 'instagram'),
         linkedin: _readString(linksMap, 'linkedin'),
       ),
-      heroImage: _readString(json, 'hero_image'),
+      heroImage: _firstNonEmpty([
+        _readString(json, 'mobile_hero_image'),
+        _readString(json, 'hero_image_mobile'),
+        _readString(json, 'hero_image'),
+        _readString(json, 'hero_image_web'),
+      ]),
     );
+  }
+
+  static String? _firstNonEmpty(List<String?> values) {
+    for (final v in values) {
+      if (v != null && v.trim().isNotEmpty) return v.trim();
+    }
+    return null;
   }
 
   static String? _readString(Map<String, dynamic> json, String key) {

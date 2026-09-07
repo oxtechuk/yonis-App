@@ -27,6 +27,7 @@ class CountryCode {
 }
 
 const List<CountryCode> kCountryCodes = [
+  CountryCode(name: 'Iraq',               flag: '🇮🇶', dialCode: '+964', isoCode: 'IQ'),
   CountryCode(name: 'Saudi Arabia',       flag: '🇸🇦', dialCode: '+966', isoCode: 'SA'),
   CountryCode(name: 'United Arab Emirates', flag: '🇦🇪', dialCode: '+971', isoCode: 'AE'),
   CountryCode(name: 'Kuwait',             flag: '🇰🇼', dialCode: '+965', isoCode: 'KW'),
@@ -35,7 +36,6 @@ const List<CountryCode> kCountryCodes = [
   CountryCode(name: 'Oman',               flag: '🇴🇲', dialCode: '+968', isoCode: 'OM'),
   CountryCode(name: 'Jordan',             flag: '🇯🇴', dialCode: '+962', isoCode: 'JO'),
   CountryCode(name: 'Egypt',              flag: '🇪🇬', dialCode: '+20',  isoCode: 'EG'),
-  CountryCode(name: 'Iraq',               flag: '🇮🇶', dialCode: '+964', isoCode: 'IQ'),
   CountryCode(name: 'Lebanon',            flag: '🇱🇧', dialCode: '+961', isoCode: 'LB'),
   CountryCode(name: 'Syria',              flag: '🇸🇾', dialCode: '+963', isoCode: 'SY'),
   CountryCode(name: 'Yemen',              flag: '🇾🇪', dialCode: '+967', isoCode: 'YE'),
@@ -52,3 +52,11 @@ const List<CountryCode> kCountryCodes = [
   CountryCode(name: 'Germany',            flag: '🇩🇪', dialCode: '+49',  isoCode: 'DE'),
   CountryCode(name: 'France',             flag: '🇫🇷', dialCode: '+33',  isoCode: 'FR'),
 ];
+
+/// Default country for all mobile inputs — Iraq (+964).
+const CountryCode kDefaultCountryCode = CountryCode(
+  name: 'Iraq',
+  flag: '🇮🇶',
+  dialCode: '+964',
+  isoCode: 'IQ',
+);

@@ -27,7 +27,11 @@ class HomePage extends StatelessWidget {
           create: (_) => getIt<DoctorProfileCubit>()..load(),
         ),
         BlocProvider<ServicesCubit>(
-          create: (_) => getIt<ServicesCubit>()..load('clinic'),
+          // Warm both tabs: online displays first in the sheet, clinic
+          // is preloaded silently so switching tabs is instant.
+          create: (_) => getIt<ServicesCubit>()
+            ..load('online')
+            ..preload('clinic'),
         ),
         BlocProvider<ReelsCubit>(
           create: (_) => getIt<ReelsCubit>()..load(),
@@ -112,7 +116,8 @@ class HomePage extends StatelessWidget {
 Future<void> _refreshAll(BuildContext context) {
   return Future.wait([
     context.read<DoctorProfileCubit>().load(),
-    context.read<ServicesCubit>().load('clinic', forceRefresh: true),
+    context.read<ServicesCubit>().load('online', forceRefresh: true),
+    context.read<ServicesCubit>().preload('clinic', forceRefresh: true),
     context.read<ReelsCubit>().load(),
     context.read<TestimonialsCubit>().load(),
   ]);

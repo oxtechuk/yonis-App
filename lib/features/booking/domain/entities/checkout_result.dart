@@ -1,5 +1,7 @@
 import 'package:equatable/equatable.dart';
 
+import 'checkout_user.dart';
+
 /// Result of `POST /api/checkout/initialize`.
 ///
 /// [success] `false` is a normal business outcome (e.g. the slot was just
@@ -22,6 +24,9 @@ class CheckoutResult extends Equatable {
     this.whatsappUrl,
     this.paymentUrl,
     this.redirectUrl,
+    this.token,
+    this.tokenType,
+    this.user,
   });
 
   final bool success;
@@ -39,6 +44,14 @@ class CheckoutResult extends Equatable {
   final String? paymentUrl;
   final String? redirectUrl;
 
+  /// Access token for the (possibly newly created) patient account.
+  /// Persisted to secure storage by the repository, mirroring login.
+  final String? token;
+  final String? tokenType;
+
+  /// Patient profile returned alongside the token.
+  final CheckoutUser? user;
+
   @override
   List<Object?> get props => [
         success,
@@ -55,5 +68,8 @@ class CheckoutResult extends Equatable {
         whatsappUrl,
         paymentUrl,
         redirectUrl,
+        token,
+        tokenType,
+        user,
       ];
 }

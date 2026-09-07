@@ -1,6 +1,7 @@
 import 'package:get_it/get_it.dart';
 
 import '../../core/network/api_client.dart';
+import '../../core/storage/secure_storage.dart';
 import '../../features/booking/data/repositories/checkout_repository_impl.dart';
 import '../../features/booking/data/repositories/slots_repository_impl.dart';
 import '../../features/booking/data/sources/checkout_remote_data_source.dart';
@@ -38,6 +39,7 @@ void registerBookingDependencies(GetIt getIt) {
   getIt.registerLazySingleton<CheckoutRepository>(
     () => CheckoutRepositoryImpl(
       remoteDataSource: getIt<CheckoutRemoteDataSource>(),
+      secureStorage: getIt<SecureStorage>(),
     ),
   );
 

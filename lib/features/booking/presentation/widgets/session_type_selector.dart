@@ -64,7 +64,7 @@ class SessionTypeSelector extends StatelessWidget {
                 child: Row(
                   children: [
                     Text(
-                      '${options[i].displayPrice} ${context.tr(LocaleKeys.booking_currency)}',
+                      '${options[i].displayPrice} ${options[i].currencySymbol ?? context.tr(LocaleKeys.booking_currency)}',
                       style: AppTextStyles.body.copyWith(
                         color: AppColors.primary,
                         fontWeight: FontWeight.w600,

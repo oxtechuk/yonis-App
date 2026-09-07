@@ -1,6 +1,7 @@
 import '../../../../core/error/app_exception.dart';
 import '../../../../core/error/failure_mapper.dart';
 import '../../../../core/result/result.dart';
+import '../../../../core/storage/secure_storage.dart';
 import '../../domain/entities/check_user_result.dart';
 import '../../domain/entities/checkout_result.dart';
 import '../../domain/repositories/checkout_repository.dart';
@@ -9,9 +10,12 @@ import '../sources/checkout_remote_data_source.dart';
 class CheckoutRepositoryImpl implements CheckoutRepository {
   const CheckoutRepositoryImpl({
     required CheckoutRemoteDataSource remoteDataSource,
-  }) : _remoteDataSource = remoteDataSource;
+    required SecureStorage secureStorage,
+  })  : _remoteDataSource = remoteDataSource,
+        _secureStorage = secureStorage;
 
   final CheckoutRemoteDataSource _remoteDataSource;
+  final SecureStorage _secureStorage;
 
   @override
   Future<Result<CheckUserResult>> checkUser({required String phone}) async {
@@ -53,6 +57,16 @@ class CheckoutRepositoryImpl implements CheckoutRepository {
         'email': email,
         'password': password,
       });
+      // The backend returns an access token for the (possibly newly
+      // created) patient — persist it like login so the user stays
+      // logged in across restarts (bootstrap restores from this key).
+      final token = dto.token;
+      if (dto.success && token != null && token.trim().isNotEmpty) {
+        await _secureStorage.write(
+          SecureStorageKeys.accessToken,
+          token.trim(),
+        );
+      }
       return Success(dto.toEntity());
     } on AppException catch (exception) {
       return FailureResult(FailureMapper.map(exception));

@@ -20,36 +20,36 @@ class ProfileHeader extends StatelessWidget {
       ),
       child: Row(
         children: [
-          // Avatar — right side visually (first child in RTL)
-          const CircleAvatar(
-            radius: 32,
-            backgroundColor: AppColors.border,
-            child: Icon(Icons.person, size: 36, color: Color(0xFFBDBDBD)),
+          // Name + subtitle — Expanded bounds the column so long
+          // names/emails ellipsize instead of overflowing the row.
+          Expanded(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  name,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: AppTextStyles.title.copyWith(
+                    color: AppColors.textPrimary,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  subtitle,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: AppTextStyles.bodySmall.copyWith(
+                    color: AppColors.textSecondary,
+                  ),
+                ),
+              ],
+            ),
           ),
           const SizedBox(width: AppSpacing.md),
-          // Name + subtitle
-          Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                name,
-                style: AppTextStyles.title.copyWith(
-                  color: AppColors.textPrimary,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-              const SizedBox(height: 2),
-              Text(
-                subtitle,
-                style: AppTextStyles.bodySmall.copyWith(
-                  color: AppColors.textSecondary,
-                ),
-              ),
-            ],
-          ),
           // Back chevron — left side visually, flipped for RTL
-          const Spacer(),
           const Icon(
             Icons.chevron_right,
             color: AppColors.textSecondary,

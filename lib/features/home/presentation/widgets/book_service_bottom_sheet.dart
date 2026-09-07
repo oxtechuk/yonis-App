@@ -2,6 +2,7 @@ import 'dart:math' as math;
 import 'dart:ui' as ui;
 
 import 'package:easy_localization/easy_localization.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -10,7 +11,6 @@ import '../../../../app/di/dependency_injection.dart';
 import '../../../../app/localization/locale_keys.g.dart';
 import '../../../../app/router/app_routes.dart';
 import '../../../../app/styles/app_colors.dart';
-import '../../../../app/styles/app_radius.dart';
 import '../../../../app/styles/app_sizes.dart';
 import '../../../../app/styles/app_spacing.dart';
 import '../../../../app/styles/app_text_styles.dart';
@@ -19,7 +19,7 @@ import '../../domain/entities/service.dart';
 import '../cubit/services_cubit.dart';
 import 'service_option_card.dart';
 
-enum ServiceType { clinic, online }
+enum ServiceType { online, clinic }
 
 /// Bottom sheet shown when the user taps "Book Your Consultation".
 /// First lets the user choose between clinic and online, then lists
@@ -31,6 +31,15 @@ class BookServiceBottomSheet extends StatefulWidget {
 
   static void show(BuildContext context) {
     final router = GoRouter.of(context);
+    final servicesCubit = getIt<ServicesCubit>();
+    // Present the sheet FIRST so the entrance animation starts on this
+    // frame. Kicking the fetches afterwards (post-frame) keeps the
+    // resulting cubit emits — which also rebuild the offstage
+    // ServicesPage branch sharing this singleton — off the critical
+    // path of the sheet sliding up.
+    // load() is a no-op when 'online' is cached or already loading
+    // (see ServicesCubit), so warm taps open instantly; preload()
+    // warms the other tab without clobbering UI.
     showModalBottomSheet<void>(
       context: context,
       useRootNavigator: false,
@@ -38,10 +47,14 @@ class BookServiceBottomSheet extends StatefulWidget {
       backgroundColor: Colors.transparent,
       barrierColor: AppColors.primary.withValues(alpha: 0.31),
       builder: (_) => BlocProvider<ServicesCubit>.value(
-        value: getIt<ServicesCubit>()..load('clinic'),
+        value: servicesCubit,
         child: BookServiceBottomSheet(router: router),
       ),
     );
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      servicesCubit.load('online');
+      servicesCubit.preload('clinic');
+    });
   }
 
   static const double headerSlotWidth = 40;
@@ -51,7 +64,7 @@ class BookServiceBottomSheet extends StatefulWidget {
 }
 
 class _BookServiceBottomSheetState extends State<BookServiceBottomSheet> {
-  ServiceType _selectedType = ServiceType.clinic;
+  ServiceType _selectedType = ServiceType.online;
   Service? _channelSelectionService;
 
   void _selectType(ServiceType type) {
@@ -175,24 +188,43 @@ class _BookServiceBottomSheetState extends State<BookServiceBottomSheet> {
   }
 
   Widget _buildTypeSelector(BuildContext context) {
-    return Row(
-      children: [
-        Expanded(
-          child: _TypeTab(
-            label: context.tr(LocaleKeys.home_bookService_clinicTab),
-            isSelected: _selectedType == ServiceType.clinic,
-            onTap: () => _selectType(ServiceType.clinic),
+    final isClinic = _selectedType == ServiceType.clinic;
+    return CupertinoSlidingSegmentedControl<ServiceType>(
+      groupValue: _selectedType,
+      backgroundColor: AppColors.border.withValues(alpha: 0.55),
+      thumbColor: AppColors.white,
+      padding: const EdgeInsets.all(4),
+      onValueChanged: (ServiceType? value) {
+        if (value != null) _selectType(value);
+      },
+      children: {
+        ServiceType.online: Padding(
+          padding: const EdgeInsets.symmetric(
+            vertical: AppSpacing.sm,
+            horizontal: AppSpacing.md,
+          ),
+          child: Text(
+            context.tr(LocaleKeys.home_bookService_onlineTab),
+            style: AppTextStyles.body.copyWith(
+              color: !isClinic ? AppColors.primary : AppColors.textSecondary,
+              fontWeight: FontWeight.w700,
+            ),
           ),
         ),
-        const SizedBox(width: AppSpacing.md),
-        Expanded(
-          child: _TypeTab(
-            label: context.tr(LocaleKeys.home_bookService_onlineTab),
-            isSelected: _selectedType == ServiceType.online,
-            onTap: () => _selectType(ServiceType.online),
+        ServiceType.clinic: Padding(
+          padding: const EdgeInsets.symmetric(
+            vertical: AppSpacing.sm,
+            horizontal: AppSpacing.md,
+          ),
+          child: Text(
+            context.tr(LocaleKeys.home_bookService_clinicTab),
+            style: AppTextStyles.body.copyWith(
+              color: isClinic ? AppColors.primary : AppColors.textSecondary,
+              fontWeight: FontWeight.w700,
+            ),
           ),
         ),
-      ],
+      },
     );
   }
 
@@ -214,11 +246,17 @@ class _BookServiceBottomSheetState extends State<BookServiceBottomSheet> {
           iconType: isOnline
               ? ServiceOptionIconType.online
               : ServiceOptionIconType.clinic,
+          bootstrapIcon: service.icon,
+          iconUrl: service.iconUrl,
           title: service.title,
           description: service.description,
           price: context.tr(
             LocaleKeys.home_bookService_priceFrom,
-            namedArgs: {'price': service.displayPrice},
+            namedArgs: {
+              'price': service.displayPrice,
+              'currency': service.currencySymbol ??
+                  context.tr(LocaleKeys.booking_currency),
+            },
           ),
           onTap: () => _onServiceTap(context, service),
         );
@@ -279,48 +317,6 @@ class _BookServiceBottomSheetState extends State<BookServiceBottomSheet> {
     // No login gate: guests book as guests — account creation / login
     // happens inside BookingPage before payment.
     widget.router.push(AppRoutes.booking, extra: extra);
-  }
-}
-
-class _TypeTab extends StatelessWidget {
-  const _TypeTab({
-    required this.label,
-    required this.isSelected,
-    required this.onTap,
-  });
-
-  final String label;
-  final bool isSelected;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        padding: const EdgeInsets.symmetric(
-          vertical: AppSpacing.sm,
-        ),
-        decoration: BoxDecoration(
-          color: isSelected ? AppColors.primary : AppColors.white,
-          borderRadius: AppRadius.allXl,
-          border: Border.all(
-            color: isSelected ? AppColors.primary : AppColors.border,
-            width: isSelected ? 1.5 : 1,
-          ),
-        ),
-        child: Center(
-          child: Text(
-            label,
-            style: AppTextStyles.body.copyWith(
-              color: isSelected ? AppColors.white : AppColors.textPrimary,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-        ),
-      ),
-    );
   }
 }
 

@@ -75,7 +75,7 @@ class _Chip extends StatelessWidget {
         vertical: AppSpacing.sm,
       ),
       decoration: BoxDecoration(
-        color: AppColors.fieldFill,
+        color: Color(0xffE5E7EB),
         borderRadius: BorderRadius.circular(50),
         boxShadow: [
           BoxShadow(

@@ -48,7 +48,7 @@
       "clinicDesc": "Request your sessions via a text chat that supports written and voice messages, as well as sending images and documents",
       "onlineTitle": "Online Consultation (Chat - Voice - Video)",
       "onlineDesc": "Connect with a doctor via instant voice call and ask questions on a specific topic. Session duration starts from 15 minutes",
-      "priceFrom": "Starting from {price} IQD",
+      "priceFrom": "Starting from {price} {currency}",
       "startNow": "Start Your Sessions Now",
       "clinicTab": "Clinic",
       "onlineTab": "Online",
@@ -205,7 +205,10 @@
     "startConsultation": "Start consultation",
     "reference": "Reference number",
     "consultant": "Consultant",
-    "zaincashLabel": "Zain Cash (ZainCash)"
+    "zaincashLabel": "Zain Cash (ZainCash)",
+    "confirmTitle": "Confirm payment method?",
+    "confirmMessage": "Pay with {method}? Other methods will be disabled.",
+    "confirmButton": "Confirm"
   },
   "placeholders": {
     "homeTabContent": "Home tab content",

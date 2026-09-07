@@ -16,12 +16,13 @@ class ConsultationOption {
     required this.price,
     this.durationMinutes,
     this.channel,
+    this.currencySymbol,
   });
 
   /// Arabic display label (the booking flow is Arabic-only for now).
   final String label;
 
-  /// Session price in IQD.
+  /// Session price in the service's currency (see [currencySymbol]).
   final double price;
 
   /// Session length in minutes, when provided by the backend.
@@ -30,6 +31,10 @@ class ConsultationOption {
   /// Delivery channel ('chat', 'voice', 'video' or 'clinic'), used to pick
   /// the matching icon. Null when the backend didn't specify one.
   final String? channel;
+
+  /// Currency symbol from the backend (e.g. "$"). Null for the legacy
+  /// fallback options — callers fall back to the localized default.
+  final String? currencySymbol;
 
   /// Trims trailing zeros ("50.00" -> "50") for display.
   String get displayPrice {
@@ -73,6 +78,7 @@ abstract final class ConsultationOptions {
           price: price,
           durationMinutes: service.duration,
           channel: 'clinic',
+          currencySymbol: service.currencySymbol,
         ),
       ];
     }
@@ -89,6 +95,8 @@ abstract final class ConsultationOptions {
           price: channel.price,
           durationMinutes: channel.duration ?? service.duration,
           channel: channel.channel,
+          currencySymbol:
+              channel.currencySymbol ?? service.currencySymbol,
         ),
       ];
     }
@@ -102,6 +110,8 @@ abstract final class ConsultationOptions {
                 price: c.price,
                 durationMinutes: c.duration ?? service.duration,
                 channel: c.channel,
+                currencySymbol:
+                    c.currencySymbol ?? service.currencySymbol,
               ))
           .toList();
     }
@@ -113,6 +123,7 @@ abstract final class ConsultationOptions {
           price: service.chatPrice!,
           durationMinutes: service.duration,
           channel: 'chat',
+          currencySymbol: service.currencySymbol,
         ),
       if (service.voicePrice != null)
         ConsultationOption(
@@ -120,6 +131,7 @@ abstract final class ConsultationOptions {
           price: service.voicePrice!,
           durationMinutes: service.duration,
           channel: 'voice',
+          currencySymbol: service.currencySymbol,
         ),
       if (service.videoPrice != null)
         ConsultationOption(
@@ -127,6 +139,7 @@ abstract final class ConsultationOptions {
           price: service.videoPrice!,
           durationMinutes: service.duration,
           channel: 'video',
+          currencySymbol: service.currencySymbol,
         ),
     ];
 
@@ -138,6 +151,7 @@ abstract final class ConsultationOptions {
         label: service.title,
         price: service.price,
         durationMinutes: service.duration,
+        currencySymbol: service.currencySymbol,
       ),
     ];
   }

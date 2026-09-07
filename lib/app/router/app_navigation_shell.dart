@@ -1,5 +1,3 @@
-import 'dart:math' as math;
-
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -43,35 +41,38 @@ class AppNavigationShell extends StatelessWidget {
 
     return Scaffold(
       body: navigationShell,
-      // ColoredBox fills the transparent pixels of the rounded top
-      // corners with the page background — otherwise the dark surface
-      // behind (system/theme background) shows through at the corners.
+      // ColoredBox fills the margin around the floating bar with the
+      // page background — otherwise the dark surface behind
+      // (system/theme background) shows through at the corners.
       bottomNavigationBar: ColoredBox(
         color: AppColors.background,
-        child: Container(
-          decoration: BoxDecoration(
-            color: AppColors.white,
-            borderRadius: const BorderRadius.only(
-              topLeft: Radius.circular(24),
-              topRight: Radius.circular(24),
+        child: SafeArea(
+          top: false,
+          bottom: false,
+          // Outer margin lifts the bar off the screen edges so it
+          // floats above the bottom (16dp + system gesture inset).
+          child: Padding(
+            padding: EdgeInsets.fromLTRB(
+              16,
+              0,
+              16,
+              16 + MediaQuery.paddingOf(context).bottom,
             ),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.08),
-                blurRadius: 20,
-                offset: const Offset(0, -4),
+            child: Container(
+              decoration: BoxDecoration(
+                color: AppColors.white,
+                borderRadius: BorderRadius.circular(24),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.08),
+                    blurRadius: 20,
+                    offset: const Offset(0, 6),
+                  ),
+                ],
               ),
-            ],
-          ),
-          child: SafeArea(
-            top: false,
-            bottom: false,
-            child: Padding(
-              padding: EdgeInsets.only(
-                top: 8,
-                bottom: math.max(8, MediaQuery.paddingOf(context).bottom),
-              ),
-              child: Row(
+              child: Padding(
+                padding: const EdgeInsets.only(top: 8, bottom: 8),
+                child: Row(
                 children: [
                   _NavItem(
                     icon: Icons.person_outline,
@@ -102,6 +103,7 @@ class AppNavigationShell extends StatelessWidget {
                     onTap: () => _onTap(context,0),
                   ),
                 ],
+                ),
               ),
             ),
           ),

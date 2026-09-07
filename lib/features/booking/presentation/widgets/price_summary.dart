@@ -17,7 +17,8 @@ class PriceSummary extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final price = option.displayPrice;
-    final currency = context.tr(LocaleKeys.booking_currency);
+    final currency =
+        option.currencySymbol ?? context.tr(LocaleKeys.booking_currency);
     return Container(
       padding: const EdgeInsets.all(AppSpacing.md),
       decoration: BoxDecoration(

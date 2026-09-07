@@ -24,7 +24,7 @@ class WelcomeStartButton extends StatelessWidget {
         AppSpacing.lg,
         AppSpacing.md,
         AppSpacing.lg,
-        math.max(AppSpacing.xl, bottomInset),
+        math.max(AppSpacing.xl, bottomInset) + AppSpacing.lg,
       ),
       child: SizedBox(
         width: double.infinity,

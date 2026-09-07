@@ -33,7 +33,7 @@ class _LoginFormState extends State<LoginForm> {
   final _phoneController = TextEditingController();
   final _passwordController = TextEditingController();
   bool _obscurePassword = true;
-  CountryCode _country = kCountryCodes.first;
+  CountryCode _country = kDefaultCountryCode;
 
   @override
   void dispose() {

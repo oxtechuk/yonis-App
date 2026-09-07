@@ -17,7 +17,14 @@ class ServicesRepositoryImpl implements ServicesRepository {
     try {
       final dto = await _remoteDataSource.getClinicServices();
       return Success(
-        dto.services.map((item) => item.toEntity()).toList(growable: false),
+        dto.services
+            .map(
+              (item) => item.toEntity(
+                fallbackCurrency: dto.currency,
+                fallbackCurrencySymbol: dto.currencySymbol,
+              ),
+            )
+            .toList(growable: false),
       );
     } on AppException catch (exception) {
       return FailureResult(FailureMapper.map(exception));
@@ -29,7 +36,14 @@ class ServicesRepositoryImpl implements ServicesRepository {
     try {
       final dto = await _remoteDataSource.getOnlineServices();
       return Success(
-        dto.services.map((item) => item.toEntity()).toList(growable: false),
+        dto.services
+            .map(
+              (item) => item.toEntity(
+                fallbackCurrency: dto.currency,
+                fallbackCurrencySymbol: dto.currencySymbol,
+              ),
+            )
+            .toList(growable: false),
       );
     } on AppException catch (exception) {
       return FailureResult(FailureMapper.map(exception));

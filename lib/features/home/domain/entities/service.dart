@@ -20,6 +20,8 @@ class Service extends Equatable {
     this.bookingType,
     this.currency,
     this.currencySymbol,
+    this.icon,
+    this.iconUrl,
   });
 
   final int id;
@@ -65,6 +67,12 @@ class Service extends Equatable {
   /// Currency symbol (e.g. د.ع).
   final String? currencySymbol;
 
+  /// Bootstrap icon name from the API (e.g. "bi-hospital").
+  final String? icon;
+
+  /// Optional absolute icon image URL from the API.
+  final String? iconUrl;
+
   /// Trims trailing zeros from the API price ("50.00" -> "50").
   String get displayPrice {
     if (price == price.truncateToDouble()) {
@@ -96,6 +104,8 @@ class Service extends Equatable {
         bookingType,
         currency,
         currencySymbol,
+        icon,
+        iconUrl,
       ];
 }
 

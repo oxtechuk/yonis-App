@@ -44,7 +44,7 @@ class HomeHeroSection extends StatelessWidget {
                           heroImageUrl!,
                           width: double.infinity,
                           height: imageHeight,
-                          fit: BoxFit.contain,
+                          fit: BoxFit.cover,
                         )
                       : Image.asset(
                           AppImages.homeHero,
@@ -134,36 +134,36 @@ class HomeHeroSection extends StatelessWidget {
 
         SizedBox(height: btnHeight / 2 + AppSpacing.sm),
 
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
-          child: SizedBox(
-            width: double.infinity,
-            height: btnHeight,
-            child: ElevatedButton(
-              onPressed: onAboutTap,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.white,
-                foregroundColor: AppColors.primary,
-                elevation: 2,
-                shadowColor: Colors.black12,
-                shape: const StadiumBorder(),
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    context.tr(LocaleKeys.home_getToKnowYounis),
-                    style: AppTextStyles.button.copyWith(
-                      color: AppColors.primary,
-                    ),
-                  ),
-                  const SizedBox(width: AppSpacing.sm),
-                  const Icon(Icons.person_outline, size: AppSizes.iconMd),
-                ],
-              ),
-            ),
-          ),
-        ),
+        // Padding(
+        //   padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+        //   child: SizedBox(
+        //     width: double.infinity,
+        //     height: btnHeight,
+        //     child: ElevatedButton(
+        //       onPressed: onAboutTap,
+        //       style: ElevatedButton.styleFrom(
+        //         backgroundColor: AppColors.white,
+        //         foregroundColor: AppColors.primary,
+        //         elevation: 2,
+        //         shadowColor: Colors.black12,
+        //         shape: const StadiumBorder(),
+        //       ),
+        //       child: Row(
+        //         mainAxisSize: MainAxisSize.min,
+        //         children: [
+        //           Text(
+        //             context.tr(LocaleKeys.home_getToKnowYounis),
+        //             style: AppTextStyles.button.copyWith(
+        //               color: AppColors.primary,
+        //             ),
+        //           ),
+        //           const SizedBox(width: AppSpacing.sm),
+        //           const Icon(Icons.person_outline, size: AppSizes.iconMd),
+        //         ],
+        //       ),
+        //     ),
+        //   ),
+        // ),
       ],
     );
   }

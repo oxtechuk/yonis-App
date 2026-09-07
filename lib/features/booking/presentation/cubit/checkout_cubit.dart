@@ -48,6 +48,12 @@ class CheckoutCubit extends Cubit<CheckoutState> {
 
   final InitializeCheckoutUseCase _initializeCheckoutUseCase;
 
+  /// Clears the current checkout result — used when the user deselects
+  /// the payment method so the QR / success card disappears.
+  void reset() {
+    if (state is! CheckoutInitial) emit(const CheckoutInitial());
+  }
+
   Future<void> submit({
     required int serviceId,
     required String bookingType,

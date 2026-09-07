@@ -76,7 +76,7 @@ class CreateAccountSection extends StatefulWidget {
 }
 
 class _CreateAccountSectionState extends State<CreateAccountSection> {
-  CountryCode _country = kCountryCodes.first;
+  CountryCode _country = kDefaultCountryCode;
 
   String get _fullPhone => '${_country.dialCode}${widget.phoneController.text.trim()}';
 

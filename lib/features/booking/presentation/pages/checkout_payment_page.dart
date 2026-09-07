@@ -15,19 +15,24 @@ import '../../../../app/styles/app_text_styles.dart';
 import '../../../../app/widgets/app_skeleton.dart';
 import '../../../../app/widgets/app_toast.dart';
 import '../../../../app/widgets/primary_button.dart';
+import '../../../auth/domain/auth_state.dart';
+import '../../../auth/presentation/cubit/login_cubit.dart';
 import '../../../home/domain/entities/service.dart';
+import '../cubit/check_user_cubit.dart';
 import '../cubit/checkout_cubit.dart';
 import '../models/booking_models.dart';
 import '../widgets/booking_app_bar.dart';
+import '../widgets/booking_create_account_section.dart';
 import '../widgets/payment_method_selector.dart';
 import '../widgets/price_summary.dart';
 
-/// Second (and final) step of the booking flow: payment + QR on one page.
+/// Second (and final) step of the booking flow: account check (phone lookup /
+/// create account or login — skipped when a stored login token already
+/// identifies the user) + payment method selection + QR on one page.
 ///
-/// Receives everything collected on [BookingPage] (details, schedule,
-/// account). Selecting a payment method immediately sends the checkout
-/// (`/api/checkout/initialize`) and the QR code / booking reference appear
-/// inline underneath the payment methods — there is no third page.
+/// Receives details + schedule from [BookingPage]. Confirming a payment
+/// method sends the checkout (`/api/checkout/initialize`) and the QR code /
+/// booking reference appear inline underneath — there is no third page.
 class CheckoutPaymentPage extends StatefulWidget {
   const CheckoutPaymentPage({
     super.key,
@@ -94,21 +99,50 @@ class CheckoutPaymentPage extends StatefulWidget {
 }
 
 class _CheckoutPaymentPageState extends State<CheckoutPaymentPage> {
+  final _accountFormKey = GlobalKey<FormState>();
+
   late final CheckoutCubit _checkoutCubit;
+  late final CheckUserCubit _checkUserCubit;
+  late final LoginCubit _loginCubit;
 
   /// Nothing pre-selected: checkout is only sent after the user taps
   /// a payment method.
   PaymentMethod? _paymentMethod;
 
+  // Account form controllers (guests only — hidden when a stored login
+  // token already identifies the user).
+  final _nameController = TextEditingController();
+  final _phoneController = TextEditingController();
+  final _emailController = TextEditingController();
+  final _passwordController = TextEditingController();
+  bool _obscurePassword = true;
+
+  // Login password — used only when check-user finds an existing account.
+  final _loginPasswordController = TextEditingController();
+  bool _obscureLoginPassword = true;
+
+  /// The full E.164 phone (dial code + digits) last sent to check-user —
+  /// captured here since [CreateAccountSection] owns the country picker.
+  String? _checkedPhone;
+
   @override
   void initState() {
     super.initState();
     _checkoutCubit = getIt<CheckoutCubit>();
+    _checkUserCubit = getIt<CheckUserCubit>();
+    _loginCubit = getIt<LoginCubit>();
   }
 
   @override
   void dispose() {
     _checkoutCubit.close();
+    _checkUserCubit.close();
+    _loginCubit.close();
+    _nameController.dispose();
+    _phoneController.dispose();
+    _emailController.dispose();
+    _passwordController.dispose();
+    _loginPasswordController.dispose();
     super.dispose();
   }
 
@@ -128,7 +162,58 @@ class _CheckoutPaymentPageState extends State<CheckoutPaymentPage> {
     price: (widget.optionPrice ?? widget.amount).toDouble(),
     durationMinutes: widget.optionDuration,
     channel: widget.optionChannel ?? widget.consultationType,
+    currencySymbol: widget.currencySymbol.isNotEmpty
+        ? widget.currencySymbol
+        : widget.service?.currencySymbol,
   );
+
+  void _onPhoneChecked(String fullPhone) {
+    _checkedPhone = fullPhone;
+    _loginCubit.reset();
+    _loginPasswordController.clear();
+    _checkUserCubit.check(fullPhone);
+  }
+
+  void _onChangePhone() {
+    _checkUserCubit.reset();
+    _loginCubit.reset();
+    _loginPasswordController.clear();
+  }
+
+  void _onLogin(String password) {
+    final phone = _checkedPhone;
+    if (phone == null) return;
+    _loginCubit.login(identifier: phone, password: password);
+  }
+
+  void _onLoginStateChanged(BuildContext context, LoginState state) {
+    if (state is LoginSuccess) {
+      AuthState.instance.login();
+    }
+  }
+
+  /// Account must be resolved before any checkout: guests verify their
+  /// phone first (and log in when the number is recognized).
+  bool _isAccountReady() {
+    // A persisted login token already identifies the user on the backend
+    // (sent as `Authorization: Bearer`) — no phone check needed.
+    if (AuthState.instance.isLoggedIn) return true;
+    final checkState = _checkUserCubit.state;
+    if (checkState is! CheckUserLoaded) {
+      AppToast.show(context, context.tr(LocaleKeys.booking_verifyPhoneFirst));
+      return false;
+    }
+    // A recognized account must actually log in first — that's what gets
+    // the auth token the checkout call is identified by.
+    if (checkState.result.isRegistered && _loginCubit.state is! LoginSuccess) {
+      AppToast.show(context, context.tr(LocaleKeys.booking_loginFirst));
+      return false;
+    }
+    if (!checkState.result.isRegistered) {
+      if (!(_accountFormKey.currentState?.validate() ?? false)) return false;
+    }
+    return true;
+  }
 
   void _submitFor(PaymentMethod method) {
     if (_checkoutCubit.state is CheckoutSubmitting) return;
@@ -139,6 +224,34 @@ class _CheckoutPaymentPageState extends State<CheckoutPaymentPage> {
       AppToast.show(context, context.tr(LocaleKeys.booking_selectDateTime));
       return;
     }
+    if (!_isAccountReady()) return;
+
+    // New flow: account payload comes from this step's account section.
+    // Legacy callers may still pass it via extras — fall back to those.
+    final bool isRegistered;
+    final String? name;
+    final String? phone;
+    final String? email;
+    final String? password;
+    if (AuthState.instance.isLoggedIn) {
+      isRegistered = true;
+      name = phone = email = password = null;
+    } else if (_checkedPhone != null) {
+      final checkState = _checkUserCubit.state;
+      isRegistered =
+          checkState is CheckUserLoaded && checkState.result.isRegistered;
+      name = isRegistered ? null : _nameController.text.trim();
+      phone = isRegistered ? null : _checkedPhone;
+      email = isRegistered ? null : _emailController.text.trim();
+      password = isRegistered ? null : _passwordController.text;
+    } else {
+      isRegistered = widget.isRegistered ?? false;
+      name = isRegistered ? null : widget.name;
+      phone = isRegistered ? null : widget.phone;
+      email = isRegistered ? null : widget.email;
+      password = isRegistered ? null : widget.password;
+    }
+
     _checkoutCubit.submit(
       serviceId: serviceId,
       bookingType: widget.bookingType ?? 'online',
@@ -148,16 +261,70 @@ class _CheckoutPaymentPageState extends State<CheckoutPaymentPage> {
       startTime: startTime,
       title: widget.title ?? '',
       notes: widget.notes,
-      name: (widget.isRegistered ?? false) ? null : widget.name,
-      phone: (widget.isRegistered ?? false) ? null : widget.phone,
-      email: (widget.isRegistered ?? false) ? null : widget.email,
-      password: (widget.isRegistered ?? false) ? null : widget.password,
+      name: name,
+      phone: phone,
+      email: email,
+      password: password,
     );
   }
 
-  void _onMethodSelected(PaymentMethod method) {
+  Future<void> _onMethodSelected(PaymentMethod? method) async {
+    // Tapping the selected method again removes the selection and
+    // clears any checkout result shown underneath (unlocks the others).
+    if (method == null) {
+      if (_checkoutCubit.state is CheckoutSubmitting) return;
+      setState(() => _paymentMethod = null);
+      _checkoutCubit.reset();
+      return;
+    }
+    if (_checkoutCubit.state is CheckoutSubmitting) return;
+    // Account first: no confirm dialog until the phone is verified
+    // (and recognized accounts are logged in).
+    if (!_isAccountReady()) return;
+    // Confirm before locking the other methods and sending checkout.
+    final confirmed = await _confirmMethod(context, method);
+    if (!confirmed || !mounted) return;
     setState(() => _paymentMethod = method);
     _submitFor(method);
+  }
+
+  /// Confirmation dialog shown before a payment method locks the others
+  /// and triggers checkout.
+  Future<bool> _confirmMethod(
+    BuildContext context,
+    PaymentMethod method,
+  ) async {
+    final label = method.localizedLabel(context);
+    final result = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: Text(dialogContext.tr(LocaleKeys.payment_confirmTitle)),
+        content: Text(
+          dialogContext.tr(
+            LocaleKeys.payment_confirmMessage,
+            namedArgs: {'method': label},
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(false),
+            child: Text(dialogContext.tr(LocaleKeys.common_cancel)),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(dialogContext).pop(true),
+            style: FilledButton.styleFrom(
+              backgroundColor: AppColors.primary,
+              shape: const StadiumBorder(),
+            ),
+            child: Text(
+              dialogContext.tr(LocaleKeys.payment_confirmButton),
+              style: AppTextStyles.button.copyWith(color: AppColors.white),
+            ),
+          ),
+        ],
+      ),
+    );
+    return result ?? false;
   }
 
   void _retryLastMethod() {
@@ -174,9 +341,18 @@ class _CheckoutPaymentPageState extends State<CheckoutPaymentPage> {
           context,
           result.message ?? context.tr(LocaleKeys.booking_bookingFailed),
         );
+      case CheckoutLoaded(:final result) when result.success:
+        // The backend returns an access token for the patient account
+        // (already persisted by the repository) — treat them as logged in
+        // so account-gated tabs unlock immediately.
+        if (result.token != null && result.token!.trim().isNotEmpty) {
+          AuthState.instance.login();
+        }
       case CheckoutError(:final failure):
         AppToast.show(context, failure.message);
-      case CheckoutInitial() || CheckoutSubmitting() || CheckoutLoaded():
+      case CheckoutInitial() ||
+          CheckoutSubmitting() ||
+          CheckoutLoaded():
         break;
     }
   }
@@ -193,9 +369,17 @@ class _CheckoutPaymentPageState extends State<CheckoutPaymentPage> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocListener<CheckoutCubit, CheckoutState>(
-      bloc: _checkoutCubit,
-      listener: _onCheckoutChanged,
+    return MultiBlocListener(
+      listeners: [
+        BlocListener<CheckoutCubit, CheckoutState>(
+          bloc: _checkoutCubit,
+          listener: _onCheckoutChanged,
+        ),
+        BlocListener<LoginCubit, LoginState>(
+          bloc: _loginCubit,
+          listener: _onLoginStateChanged,
+        ),
+      ],
       child: Directionality(
         textDirection: ui.TextDirection.rtl,
         child: Scaffold(
@@ -216,6 +400,50 @@ class _CheckoutPaymentPageState extends State<CheckoutPaymentPage> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
+                        // ── Account check / creation (hidden when a stored
+                        // token already identifies the user) ──────────────
+                        if (!AuthState.instance.isLoggedIn) ...[
+                          Form(
+                            key: _accountFormKey,
+                            child: BlocBuilder<CheckUserCubit, CheckUserState>(
+                              bloc: _checkUserCubit,
+                              builder: (context, checkState) {
+                                return BlocBuilder<LoginCubit, LoginState>(
+                                  bloc: _loginCubit,
+                                  builder: (context, loginState) {
+                                    return CreateAccountSection(
+                                      nameController: _nameController,
+                                      phoneController: _phoneController,
+                                      emailController: _emailController,
+                                      passwordController: _passwordController,
+                                      obscurePassword: _obscurePassword,
+                                      onTogglePassword: () => setState(
+                                        () => _obscurePassword =
+                                            !_obscurePassword,
+                                      ),
+                                      checkState: checkState,
+                                      onCheckPhone: _onPhoneChecked,
+                                      onChangePhone: _onChangePhone,
+                                      loginPasswordController:
+                                          _loginPasswordController,
+                                      obscureLoginPassword:
+                                          _obscureLoginPassword,
+                                      onToggleLoginPassword: () => setState(
+                                        () => _obscureLoginPassword =
+                                            !_obscureLoginPassword,
+                                      ),
+                                      loginState: loginState,
+                                      onLogin: _onLogin,
+                                    );
+                                  },
+                                );
+                              },
+                            ),
+                          ),
+                          const SizedBox(height: AppSpacing.sm),
+                          const RememberAccountCard(),
+                          const SizedBox(height: AppSpacing.lg),
+                        ],
                         Text(
                           context.tr(LocaleKeys.booking_paymentTitle),
                           textAlign: TextAlign.right,
@@ -228,6 +456,7 @@ class _CheckoutPaymentPageState extends State<CheckoutPaymentPage> {
                         PaymentMethodSelector(
                           selected: _paymentMethod,
                           onChanged: _onMethodSelected,
+                          locked: _paymentMethod != null,
                         ),
                         const SizedBox(height: AppSpacing.md),
                         PriceSummary(option: _option),

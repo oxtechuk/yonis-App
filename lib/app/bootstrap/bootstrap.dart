@@ -1,6 +1,7 @@
 import 'package:device_preview/device_preview.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -21,6 +22,12 @@ Future<void> bootstrap() async {
   WidgetsFlutterBinding.ensureInitialized();
   await EasyLocalization.ensureInitialized();
 
+  // Prevent landscape: lock the whole app to portrait.
+  await SystemChrome.setPreferredOrientations([
+    DeviceOrientation.portraitUp,
+    DeviceOrientation.portraitDown,
+  ]);
+
   final environment = AppEnvironment.fromName(
     const String.fromEnvironment('APP_ENV'),
   );
@@ -34,8 +41,9 @@ Future<void> bootstrap() async {
   // Returning user with a persisted login token stays logged in —
   // every request already carries it via the auth interceptor.
   try {
-    final storedToken =
-        await getIt<SecureStorage>().read(SecureStorageKeys.accessToken);
+    final storedToken = await getIt<SecureStorage>().read(
+      SecureStorageKeys.accessToken,
+    );
     AuthState.instance.restoreFromToken(storedToken);
   } catch (_) {
     // Secure storage unreadable: stay logged out and ask for login.
@@ -67,7 +75,7 @@ Future<void> bootstrap() async {
   final Widget app = kReleaseMode
       ? YounisApp()
       : DevicePreview(
-          enabled: true,
+          enabled: !true,
           builder: (_) => YounisApp(appBuilder: DevicePreview.appBuilder),
         );
 

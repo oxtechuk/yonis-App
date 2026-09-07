@@ -430,26 +430,38 @@ class ProfileSkeleton extends StatelessWidget {
   }
 }
 
-/// Time-slot grid placeholder (2-column chips).
+/// Time-slot grid placeholder (3 columns x 3 visible rows).
 class TimeSlotsSkeleton extends StatelessWidget {
-  const TimeSlotsSkeleton({super.key, this.itemCount = 6});
+  const TimeSlotsSkeleton({super.key, this.itemCount = 9});
 
   final int itemCount;
 
   @override
   Widget build(BuildContext context) {
     return SkeletonPulse(
-      child: GridView.count(
-        crossAxisCount: 2,
-        shrinkWrap: true,
-        physics: const NeverScrollableScrollPhysics(),
-        mainAxisSpacing: AppSpacing.sm,
-        crossAxisSpacing: AppSpacing.sm,
-        childAspectRatio: 2.8,
-        children: List.generate(
-          itemCount,
-          (_) => const SkeletonBox(height: double.infinity, borderRadius: 12),
-        ),
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          const visibleRows = 3;
+          final rowHeight =
+              (constraints.maxWidth - 2 * AppSpacing.sm) / 3 / 2.8;
+          final height = visibleRows * rowHeight +
+              (visibleRows - 1) * AppSpacing.sm;
+          return SizedBox(
+            height: height,
+            child: GridView.count(
+              crossAxisCount: 3,
+              physics: const NeverScrollableScrollPhysics(),
+              mainAxisSpacing: AppSpacing.sm,
+              crossAxisSpacing: AppSpacing.sm,
+              childAspectRatio: 2.8,
+              children: List.generate(
+                itemCount,
+                (_) => const SkeletonBox(
+                    height: double.infinity, borderRadius: 12),
+              ),
+            ),
+          );
+        },
       ),
     );
   }

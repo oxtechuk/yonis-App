@@ -10,6 +10,7 @@ import '../../../../app/styles/app_colors.dart';
 import '../../../../app/styles/app_images.dart';
 import '../../../../app/styles/app_spacing.dart';
 import '../../../../app/styles/app_text_styles.dart';
+import '../../../home/presentation/widgets/book_service_bottom_sheet.dart';
 import '../widgets/login_form.dart';
 import '../widgets/login_no_account_card.dart';
 
@@ -32,6 +33,17 @@ class LoginPage extends StatelessWidget {
   }
 
   void _pop(BuildContext context) => context.pop();
+
+  /// "Start your sessions" opens the booking sheet directly — guests book
+  /// as guests, account creation happens inside BookingPage before payment.
+  /// A caller-provided [onGuestBooking] still takes precedence.
+  void _onStartSessions(BuildContext context) {
+    if (onGuestBooking != null) {
+      onGuestBooking!();
+      return;
+    }
+    BookServiceBottomSheet.show(context);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -59,7 +71,7 @@ class LoginPage extends StatelessWidget {
                 const SizedBox(height: AppSpacing.lg),
                 const LoginForm(),
                 const SizedBox(height: AppSpacing.lg),
-                LoginNoAccountCard(onTap: onGuestBooking),
+                LoginNoAccountCard(onTap: () => _onStartSessions(context)),
                 const SizedBox(height: AppSpacing.xl),
               ],
             ),

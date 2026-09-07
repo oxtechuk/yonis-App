@@ -12,53 +12,67 @@ class PaymentMethodSelector extends StatelessWidget {
     super.key,
     required this.selected,
     required this.onChanged,
+    this.locked = false,
   });
 
   final PaymentMethod? selected;
-  final ValueChanged<PaymentMethod> onChanged;
+  final ValueChanged<PaymentMethod?> onChanged;
+
+  /// When true (a method is confirmed), every non-selected method is
+  /// visibly disabled and non-tappable. The selected card stays tappable
+  /// so the user can still deselect it.
+  final bool locked;
 
   @override
   Widget build(BuildContext context) {
     return Column(
       children: PaymentMethod.values.map((method) {
         final isSelected = method == selected;
-        return Padding(
-          padding: const EdgeInsets.only(bottom: AppSpacing.sm),
-          child: GestureDetector(
-            onTap: () => onChanged(method),
-            child: AnimatedContainer(
-              duration: const Duration(milliseconds: 200),
-              padding: const EdgeInsets.symmetric(
-                horizontal: AppSpacing.md,
-                vertical: AppSpacing.md,
-              ),
-              decoration: BoxDecoration(
-                color: isSelected
-                    ? AppColors.primary.withValues(alpha: 0.07)
-                    : AppColors.white,
-                borderRadius: AppRadius.allXl,
-                border: Border.all(
-                  color: isSelected ? AppColors.primary : AppColors.border,
-                  width: isSelected ? 1.5 : 1,
-                ),
-              ),
-              child: Row(
-                children: [
-                  _paymentIcon(method),
-                  const Spacer(),
-                  Text(
-                    method.localizedLabel(context),
-                    style: AppTextStyles.body.copyWith(
-                      color: AppColors.textPrimary,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                  const SizedBox(width: AppSpacing.md),
-                  _RadioDot(selected: isSelected),
-                ],
-              ),
+        final isDisabled = locked && !isSelected;
+        final card = AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppSpacing.md,
+            vertical: AppSpacing.md,
+          ),
+          decoration: BoxDecoration(
+            color: isSelected
+                ? AppColors.primary.withValues(alpha: 0.07)
+                : AppColors.white,
+            borderRadius: AppRadius.allXl,
+            border: Border.all(
+              color: isSelected ? AppColors.primary : AppColors.border,
+              width: isSelected ? 1.5 : 1,
             ),
           ),
+          child: Row(
+            children: [
+              _paymentIcon(method),
+              const Spacer(),
+              Text(
+                method.localizedLabel(context),
+                style: AppTextStyles.body.copyWith(
+                  color: isDisabled
+                      ? AppColors.textSecondary.withValues(alpha: 0.6)
+                      : AppColors.textPrimary,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              const SizedBox(width: AppSpacing.md),
+              _RadioDot(selected: isSelected),
+            ],
+          ),
+        );
+        return Padding(
+          padding: const EdgeInsets.only(bottom: AppSpacing.sm),
+          child: isDisabled
+              ? IgnorePointer(
+                  child: Opacity(opacity: 0.45, child: card),
+                )
+              : GestureDetector(
+                  onTap: () => onChanged(isSelected ? null : method),
+                  child: card,
+                ),
         );
       }).toList(),
     );

@@ -217,7 +217,7 @@ class _BookingStep2PageState extends State<BookingStep2Page> {
             'bookingReference': result.bookingReference ?? '',
             'serviceTitle': widget.title ?? context.tr(LocaleKeys.booking_defaultTitle),
             'date': _selectedDate != null ? _formatDate(_selectedDate!) : '',
-            'time': _selectedTime?.displayStart ?? '',
+            'time': _selectedTime?.start ?? '',
             'paymentMethod': result.paymentMethod ?? widget.paymentMethod ?? 'zaincash',
             'amount': result.amount ?? 0,
             'currencySymbol': result.currencySymbol ?? context.tr(LocaleKeys.booking_currency),

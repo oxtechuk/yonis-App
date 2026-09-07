@@ -103,7 +103,9 @@ GoRouter createAppRouter() {
             bookingReference: extra?['bookingReference'] as String? ?? '',
             paymentMethod: extra?['paymentMethod'] as String? ?? 'zaincash',
             amount: extra?['amount'] as num? ?? 0,
-            currencySymbol: extra?['currencySymbol'] as String? ?? 'د.ع',
+            currencySymbol: extra?['currencySymbol'] as String? ??
+                (extra?['service'] as Service?)?.currencySymbol ??
+                'د.ع',
             qrCode: extra?['qrCode'] as String?,
             paymentInstructions: extra?['paymentInstructions'] as String?,
             whatsappUrl: extra?['whatsappUrl'] as String?,
