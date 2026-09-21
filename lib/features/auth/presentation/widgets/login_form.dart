@@ -111,7 +111,7 @@ class _LoginFormState extends State<LoginForm> {
                   controller: _phoneController,
                   keyboardType: TextInputType.phone,
                   textDirection: ui.TextDirection.ltr,
-                  textAlign: TextAlign.right,
+                  textAlign: TextAlign.start,
                   inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                   hint: context.tr(LocaleKeys.auth_phonePlaceholder),
                   height: 56,

@@ -1,8 +1,7 @@
-import 'dart:ui' as ui;
-
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 
+import '../../../../app/localization/locale_direction.dart';
 import '../../../../app/localization/locale_keys.g.dart';
 import '../../../../app/styles/app_colors.dart';
 import '../../../../app/styles/app_sizes.dart';
@@ -52,7 +51,7 @@ class ServiceOptionCard extends StatelessWidget {
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
-        textDirection: ui.TextDirection.rtl,
+        textDirection: context.localeTextDirection,
         children: [
           _buildIcon(iconSize),
           const SizedBox(width: AppSpacing.sm),
@@ -62,7 +61,7 @@ class ServiceOptionCard extends StatelessWidget {
               children: [
                 Text(
                   title,
-                  textAlign: TextAlign.right,
+                  textAlign: TextAlign.start,
                   style: AppTextStyles.title.copyWith(
                     color: AppColors.textPrimary,
                     fontWeight: FontWeight.w800,
@@ -71,56 +70,51 @@ class ServiceOptionCard extends StatelessWidget {
                 const SizedBox(height: AppSpacing.sm),
                 Text(
                   description,
-                  textAlign: TextAlign.right,
+                  textAlign: TextAlign.start,
                   style: AppTextStyles.body.copyWith(
                     color: AppColors.textSecondary,
                     height: 1.6,
                   ),
                 ),
-                const SizedBox(height: AppSpacing.md),
-                Row(
-                  textDirection: ui.TextDirection.rtl,
-                  children: [
-                    Expanded(
-                      child: SizedBox(
-                        height: AppSizes.buttonHeight,
-                        child: FilledButton(
-                          onPressed: onTap,
-                          style: FilledButton.styleFrom(
-                            backgroundColor: AppColors.primary,
-                            shape: const StadiumBorder(),
-                            padding: EdgeInsets.zero,
-                          ),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Flexible(
-                                child: Text(
-                                  context.tr(
-                                    LocaleKeys.home_bookService_startNow,
-                                  ),
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: AppTextStyles.button
-                                      .copyWith(color: AppColors.white),
-                                ),
-                              ),
-                              const SizedBox(width: AppSpacing.xs),
-                              const _AnimatedStartArrow(),
-                            ],
+                const SizedBox(height: AppSpacing.sm),
+                Text(
+                  price,
+                  textAlign: TextAlign.start,
+                  style: AppTextStyles.body.copyWith(
+                    color: AppColors.primary,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                const SizedBox(height: AppSpacing.sm),
+                SizedBox(
+                  width: double.infinity,
+                  height: AppSizes.buttonHeight,
+                  child: FilledButton(
+                    onPressed: onTap,
+                    style: FilledButton.styleFrom(
+                      backgroundColor: AppColors.primary,
+                      shape: const StadiumBorder(),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: AppSpacing.md,
+                      ),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Flexible(
+                          child: Text(
+                            context.tr(LocaleKeys.home_bookService_startNow),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: AppTextStyles.button
+                                .copyWith(color: AppColors.white),
                           ),
                         ),
-                      ),
+                        const SizedBox(width: AppSpacing.xs),
+                        const _AnimatedStartArrow(),
+                      ],
                     ),
-                    const SizedBox(width: AppSpacing.sm),
-                    Text(
-                      price,
-                      style: AppTextStyles.body.copyWith(
-                        color: AppColors.primary,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ],
+                  ),
                 ),
               ],
             ),
@@ -217,9 +211,9 @@ class ServiceOptionCard extends StatelessWidget {
 
 enum ServiceOptionIconType { clinic, online }
 
-/// Forward-pointing arrow for the "start" CTA. In this RTL layout the
-/// forward direction is left, so it gently nudges toward the left edge
-/// to invite the tap.
+/// Forward-pointing arrow for the "start" CTA. It nudges toward the reading
+/// direction's forward edge (left in Arabic, right in English) to invite
+/// the tap.
 class _AnimatedStartArrow extends StatefulWidget {
   const _AnimatedStartArrow();
 
@@ -234,9 +228,9 @@ class _AnimatedStartArrowState extends State<_AnimatedStartArrow>
     duration: const Duration(milliseconds: 900),
   )..repeat(reverse: true);
 
-  late final Animation<Offset> _nudge = Tween<Offset>(
-    begin: Offset.zero,
-    end: const Offset(-0.3, 0),
+  late final Animation<double> _nudge = Tween<double>(
+    begin: 0,
+    end: 0.3,
   ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut));
 
   @override
@@ -247,10 +241,16 @@ class _AnimatedStartArrowState extends State<_AnimatedStartArrow>
 
   @override
   Widget build(BuildContext context) {
-    return SlideTransition(
-      position: _nudge,
-      child: const Icon(
-        Icons.arrow_back_rounded,
+    // Forward edge is left in Arabic, right in English.
+    final sign = context.isRtl ? -1.0 : 1.0;
+    return AnimatedBuilder(
+      animation: _nudge,
+      builder: (context, child) => FractionalTranslation(
+        translation: Offset(_nudge.value * sign, 0),
+        child: child,
+      ),
+      child: Icon(
+        context.isRtl ? Icons.arrow_back_rounded : Icons.arrow_forward_rounded,
         size: 16,
         color: AppColors.white,
       ),

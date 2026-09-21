@@ -22,9 +22,18 @@ class Service extends Equatable {
     this.currencySymbol,
     this.icon,
     this.iconUrl,
+    this.titleAr = '',
+    this.titleEn = '',
+    this.descriptionAr = '',
+    this.descriptionEn = '',
+    this.channelLabelAr = '',
+    this.channelLabelEn = '',
   });
 
   final int id;
+
+  /// Legacy resolved title (kept for backward compat). Prefer
+  /// [titleFor] so English mode shows `title_en` and Arabic `title_ar`.
   final String title;
   final String description;
 
@@ -73,6 +82,40 @@ class Service extends Equatable {
   /// Optional absolute icon image URL from the API.
   final String? iconUrl;
 
+  /// Localized titles from `title_ar` / `title_en` (`GET /api/services/*`).
+  final String titleAr;
+  final String titleEn;
+  final String descriptionAr;
+  final String descriptionEn;
+
+  /// Localized channel labels (`channel_label_ar` / `channel_label_en`).
+  final String channelLabelAr;
+  final String channelLabelEn;
+
+  /// Title for the current locale. Falls back to [title] (then the other
+  /// language) when the requested translation is missing.
+  String titleFor(bool isArabic) {
+    if (isArabic) {
+      if (titleAr.isNotEmpty) return titleAr;
+      if (title.isNotEmpty) return title;
+      return titleEn;
+    }
+    if (titleEn.isNotEmpty) return titleEn;
+    if (title.isNotEmpty) return title;
+    return titleAr;
+  }
+
+  String descriptionFor(bool isArabic) {
+    if (isArabic) {
+      if (descriptionAr.isNotEmpty) return descriptionAr;
+      if (description.isNotEmpty) return description;
+      return descriptionEn;
+    }
+    if (descriptionEn.isNotEmpty) return descriptionEn;
+    if (description.isNotEmpty) return description;
+    return descriptionAr;
+  }
+
   /// Trims trailing zeros from the API price ("50.00" -> "50").
   String get displayPrice {
     if (price == price.truncateToDouble()) {
@@ -89,6 +132,12 @@ class Service extends Equatable {
         id,
         title,
         description,
+        titleAr,
+        titleEn,
+        descriptionAr,
+        descriptionEn,
+        channelLabelAr,
+        channelLabelEn,
         type,
         price,
         duration,
@@ -109,7 +158,7 @@ class Service extends Equatable {
       ];
 }
 
-class ServiceChannel {
+class ServiceChannel extends Equatable {
   const ServiceChannel({
     required this.channel,
     required this.name,
@@ -118,13 +167,35 @@ class ServiceChannel {
     required this.isEnabled,
     this.currency,
     this.currencySymbol,
+    this.nameAr = '',
+    this.nameEn = '',
   });
 
   final String channel;
+
+  /// Legacy resolved name. Prefer [nameFor] for locale-aware display.
   final String name;
   final double price;
   final int? duration;
   final bool isEnabled;
   final String? currency;
   final String? currencySymbol;
+
+  /// Localized names from `name_ar` / `name_en`.
+  final String nameAr;
+  final String nameEn;
+
+  String nameFor(bool isArabic) {
+    if (isArabic) {
+      if (nameAr.isNotEmpty) return nameAr;
+      if (name.isNotEmpty) return name;
+      return nameEn;
+    }
+    if (nameEn.isNotEmpty) return nameEn;
+    if (name.isNotEmpty) return name;
+    return nameAr;
+  }
+
+  @override
+  List<Object?> get props => [channel, name, nameAr, nameEn, price];
 }

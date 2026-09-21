@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../app/di/dependency_injection.dart';
+import '../../../../app/localization/locale_direction.dart';
 import '../../../../app/localization/locale_keys.g.dart';
 import '../../../../app/router/app_routes.dart';
 import '../../../../app/styles/app_colors.dart';
@@ -91,7 +92,7 @@ class _ServicesViewState extends State<_ServicesView>
   @override
   Widget build(BuildContext context) {
     return Directionality(
-      textDirection: TextDirection.rtl,
+      textDirection: context.localeTextDirection,
       child: Scaffold(
         backgroundColor: AppColors.background,
         body: SafeArea(
@@ -213,14 +214,15 @@ class _ServiceList extends StatelessWidget {
         separatorBuilder: (_, _) => const SizedBox(height: AppSpacing.md),
         itemBuilder: (context, index) {
           final service = services[index];
+          final isArabic = context.locale.languageCode == 'ar';
           return ServiceOptionCard(
             iconType: isOnline
                 ? ServiceOptionIconType.online
                 : ServiceOptionIconType.clinic,
             bootstrapIcon: service.icon,
             iconUrl: service.iconUrl,
-            title: service.title,
-            description: service.description,
+            title: service.titleFor(isArabic),
+            description: service.descriptionFor(isArabic),
             price: context.tr(
               LocaleKeys.home_bookService_priceFrom,
               namedArgs: {

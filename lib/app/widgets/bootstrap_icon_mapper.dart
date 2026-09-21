@@ -134,6 +134,34 @@ IconData bootstrapIconToMaterial(
       return BootstrapIcons.camera_video;
     case 'bi-video-fill':
       return BootstrapIcons.camera_video_fill;
+
+    // Payment
+    case 'bi-wallet':
+      return BootstrapIcons.wallet;
+    case 'bi-wallet2':
+      return BootstrapIcons.wallet2;
+    case 'bi-wallet-fill':
+      return BootstrapIcons.wallet_fill;
+    case 'bi-qr-code':
+      return BootstrapIcons.qr_code;
+    case 'bi-qr-code-scan':
+      return BootstrapIcons.qr_code_scan;
+    case 'bi-credit-card':
+      return BootstrapIcons.credit_card;
+    case 'bi-credit-card-fill':
+      return BootstrapIcons.credit_card_fill;
+    case 'bi-credit-card-2-front':
+      return BootstrapIcons.credit_card_2_front;
+    case 'bi-cash':
+      return BootstrapIcons.cash;
+    case 'bi-cash-stack':
+      return BootstrapIcons.cash_stack;
+    case 'bi-bank':
+      return BootstrapIcons.bank;
+    case 'bi-bank2':
+      return BootstrapIcons.bank2;
+    case 'bi-currency-exchange':
+      return BootstrapIcons.currency_exchange;
     case '':
       return isClinic ? BootstrapIcons.hospital : BootstrapIcons.camera_video;
     default:

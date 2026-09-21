@@ -1,5 +1,3 @@
-import 'dart:ui' as ui;
-
 import 'package:flutter/material.dart';
 
 import '../../../../app/styles/app_colors.dart';
@@ -28,7 +26,6 @@ class OutlinedCardField extends StatelessWidget {
     return AppTextField(
       controller: controller,
       hint: hintText,
-      textDirection: ui.TextDirection.rtl,
       maxLines: maxLines,
       validator: validator,
       fillColor: AppColors.white,

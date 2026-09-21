@@ -1,5 +1,4 @@
 import 'dart:math' as math;
-import 'dart:ui' as ui;
 
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/cupertino.dart';
@@ -8,6 +7,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../app/di/dependency_injection.dart';
+import '../../../../app/localization/locale_direction.dart';
 import '../../../../app/localization/locale_keys.g.dart';
 import '../../../../app/router/app_routes.dart';
 import '../../../../app/styles/app_colors.dart';
@@ -79,7 +79,7 @@ class _BookServiceBottomSheetState extends State<BookServiceBottomSheet> {
   Widget build(BuildContext context) {
     final isArabic = context.locale.languageCode == 'ar';
     return Directionality(
-      textDirection: ui.TextDirection.rtl,
+      textDirection: context.localeTextDirection,
       child: Container(
         constraints: BoxConstraints(
           maxHeight: MediaQuery.sizeOf(context).height * 0.85,
@@ -239,6 +239,7 @@ class _BookServiceBottomSheetState extends State<BookServiceBottomSheet> {
       separatorBuilder: (_, _) => const SizedBox(height: AppSpacing.md),
       itemBuilder: (context, index) {
         final service = bookable[index];
+        final isArabic = context.locale.languageCode == 'ar';
         final isOnline = service.bookingType == 'online' ||
             (service.channels != null && service.channels!.isNotEmpty) ||
             service.serviceType == 'online';
@@ -248,8 +249,8 @@ class _BookServiceBottomSheetState extends State<BookServiceBottomSheet> {
               : ServiceOptionIconType.clinic,
           bootstrapIcon: service.icon,
           iconUrl: service.iconUrl,
-          title: service.title,
-          description: service.description,
+          title: service.titleFor(isArabic),
+          description: service.descriptionFor(isArabic),
           price: context.tr(
             LocaleKeys.home_bookService_priceFrom,
             namedArgs: {
@@ -354,7 +355,7 @@ class _ChannelOptionCard extends StatelessWidget {
           border: Border.all(color: AppColors.primary.withValues(alpha: 0.35), width: 1.5),
         ),
         child: Row(
-          textDirection: ui.TextDirection.rtl,
+          textDirection: context.localeTextDirection,
           children: [
             Container(
               width: 48,
@@ -374,8 +375,10 @@ class _ChannelOptionCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   Text(
-                    channel.name,
-                    textAlign: TextAlign.right,
+                    channel.nameFor(
+                      context.locale.languageCode == 'ar',
+                    ),
+                    textAlign: TextAlign.start,
                     style: AppTextStyles.title.copyWith(
                       color: AppColors.textPrimary,
                       fontWeight: FontWeight.w700,
@@ -388,7 +391,7 @@ class _ChannelOptionCard extends StatelessWidget {
                         LocaleKeys.home_bookService_minutesShort,
                         namedArgs: {'count': '${channel.duration}'},
                       ),
-                      textAlign: TextAlign.right,
+                      textAlign: TextAlign.start,
                       style: AppTextStyles.caption.copyWith(color: AppColors.textSecondary),
                     ),
                   ],

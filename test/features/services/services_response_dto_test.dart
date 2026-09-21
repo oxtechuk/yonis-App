@@ -139,5 +139,72 @@ void main() {
       );
       expect(service.channels!.first.name, 'مكالمة فيديو أونلاين');
     });
+
+    test('parses the bilingual ar/en payload and localizes titles', () {
+      final json = {
+        'success': true,
+        'type': 'clinic',
+        'currency': 'USD',
+        'currency_symbol': r'$',
+        'is_enabled': true,
+        'total': 1,
+        'services': [
+          {
+            'id': 12,
+            'title_ar': 'كشف في العيادة',
+            'title_en': 'Clinic checkup',
+            'description_ar': '',
+            'description_en': '',
+            'icon': 'bi-hospital',
+            'icon_url': null,
+            'duration': 45,
+            'type': 'clinic',
+            'channel_type': 'clinic',
+            'channel_label_ar': 'كشف في العيادة',
+            'channel_label_en': 'Clinic In-Person',
+            'price': 20,
+            'clinic_price': 20,
+            'video_price': null,
+            'voice_price': null,
+            'chat_price': null,
+            'currency': 'USD',
+            'currency_symbol': r'$',
+            'channels': [
+              {
+                'channel': 'clinic',
+                'name_ar': 'كشف في العيادة',
+                'name_en': 'In-Clinic Consultation',
+                'price': 20,
+                'currency': 'USD',
+                'currency_symbol': r'$',
+                'duration': 45,
+                'is_enabled': true,
+              },
+            ],
+          },
+        ],
+      };
+
+      final response = ServicesResponseDto.fromJson(json);
+
+      expect(response.currency, 'USD');
+      expect(response.currencySymbol, r'$');
+
+      final service = response.services.single.toEntity();
+      expect(service.titleAr, 'كشف في العيادة');
+      expect(service.titleEn, 'Clinic checkup');
+      expect(service.titleFor(true), 'كشف في العيادة');
+      expect(service.titleFor(false), 'Clinic checkup');
+      expect(service.channelLabelEn, 'Clinic In-Person');
+      expect(service.channels, hasLength(1));
+      expect(
+        service.channels!.single.nameFor(true),
+        'كشف في العيادة',
+      );
+      expect(
+        service.channels!.single.nameFor(false),
+        'In-Clinic Consultation',
+      );
+    });
   });
 }

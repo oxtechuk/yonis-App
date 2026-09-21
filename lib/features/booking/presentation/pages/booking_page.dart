@@ -1,11 +1,10 @@
-import 'dart:ui' as ui;
-
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../app/di/dependency_injection.dart';
+import '../../../../app/localization/locale_direction.dart';
 import '../../../../app/localization/locale_keys.g.dart';
 import '../../../../app/router/app_routes.dart';
 import '../../../../app/styles/app_colors.dart';
@@ -73,12 +72,22 @@ class _BookingPageState extends State<BookingPage> {
   String? get _bookingType =>
       widget.selectedBookingType ?? widget.service?.bookingType;
 
-  late final List<ConsultationOption> _options =
-      ConsultationOptions.fromService(
-        widget.service,
-        selectedChannelType: widget.selectedChannelType,
-        bookingTypeOverride: widget.selectedBookingType,
-      );
+  List<ConsultationOption>? _options;
+  bool _optionsInitialized = false;
+
+  List<ConsultationOption> _consultationOptions(BuildContext context) {
+    final cached = _options;
+    if (_optionsInitialized && cached != null) return cached;
+    _optionsInitialized = true;
+    final resolved = ConsultationOptions.fromService(
+      widget.service,
+      selectedChannelType: widget.selectedChannelType,
+      bookingTypeOverride: widget.selectedBookingType,
+      isArabic: context.locale.languageCode == 'ar',
+    );
+    _options = resolved;
+    return resolved;
+  }
   int _selectedOptionIndex = 0;
 
   final _titleController = TextEditingController();
@@ -90,7 +99,18 @@ class _BookingPageState extends State<BookingPage> {
 
   TimeSlot? _selectedTime;
 
-  ConsultationOption get _selectedOption => _options[_selectedOptionIndex];
+  ConsultationOption get _selectedOption {
+    final options = _options;
+    if (options == null || options.isEmpty) {
+      // Fallback before the first build resolves localized options.
+      return ConsultationOptions.fromService(
+        widget.service,
+        selectedChannelType: widget.selectedChannelType,
+        bookingTypeOverride: widget.selectedBookingType,
+      )[_selectedOptionIndex];
+    }
+    return options[_selectedOptionIndex];
+  }
 
   @override
   void initState() {
@@ -141,25 +161,27 @@ class _BookingPageState extends State<BookingPage> {
 
     // Account check + creation happen on the next step (CheckoutPaymentPage)
     // — this step only carries details, schedule and the price snapshot.
+    final isArabic = context.locale.languageCode == 'ar';
+    final selectedOption = _selectedOption;
     context.push(
       AppRoutes.payment,
       extra: <String, dynamic>{
         'serviceId': widget.service?.id,
         'service': widget.service,
         'bookingType': _bookingType,
-        'consultationType': _selectedOption.channel,
+        'consultationType': selectedOption.channel,
         'title': _titleController.text.trim(),
         'notes': _detailsController.text.trim(),
         'date': _formatDate(date),
         'startTime': time.apiStartTime,
         'timeDisplay': time.start,
-        'serviceTitle': widget.service?.title,
+        'serviceTitle': widget.service?.titleFor(isArabic),
         // Price snapshot for the summary on the next step.
-        'optionLabel': _selectedOption.label,
-        'optionPrice': _selectedOption.price,
-        'optionDuration': _selectedOption.durationMinutes,
-        'optionChannel': _selectedOption.channel,
-        'currencySymbol': _selectedOption.currencySymbol ??
+        'optionLabel': selectedOption.label,
+        'optionPrice': selectedOption.price,
+        'optionDuration': selectedOption.durationMinutes,
+        'optionChannel': selectedOption.channel,
+        'currencySymbol': selectedOption.currencySymbol ??
             widget.service?.currencySymbol ??
             context.tr(LocaleKeys.booking_currency),
       },
@@ -168,8 +190,9 @@ class _BookingPageState extends State<BookingPage> {
 
   @override
   Widget build(BuildContext context) {
+    final options = _consultationOptions(context);
     return Directionality(
-      textDirection: ui.TextDirection.rtl,
+      textDirection: context.localeTextDirection,
       child: Scaffold(
         backgroundColor: AppColors.background,
         body: SafeArea(
@@ -178,8 +201,9 @@ class _BookingPageState extends State<BookingPage> {
             child: Column(
               children: [
                 BookingAppBar(
-                  title:
-                      widget.service?.title ??
+                  title: widget.service?.titleFor(
+                        context.locale.languageCode == 'ar',
+                      ) ??
                       context.tr(LocaleKeys.booking_instantSession),
                   onBack: () => context.pop(),
                 ),
@@ -199,7 +223,7 @@ class _BookingPageState extends State<BookingPage> {
                           ),
                           const SizedBox(height: AppSpacing.sm),
                           SessionTypeSelector(
-                            options: _options,
+                            options: options,
                             selectedIndex: _selectedOptionIndex,
                             onChanged: (i) =>
                                 setState(() => _selectedOptionIndex = i),
@@ -296,7 +320,7 @@ class _SectionTitle extends StatelessWidget {
   Widget build(BuildContext context) {
     return Text(
       title,
-      textAlign: TextAlign.right,
+      textAlign: TextAlign.start,
       style: AppTextStyles.title.copyWith(
         color: AppColors.textPrimary,
         fontWeight: FontWeight.w700,

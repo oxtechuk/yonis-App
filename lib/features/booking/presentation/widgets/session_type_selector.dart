@@ -8,8 +8,9 @@ import '../../../../app/styles/app_spacing.dart';
 import '../../../../app/styles/app_text_styles.dart';
 import '../models/booking_models.dart';
 
-/// Selectable list of consultation options (price on the leading edge,
-/// RTL). Options come from the selected backend service.
+/// Selectable list of consultation options. The channel icon sits on the
+/// leading edge and the price on the trailing edge, mirrored per locale.
+/// Options come from the selected backend service.
 class SessionTypeSelector extends StatelessWidget {
   const SessionTypeSelector({
     super.key,
@@ -63,26 +64,29 @@ class SessionTypeSelector extends StatelessWidget {
                 ),
                 child: Row(
                   children: [
+                    Icon(
+                      _iconFor(options[i].channel),
+                      color: AppColors.primary,
+                      size: 22,
+                    ),
+                    const SizedBox(width: AppSpacing.sm),
+                    Expanded(
+                      child: Text(
+                        localizedOptionLabel(context, options[i].label),
+                        textAlign: TextAlign.start,
+                        style: AppTextStyles.title.copyWith(
+                          color: AppColors.textPrimary,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: AppSpacing.sm),
                     Text(
                       '${options[i].displayPrice} ${options[i].currencySymbol ?? context.tr(LocaleKeys.booking_currency)}',
                       style: AppTextStyles.body.copyWith(
                         color: AppColors.primary,
                         fontWeight: FontWeight.w600,
                       ),
-                    ),
-                    const Spacer(),
-                    Text(
-                      localizedOptionLabel(context, options[i].label),
-                      style: AppTextStyles.title.copyWith(
-                        color: AppColors.textPrimary,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    const SizedBox(width: AppSpacing.sm),
-                    Icon(
-                      _iconFor(options[i].channel),
-                      color: AppColors.primary,
-                      size: 22,
                     ),
                   ],
                 ),

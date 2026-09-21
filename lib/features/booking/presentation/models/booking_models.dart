@@ -61,6 +61,7 @@ abstract final class ConsultationOptions {
     Service? service, {
     String? selectedChannelType,
     String? bookingTypeOverride,
+    bool isArabic = true,
   }) {
     if (service == null) return _fallback;
 
@@ -72,9 +73,16 @@ abstract final class ConsultationOptions {
     // Clinic services: single حضوري option from backend clinic_price/location.
     if (bookingType == 'clinic') {
       final price = service.clinicPrice ?? service.price;
+      final label = isArabic
+          ? (service.channelLabelAr.isNotEmpty
+              ? service.channelLabelAr
+              : 'حضوري في العيادة')
+          : (service.channelLabelEn.isNotEmpty
+              ? service.channelLabelEn
+              : 'In-clinic visit');
       return [
         ConsultationOption(
-          label: 'حضوري في العيادة',
+          label: label,
           price: price,
           durationMinutes: service.duration,
           channel: 'clinic',
@@ -91,7 +99,7 @@ abstract final class ConsultationOptions {
       );
       return [
         ConsultationOption(
-          label: channel.name,
+          label: channel.nameFor(isArabic),
           price: channel.price,
           durationMinutes: channel.duration ?? service.duration,
           channel: channel.channel,
@@ -106,7 +114,7 @@ abstract final class ConsultationOptions {
       return service.channels!
           .where((c) => c.isEnabled)
           .map((c) => ConsultationOption(
-                label: c.name,
+                label: c.nameFor(isArabic),
                 price: c.price,
                 durationMinutes: c.duration ?? service.duration,
                 channel: c.channel,
@@ -148,25 +156,13 @@ abstract final class ConsultationOptions {
     // No per-channel pricing: single option from the base price.
     return [
       ConsultationOption(
-        label: service.title,
+        label: service.titleFor(isArabic),
         price: service.price,
         durationMinutes: service.duration,
         currencySymbol: service.currencySymbol,
       ),
     ];
   }
-}
-
-/// Payment method options.
-enum PaymentMethod {
-  zaincash,
-  superki;
-
-  /// Localized display label (requires [BuildContext] for the locale).
-  String localizedLabel(BuildContext context) => switch (this) {
-        PaymentMethod.zaincash => context.tr(LocaleKeys.booking_payZain),
-        PaymentMethod.superki => context.tr(LocaleKeys.booking_paySuper),
-      };
 }
 
 /// Localizes backend/Arabic fallback consultation labels.

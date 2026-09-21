@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../app/di/dependency_injection.dart';
+import '../../../../app/localization/locale_direction.dart';
 import '../../../../app/localization/locale_keys.g.dart';
 import '../../../../app/router/app_routes.dart';
 import '../../../../app/styles/app_colors.dart';
@@ -209,7 +210,7 @@ class _SessionsViewState extends State<_SessionsView>
   @override
   Widget build(BuildContext context) {
     return Directionality(
-      textDirection: TextDirection.rtl,
+      textDirection: context.localeTextDirection,
       child: Scaffold(
         backgroundColor: AppColors.background,
         // Auth gate here (not inside _buildBody) so the sessions header +

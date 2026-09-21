@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../../app/localization/locale_direction.dart';
 import '../../../../app/styles/app_colors.dart';
 import '../../../../app/styles/app_spacing.dart';
 import '../../../../app/styles/app_text_styles.dart';
@@ -49,9 +50,9 @@ class ProfileHeader extends StatelessWidget {
             ),
           ),
           const SizedBox(width: AppSpacing.md),
-          // Back chevron — left side visually, flipped for RTL
-          const Icon(
-            Icons.chevron_right,
+          // Back chevron — points toward the trailing edge per locale.
+          Icon(
+            context.isRtl ? Icons.chevron_left : Icons.chevron_right,
             color: AppColors.textSecondary,
             size: 28,
           ),

@@ -6,6 +6,8 @@ class CheckoutResultDto {
     required this.success,
     this.message,
     this.bookingReference,
+    this.transactionReference,
+    this.transferNumber,
     this.stripeEnabled = false,
     this.clientSecret,
     this.amount,
@@ -27,6 +29,10 @@ class CheckoutResultDto {
       success: json['success'] as bool? ?? false,
       message: json['message'] as String?,
       bookingReference: json['booking_reference'] as String?,
+      transactionReference: _readString(
+        json['transaction_reference'] ?? json['transaction_id'],
+      ),
+      transferNumber: _readString(json['transfer_number']),
       stripeEnabled: json['stripe_enabled'] as bool? ?? false,
       clientSecret: json['client_secret'] as String?,
       amount: _readDouble(json['amount']),
@@ -72,6 +78,8 @@ class CheckoutResultDto {
   final bool success;
   final String? message;
   final String? bookingReference;
+  final String? transactionReference;
+  final String? transferNumber;
   final bool stripeEnabled;
   final String? clientSecret;
   final double? amount;
@@ -91,6 +99,8 @@ class CheckoutResultDto {
         success: success,
         message: message,
         bookingReference: bookingReference,
+        transactionReference: transactionReference,
+        transferNumber: transferNumber,
         stripeEnabled: stripeEnabled,
         clientSecret: clientSecret,
         amount: amount,

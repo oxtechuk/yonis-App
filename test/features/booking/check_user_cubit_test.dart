@@ -4,6 +4,7 @@ import 'package:younis_app/core/result/result.dart';
 import 'package:younis_app/features/booking/domain/entities/check_user_result.dart';
 import 'package:younis_app/features/booking/domain/entities/checkout_result.dart';
 import 'package:younis_app/features/booking/domain/entities/checkout_user.dart';
+import 'package:younis_app/features/booking/domain/entities/confirm_payment_result.dart';
 import 'package:younis_app/features/booking/domain/repositories/checkout_repository.dart';
 import 'package:younis_app/features/booking/domain/use_cases/check_user_use_case.dart';
 import 'package:younis_app/features/booking/presentation/cubit/check_user_cubit.dart';
@@ -34,6 +35,28 @@ class _FakeCheckoutRepository implements CheckoutRepository {
     String? phone,
     String? email,
     String? password,
+  }) {
+    throw UnimplementedError('not exercised by these tests');
+  }
+
+  @override
+  Future<Result<ConfirmPaymentResult>> confirmPayment({
+    required String bookingRef,
+    required String paymentMethod,
+    required String transferNumber,
+    String? transactionReference,
+    required String receiptImagePath,
+  }) {
+    throw UnimplementedError('not exercised by these tests');
+  }
+
+  @override
+  Future<Result<ConfirmPaymentResult>> confirmLocalPayment({
+    required String bookingReference,
+    required String paymentMethod,
+    required String transferNumber,
+    String? transactionReference,
+    String? notes,
   }) {
     throw UnimplementedError('not exercised by these tests');
   }

@@ -4,6 +4,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import '../../../../app/localization/locale_direction.dart';
 import '../../../../app/localization/locale_keys.g.dart';
 import '../../../../app/styles/app_colors.dart';
 import '../../../../app/styles/app_radius.dart';
@@ -90,7 +91,7 @@ class _CreateAccountSectionState extends State<CreateAccountSection> {
         if (!isRegistered) ...[
           Text(
             context.tr(LocaleKeys.bookingAccount_createTitle),
-            textAlign: TextAlign.right,
+            textAlign: TextAlign.start,
             style: AppTextStyles.headline.copyWith(
               color: AppColors.textPrimary,
               fontWeight: FontWeight.w800,
@@ -163,7 +164,7 @@ class _PhoneCheckStep extends StatelessWidget {
           hint: context.tr(LocaleKeys.auth_phonePlaceholder),
           keyboardType: TextInputType.phone,
           textDirection: ui.TextDirection.ltr,
-          textAlign: TextAlign.right,
+          textAlign: TextAlign.start,
           inputFormatters: [FilteringTextInputFormatter.digitsOnly],
           height: 56,
           enabled: !isChecking,
@@ -178,7 +179,7 @@ class _PhoneCheckStep extends StatelessWidget {
           const SizedBox(height: AppSpacing.xs),
           Text(
             errorMessage!,
-            textAlign: TextAlign.right,
+            textAlign: TextAlign.start,
             style: AppTextStyles.caption.copyWith(color: AppColors.error),
           ),
         ],
@@ -259,7 +260,7 @@ class _RecognizedAccountCard extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               Row(
-                textDirection: ui.TextDirection.rtl,
+                textDirection: context.localeTextDirection,
                 children: [
                   Icon(
                     isLoggedIn ? Icons.check_circle_rounded : Icons.verified_rounded,
@@ -271,7 +272,7 @@ class _RecognizedAccountCard extends StatelessWidget {
                       isLoggedIn
                           ? context.tr(LocaleKeys.bookingAccount_loginSuccess)
                           : result.message ?? context.tr(LocaleKeys.errors_general),
-                      textAlign: TextAlign.right,
+                      textAlign: TextAlign.start,
                       style: AppTextStyles.body.copyWith(
                         color: AppColors.textPrimary,
                         fontWeight: FontWeight.w700,
@@ -325,7 +326,7 @@ class _RecognizedAccountCard extends StatelessWidget {
                   const SizedBox(height: AppSpacing.xs),
                   Text(
                     _errorMessage!,
-                    textAlign: TextAlign.right,
+                    textAlign: TextAlign.start,
                     style: AppTextStyles.caption.copyWith(color: AppColors.error),
                   ),
                 ],
@@ -389,14 +390,14 @@ class _InfoRow extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4),
       child: Row(
-        textDirection: ui.TextDirection.rtl,
+        textDirection: context.localeTextDirection,
         children: [
           Icon(icon, size: AppSizes.iconMd, color: AppColors.textSecondary),
           const SizedBox(width: AppSpacing.sm),
           Expanded(
             child: Text(
               value,
-              textAlign: TextAlign.right,
+              textAlign: TextAlign.start,
               style: AppTextStyles.body.copyWith(color: AppColors.textPrimary),
             ),
           ),
@@ -452,7 +453,7 @@ class _NewAccountForm extends StatelessWidget {
           readOnly: true,
           enabled: false,
           textDirection: ui.TextDirection.ltr,
-          textAlign: TextAlign.right,
+          textAlign: TextAlign.start,
           height: 56,
           prefixWidget: Padding(
             padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
@@ -473,7 +474,7 @@ class _NewAccountForm extends StatelessWidget {
         AppTextField(
           controller: nameController,
           hint: context.tr(LocaleKeys.bookingAccount_fullNameHint),
-          textDirection: ui.TextDirection.rtl,
+          textDirection: context.localeTextDirection,
           height: 56,
           prefixWidget: Padding(
             padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
@@ -496,7 +497,7 @@ class _NewAccountForm extends StatelessWidget {
           hint: 'example@email.com',
           keyboardType: TextInputType.emailAddress,
           textDirection: ui.TextDirection.ltr,
-          textAlign: TextAlign.right,
+          textAlign: TextAlign.start,
           height: 56,
           prefixWidget: Padding(
             padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
@@ -559,7 +560,7 @@ class _FieldLabel extends StatelessWidget {
   Widget build(BuildContext context) {
     return Text(
       label,
-      textAlign: TextAlign.right,
+      textAlign: TextAlign.start,
       style: AppTextStyles.body.copyWith(
         color: AppColors.textSecondary,
         fontWeight: FontWeight.w500,
@@ -603,7 +604,7 @@ class RememberAccountCard extends StatelessWidget {
               children: [
                 Text(
                   context.tr(LocaleKeys.bookingAccount_rememberTitle),
-                  textAlign: TextAlign.right,
+                  textAlign: TextAlign.start,
                   style: AppTextStyles.body.copyWith(
                     color: AppColors.textPrimary,
                     fontWeight: FontWeight.w700,
@@ -612,7 +613,7 @@ class RememberAccountCard extends StatelessWidget {
                 const SizedBox(height: AppSpacing.xs),
                 Text(
                   context.tr(LocaleKeys.bookingAccount_rememberDesc),
-                  textAlign: TextAlign.right,
+                  textAlign: TextAlign.start,
                   style: AppTextStyles.bodySmall.copyWith(
                     color: AppColors.textSecondary,
                     height: 1.5,

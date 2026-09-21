@@ -13,6 +13,8 @@ class CheckoutResult extends Equatable {
     required this.success,
     this.message,
     this.bookingReference,
+    this.transactionReference,
+    this.transferNumber,
     this.stripeEnabled = false,
     this.clientSecret,
     this.amount,
@@ -32,6 +34,14 @@ class CheckoutResult extends Equatable {
   final bool success;
   final String? message;
   final String? bookingReference;
+
+  /// Payment-gateway transaction reference echoed back to
+  /// `/api/booking/{ref}/confirm-payment`.
+  final String? transactionReference;
+
+  /// The doctor's wallet / transfer destination number shown to the user.
+  final String? transferNumber;
+
   final bool stripeEnabled;
   final String? clientSecret;
   final double? amount;
@@ -57,6 +67,8 @@ class CheckoutResult extends Equatable {
         success,
         message,
         bookingReference,
+        transactionReference,
+        transferNumber,
         stripeEnabled,
         clientSecret,
         amount,

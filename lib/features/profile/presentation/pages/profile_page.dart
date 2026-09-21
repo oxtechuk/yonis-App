@@ -15,6 +15,7 @@ import '../../../../app/widgets/primary_button.dart';
 import '../../../../core/storage/secure_storage.dart';
 import '../../../auth/domain/auth_state.dart';
 import '../../../auth/domain/entities/user.dart';
+import '../../domain/entities/app_config_links.dart';
 import '../cubit/profile_cubit.dart';
 import '../widgets/profile_header.dart';
 import '../widgets/profile_menu.dart';
@@ -211,12 +212,12 @@ class _ProfileViewState extends State<_ProfileView> {
               message: failure.message,
               onRetry: () => context.read<ProfileCubit>().load(),
             ),
-          ProfileLoaded(:final user) => RefreshIndicator(
+          ProfileLoaded(:final user, :final configLinks) => RefreshIndicator(
             color: AppColors.primary,
             onRefresh: () => context.read<ProfileCubit>().load(),
             child: SingleChildScrollView(
               physics: const AlwaysScrollableScrollPhysics(),
-              child: _buildProfile(context, user),
+              child: _buildProfile(context, user, configLinks),
             ),
           ),
         };
@@ -224,7 +225,11 @@ class _ProfileViewState extends State<_ProfileView> {
     );
   }
 
-  Widget _buildProfile(BuildContext context, User user) {
+  Widget _buildProfile(
+    BuildContext context,
+    User user,
+    AppConfigLinks configLinks,
+  ) {
     final subtitle = user.email.isNotEmpty
         ? user.email
         : user.phone.isNotEmpty
@@ -234,7 +239,7 @@ class _ProfileViewState extends State<_ProfileView> {
       children: [
         ProfileHeader(name: user.name, subtitle: subtitle),
         const SizedBox(height: AppSpacing.sm),
-        ProfileMenu(onLogout: _logout),
+        ProfileMenu(configLinks: configLinks, onLogout: _logout),
       ],
     );
   }

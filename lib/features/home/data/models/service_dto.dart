@@ -76,13 +76,38 @@ class ServiceDto {
     this.currencySymbol,
     this.icon,
     this.iconUrl,
+    this.titleAr = '',
+    this.titleEn = '',
+    this.descriptionAr = '',
+    this.descriptionEn = '',
+    this.channelLabelAr = '',
+    this.channelLabelEn = '',
   });
 
   factory ServiceDto.fromJson(Map<String, dynamic> json) {
+    // New API shape carries `title_ar` / `title_en` (same for description
+    // and channel labels). Legacy payloads only sent `title` /
+    // `description` — keep reading those as fallback.
+    final titleAr = _readString(json, 'title_ar') ?? '';
+    final titleEn = _readString(json, 'title_en') ?? '';
+    final legacyTitle = _readString(json, 'title') ?? '';
+    final descriptionAr = _readString(json, 'description_ar') ?? '';
+    final descriptionEn = _readString(json, 'description_en') ?? '';
+    final legacyDescription = _readString(json, 'description') ?? '';
     return ServiceDto(
       id: (json['id'] as num?)?.toInt() ?? 0,
-      title: _readString(json, 'title') ?? '',
-      description: _readString(json, 'description') ?? '',
+      title: legacyTitle.isNotEmpty
+          ? legacyTitle
+          : (titleAr.isNotEmpty ? titleAr : titleEn),
+      description: legacyDescription.isNotEmpty
+          ? legacyDescription
+          : (descriptionAr.isNotEmpty ? descriptionAr : descriptionEn),
+      titleAr: titleAr,
+      titleEn: titleEn,
+      descriptionAr: descriptionAr,
+      descriptionEn: descriptionEn,
+      channelLabelAr: _readString(json, 'channel_label_ar') ?? '',
+      channelLabelEn: _readString(json, 'channel_label_en') ?? '',
       type: _readString(json, 'type') ?? 'both',
       price: _readDouble(json, 'price') ?? 0,
       duration: (json['duration'] as num?)?.toInt(),
@@ -149,6 +174,12 @@ class ServiceDto {
   final String? currencySymbol;
   final String? icon;
   final String? iconUrl;
+  final String titleAr;
+  final String titleEn;
+  final String descriptionAr;
+  final String descriptionEn;
+  final String channelLabelAr;
+  final String channelLabelEn;
 
   /// Falls back to the response-level currency when the service item
   /// (or its channels) omit their own — the backend sends `currency` /
@@ -161,6 +192,12 @@ class ServiceDto {
       id: id,
       title: title,
       description: description,
+      titleAr: titleAr,
+      titleEn: titleEn,
+      descriptionAr: descriptionAr,
+      descriptionEn: descriptionEn,
+      channelLabelAr: channelLabelAr,
+      channelLabelEn: channelLabelEn,
       type: type,
       price: price,
       duration: duration,
@@ -208,6 +245,12 @@ class ServiceDto {
     String? currencySymbol,
     String? icon,
     String? iconUrl,
+    String? titleAr,
+    String? titleEn,
+    String? descriptionAr,
+    String? descriptionEn,
+    String? channelLabelAr,
+    String? channelLabelEn,
   }) {
     return ServiceDto(
       id: id ?? this.id,
@@ -229,6 +272,12 @@ class ServiceDto {
       currencySymbol: currencySymbol ?? this.currencySymbol,
       icon: icon ?? this.icon,
       iconUrl: iconUrl ?? this.iconUrl,
+      titleAr: titleAr ?? this.titleAr,
+      titleEn: titleEn ?? this.titleEn,
+      descriptionAr: descriptionAr ?? this.descriptionAr,
+      descriptionEn: descriptionEn ?? this.descriptionEn,
+      channelLabelAr: channelLabelAr ?? this.channelLabelAr,
+      channelLabelEn: channelLabelEn ?? this.channelLabelEn,
     );
   }
 }
@@ -242,12 +291,21 @@ class ChannelDto {
     required this.isEnabled,
     this.currency,
     this.currencySymbol,
+    this.nameAr = '',
+    this.nameEn = '',
   });
 
   factory ChannelDto.fromJson(Map<String, dynamic> json) {
+    final nameAr = _readString(json, 'name_ar') ?? '';
+    final nameEn = _readString(json, 'name_en') ?? '';
+    final legacyName = _readString(json, 'name') ?? '';
     return ChannelDto(
       channel: _readString(json, 'channel') ?? '',
-      name: _readString(json, 'name') ?? '',
+      name: legacyName.isNotEmpty
+          ? legacyName
+          : (nameAr.isNotEmpty ? nameAr : nameEn),
+      nameAr: nameAr,
+      nameEn: nameEn,
       price: _readDouble(json, 'price') ?? 0,
       duration: (json['duration'] as num?)?.toInt(),
       isEnabled: json['is_enabled'] as bool? ?? true,
@@ -261,6 +319,8 @@ class ChannelDto {
       ServiceChannel(
         channel: channel,
         name: name,
+        nameAr: nameAr,
+        nameEn: nameEn,
         price: price,
         duration: duration,
         isEnabled: isEnabled,
@@ -294,5 +354,7 @@ class ChannelDto {
   final bool isEnabled;
   final String? currency;
   final String? currencySymbol;
+  final String nameAr;
+  final String nameEn;
 }
 

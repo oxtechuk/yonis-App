@@ -1,11 +1,10 @@
-import 'dart:ui' as ui;
-
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../app/di/dependency_injection.dart';
+import '../../../../app/localization/locale_direction.dart';
 import '../../../../app/localization/locale_keys.g.dart';
 import '../../../../app/router/app_routes.dart';
 import '../../../../app/styles/app_colors.dart';
@@ -249,7 +248,7 @@ class _BookingStep2PageState extends State<BookingStep2Page> {
         ),
       ],
       child: Directionality(
-        textDirection: ui.TextDirection.rtl,
+        textDirection: context.localeTextDirection,
         child: Scaffold(
           backgroundColor: AppColors.background,
           body: SafeArea(

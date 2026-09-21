@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 
+import '../../../../app/localization/locale_direction.dart';
 import '../../../../app/styles/app_colors.dart';
 import '../../../../app/styles/app_sizes.dart';
 import '../../../../app/styles/app_spacing.dart';
 import '../../../../app/styles/app_text_styles.dart';
 
-/// White flow header with a leading (RTL) back arrow and centered [title].
+/// White flow header with a leading back arrow (pointing per locale) and a
+/// centered [title].
 ///
 /// Shared by every step of the booking flow so the chrome stays identical.
 class BookingAppBar extends StatelessWidget {
@@ -33,7 +35,10 @@ class BookingAppBar extends StatelessWidget {
         children: [
           IconButton(
             onPressed: onBack,
-            icon: const Icon(Icons.arrow_forward, color: AppColors.textPrimary),
+            icon: Icon(
+              context.isRtl ? Icons.arrow_forward : Icons.arrow_back,
+              color: AppColors.textPrimary,
+            ),
             padding: EdgeInsets.zero,
             constraints: const BoxConstraints(),
           ),

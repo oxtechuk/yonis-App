@@ -1,22 +1,27 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../app/styles/app_colors.dart';
 import '../../../../app/styles/app_radius.dart';
 import '../../../../app/styles/app_spacing.dart';
 import '../../../../app/styles/app_text_styles.dart';
-import '../models/booking_models.dart';
+import '../../../../app/widgets/bootstrap_icon_mapper.dart';
+import '../../domain/entities/payment_method_option.dart';
 
-/// Selectable list of payment methods with brand badges.
+/// Selectable list of payment methods, driven entirely by the backend
+/// `/api/payment-methods` payload (id, localized name, brand colour, icon).
 class PaymentMethodSelector extends StatelessWidget {
   const PaymentMethodSelector({
     super.key,
+    required this.methods,
     required this.selected,
     required this.onChanged,
     this.locked = false,
   });
 
-  final PaymentMethod? selected;
-  final ValueChanged<PaymentMethod?> onChanged;
+  final List<PaymentMethodOption> methods;
+  final PaymentMethodOption? selected;
+  final ValueChanged<PaymentMethodOption?> onChanged;
 
   /// When true (a method is confirmed), every non-selected method is
   /// visibly disabled and non-tappable. The selected card stays tappable
@@ -25,9 +30,10 @@ class PaymentMethodSelector extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isArabic = context.locale.languageCode == 'ar';
     return Column(
-      children: PaymentMethod.values.map((method) {
-        final isSelected = method == selected;
+      children: methods.map((method) {
+        final isSelected = method.id == selected?.id;
         final isDisabled = locked && !isSelected;
         final card = AnimatedContainer(
           duration: const Duration(milliseconds: 200),
@@ -47,15 +53,32 @@ class PaymentMethodSelector extends StatelessWidget {
           ),
           child: Row(
             children: [
-              _paymentIcon(method),
-              const Spacer(),
-              Text(
-                method.localizedLabel(context),
-                style: AppTextStyles.body.copyWith(
-                  color: isDisabled
-                      ? AppColors.textSecondary.withValues(alpha: 0.6)
-                      : AppColors.textPrimary,
-                  fontWeight: FontWeight.w500,
+              _PayBadge(method: method),
+              const SizedBox(width: AppSpacing.sm),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      method.nameFor(isArabic),
+                      style: AppTextStyles.body.copyWith(
+                        color: isDisabled
+                            ? AppColors.textSecondary.withValues(alpha: 0.6)
+                            : AppColors.textPrimary,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    if (method.badge != null &&
+                        method.badge!.trim().isNotEmpty) ...[
+                      const SizedBox(height: 2),
+                      Text(
+                        method.badge!,
+                        style: AppTextStyles.caption.copyWith(
+                          color: AppColors.textSecondary,
+                        ),
+                      ),
+                    ],
+                  ],
                 ),
               ),
               const SizedBox(width: AppSpacing.md),
@@ -76,13 +99,6 @@ class PaymentMethodSelector extends StatelessWidget {
         );
       }).toList(),
     );
-  }
-
-  Widget _paymentIcon(PaymentMethod method) {
-    return switch (method) {
-      PaymentMethod.zaincash => _PayBadge(label: 'Zain Cash', color: Colors.green),
-      PaymentMethod.superki => _PayBadge(label: 'SuperKI', color: Colors.blue),
-    };
   }
 }
 
@@ -118,31 +134,50 @@ class _RadioDot extends StatelessWidget {
   }
 }
 
+/// Brand chip: the method's logo/image when the backend sends one,
+/// otherwise its Bootstrap icon tinted with its brand colour.
 class _PayBadge extends StatelessWidget {
-  const _PayBadge({required this.label, required this.color});
-  final String label;
-  final Color color;
+  const _PayBadge({required this.method});
+  final PaymentMethodOption method;
+
+  Color get _color {
+    final hex = method.color?.replaceFirst('#', '').trim();
+    if (hex != null && (hex.length == 6 || hex.length == 8)) {
+      final value = int.tryParse(hex, radix: 16);
+      if (value != null) {
+        return Color(hex.length == 6 ? 0xFF000000 | value : value);
+      }
+    }
+    return AppColors.primary;
+  }
 
   @override
   Widget build(BuildContext context) {
+    final imageUrl = method.logo?.isNotEmpty == true
+        ? method.logo
+        : (method.image?.isNotEmpty == true ? method.image : null);
     return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.sm,
-        vertical: AppSpacing.xs,
-      ),
+      width: 44,
+      height: 44,
+      alignment: Alignment.center,
       decoration: BoxDecoration(
-        color: AppColors.white,
+        color: _color.withValues(alpha: 0.12),
         borderRadius: AppRadius.allMd,
-        border: Border.all(color: AppColors.border),
       ),
-      child: Text(
-        label,
-        style: TextStyle(
-          fontWeight: FontWeight.w700,
-          fontSize: 13,
-          color: color,
-        ),
-      ),
+      clipBehavior: Clip.antiAlias,
+      child: imageUrl != null
+          ? Image.network(
+              imageUrl,
+              fit: BoxFit.contain,
+              errorBuilder: (context, error, stack) => _icon(),
+            )
+          : _icon(),
     );
   }
+
+  Widget _icon() => Icon(
+        bootstrapIconToMaterial(method.iconClass, isClinic: false),
+        color: _color,
+        size: 22,
+      );
 }

@@ -52,7 +52,7 @@ class LoginNoAccountCard extends StatelessWidget {
                   children: [
                     Text(
                       context.tr(LocaleKeys.auth_noAccountTitle),
-                      textAlign: TextAlign.right,
+                      textAlign: TextAlign.start,
                       style: AppTextStyles.title.copyWith(
                         color: AppColors.textPrimary,
                         fontWeight: FontWeight.w800,
@@ -61,7 +61,7 @@ class LoginNoAccountCard extends StatelessWidget {
                     const SizedBox(height: AppSpacing.xs),
                     Text(
                       context.tr(LocaleKeys.auth_noAccountDesc),
-                      textAlign: TextAlign.right,
+                      textAlign: TextAlign.start,
                       style: AppTextStyles.body.copyWith(
                         color: AppColors.textSecondary,
                         height: 1.6,

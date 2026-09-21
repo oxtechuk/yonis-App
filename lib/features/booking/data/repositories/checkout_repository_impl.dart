@@ -4,6 +4,7 @@ import '../../../../core/result/result.dart';
 import '../../../../core/storage/secure_storage.dart';
 import '../../domain/entities/check_user_result.dart';
 import '../../domain/entities/checkout_result.dart';
+import '../../domain/entities/confirm_payment_result.dart';
 import '../../domain/repositories/checkout_repository.dart';
 import '../sources/checkout_remote_data_source.dart';
 
@@ -21,6 +22,50 @@ class CheckoutRepositoryImpl implements CheckoutRepository {
   Future<Result<CheckUserResult>> checkUser({required String phone}) async {
     try {
       final dto = await _remoteDataSource.checkUser(phone: phone);
+      return Success(dto.toEntity());
+    } on AppException catch (exception) {
+      return FailureResult(FailureMapper.map(exception));
+    }
+  }
+
+  @override
+  Future<Result<ConfirmPaymentResult>> confirmPayment({
+    required String bookingRef,
+    required String paymentMethod,
+    required String transferNumber,
+    String? transactionReference,
+    required String receiptImagePath,
+  }) async {
+    try {
+      final dto = await _remoteDataSource.confirmPayment(
+        bookingRef: bookingRef,
+        paymentMethod: paymentMethod,
+        transferNumber: transferNumber,
+        transactionReference: transactionReference,
+        receiptImagePath: receiptImagePath,
+      );
+      return Success(dto.toEntity());
+    } on AppException catch (exception) {
+      return FailureResult(FailureMapper.map(exception));
+    }
+  }
+
+  @override
+  Future<Result<ConfirmPaymentResult>> confirmLocalPayment({
+    required String bookingReference,
+    required String paymentMethod,
+    required String transferNumber,
+    String? transactionReference,
+    String? notes,
+  }) async {
+    try {
+      final dto = await _remoteDataSource.confirmLocalPayment(
+        bookingReference: bookingReference,
+        paymentMethod: paymentMethod,
+        transferNumber: transferNumber,
+        transactionReference: transactionReference,
+        notes: notes,
+      );
       return Success(dto.toEntity());
     } on AppException catch (exception) {
       return FailureResult(FailureMapper.map(exception));
