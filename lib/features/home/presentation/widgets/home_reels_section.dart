@@ -68,8 +68,8 @@ class HomeReelsSection extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
         reverse: isRtl,
         itemCount: 3,
-        separatorBuilder: (_, __) => const SizedBox(width: AppSpacing.sm),
-        itemBuilder: (_, __) => _buildPlaceholderCard(cardWidth, cardHeight),
+        separatorBuilder: (context, index) => const SizedBox(width: AppSpacing.sm),
+        itemBuilder: (context, index) => _buildPlaceholderCard(cardWidth, cardHeight),
       ),
     );
   }
@@ -104,7 +104,7 @@ class HomeReelsSection extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
         reverse: isRtl,
         itemCount: reels.length,
-        separatorBuilder: (_, __) => const SizedBox(width: AppSpacing.sm),
+        separatorBuilder: (context, index) => const SizedBox(width: AppSpacing.sm),
         itemBuilder: (context, index) {
           final reel = reels[index];
           return _ReelCard(reel: reel, width: cardWidth);
@@ -151,7 +151,7 @@ class _ReelCard extends StatelessWidget {
                   child: Image.network(
                     reel.thumbnailUrl,
                     fit: BoxFit.cover,
-                    errorBuilder: (_, __, ___) => const SizedBox.shrink(),
+                    errorBuilder: (context, error, stackTrace) => const SizedBox.shrink(),
                     loadingBuilder: (context, child, loadingProgress) {
                       if (loadingProgress == null) return child;
                       return Container(color: const Color(0xFF2C2C2C));

@@ -4,6 +4,10 @@ import 'dart:io';
 import 'package:easy_localization/easy_localization.dart' hide TextDirection;
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:younis_app/app/config/app_config.dart';
+import 'package:younis_app/app/config/app_environment.dart';
+import 'package:younis_app/app/di/dependency_injection.dart';
 import 'package:younis_app/app/localization/app_localization.dart';
 import 'package:younis_app/features/booking/presentation/pages/booking_page.dart';
 import 'package:younis_app/features/booking/presentation/widgets/session_type_selector.dart';
@@ -24,6 +28,14 @@ Future<void> _pump(
   Service service, {
   String? selectedBookingType,
 }) async {
+  TestWidgetsFlutterBinding.ensureInitialized();
+  SharedPreferences.setMockInitialValues(<String, Object>{});
+  if (!getIt.isRegistered<AppConfig>()) {
+    configureDependencies(
+      environment: AppEnvironment.development,
+      sharedPreferences: await SharedPreferences.getInstance(),
+    );
+  }
   await tester.pumpWidget(
     EasyLocalization(
       supportedLocales: AppLocalization.supportedLocales,

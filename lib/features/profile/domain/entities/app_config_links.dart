@@ -6,7 +6,7 @@ import 'package:equatable/equatable.dart';
 /// {
 ///   "success": true,
 ///   "app_rating_url": "https://play.google.com/...",
-///   "privacy_policy_url": "https://younis-almurshid.com/privacytt",
+///   "privacy_policy_url": "https://younis-almurshid.com/privacy",
 ///   "terms_conditions_url": "https://younis-almurshid.com/terms",
 ///   "terms_url": "https://younis-almurshid.com/terms"
 /// }
@@ -29,7 +29,7 @@ class AppConfigLinks extends Equatable {
   static const AppConfigLinks fallback = AppConfigLinks(
     appRatingUrl:
         'https://play.google.com/store/apps/details?id=com.yonis.clinic',
-    privacyPolicyUrl: 'https://younis-almurshid.com/privacytt',
+    privacyPolicyUrl: 'https://younis-almurshid.com/privacy',
     termsConditionsUrl: 'https://younis-almurshid.com/terms',
     termsUrl: 'https://younis-almurshid.com/terms',
   );

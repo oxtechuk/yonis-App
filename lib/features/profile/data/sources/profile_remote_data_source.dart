@@ -9,6 +9,8 @@ abstract interface class ProfileRemoteDataSource {
   Future<User> getUser();
 
   Future<AppConfigLinks> getConfigLinks();
+
+  Future<void> deleteAccount();
 }
 
 class ApiProfileRemoteDataSource implements ProfileRemoteDataSource {
@@ -56,5 +58,15 @@ class ApiProfileRemoteDataSource implements ProfileRemoteDataSource {
       return AppConfigLinksDto.fromJson(dataJson).toEntity();
     }
     return AppConfigLinksDto.fromJson(json).toEntity();
+  }
+
+  @override
+  Future<void> deleteAccount() async {
+    // Authenticated RESTful user account deletion request.
+    try {
+      await _apiClient.delete<dynamic>(_userPath);
+    } catch (_) {
+      await _apiClient.post<dynamic>('$_userPath/delete');
+    }
   }
 }

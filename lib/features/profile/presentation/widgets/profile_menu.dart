@@ -68,10 +68,12 @@ class ProfileMenu extends StatelessWidget {
   const ProfileMenu({
     super.key,
     required this.onLogout,
+    this.onDeleteAccount,
     this.configLinks = AppConfigLinks.fallback,
   });
 
   final VoidCallback onLogout;
+  final VoidCallback? onDeleteAccount;
 
   /// Links from `GET /api/config`:
   /// - rateApp -> [AppConfigLinks.appRatingUrl]
@@ -110,6 +112,16 @@ class ProfileMenu extends StatelessWidget {
             label: context.tr(LocaleKeys.settings_language),
             onTap: () => showLanguageSwitcherSheet(context),
           ),
+          if (onDeleteAccount != null) ...[
+            const _MenuDivider(),
+            _MenuItem(
+              icon: Icons.delete_outline_rounded,
+              label: context.tr(LocaleKeys.profile_deleteAccount),
+              labelColor: AppColors.error,
+              iconColor: AppColors.error,
+              onTap: onDeleteAccount!,
+            ),
+          ],
           const _MenuDivider(),
           _MenuItem(
             icon: Icons.logout_rounded,

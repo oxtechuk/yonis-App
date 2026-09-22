@@ -6,4 +6,6 @@ abstract interface class ProfileRepository {
   Future<Result<User>> getUser();
 
   Future<Result<AppConfigLinks>> getConfigLinks();
+
+  Future<Result<void>> deleteAccount();
 }

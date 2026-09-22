@@ -225,6 +225,74 @@ class _ProfileViewState extends State<_ProfileView> {
     );
   }
 
+  Future<void> _confirmAndDeleteAccount(BuildContext pageContext) async {
+    final cubit = pageContext.read<ProfileCubit>();
+    final messenger = ScaffoldMessenger.of(pageContext);
+    final rootNav = Navigator.of(pageContext, rootNavigator: true);
+    final router = GoRouter.of(pageContext);
+    final confirmTitle = pageContext.tr(LocaleKeys.profile_deleteAccountConfirmTitle);
+    final confirmMsg = pageContext.tr(LocaleKeys.profile_deleteAccountConfirmMessage);
+    final cancelLabel = pageContext.tr(LocaleKeys.profile_cancel);
+    final deleteLabel = pageContext.tr(LocaleKeys.profile_deleteAccount);
+    final errorMsg = pageContext.tr(LocaleKeys.profile_deleteAccountError);
+    final successMsg = pageContext.tr(LocaleKeys.profile_deleteAccountSuccess);
+
+    final confirmed = await showDialog<bool>(
+      context: pageContext,
+      builder: (dialogContext) => AlertDialog(
+        title: Text(confirmTitle),
+        content: Text(confirmMsg),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(false),
+            child: Text(cancelLabel),
+          ),
+          TextButton(
+            style: TextButton.styleFrom(foregroundColor: AppColors.error),
+            onPressed: () => Navigator.of(dialogContext).pop(true),
+            child: Text(deleteLabel),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed != true || !mounted) return;
+
+    // Show loading indicator during deletion request
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => const Center(
+        child: CircularProgressIndicator(color: AppColors.primary),
+      ),
+    );
+
+    final result = await cubit.deleteAccount();
+
+    if (!mounted) return;
+    rootNav.pop();
+
+    final failure = result.failureOrNull;
+    if (failure != null) {
+      messenger.showSnackBar(
+        SnackBar(
+          content: Text(
+            failure.message.isNotEmpty ? failure.message : errorMsg,
+          ),
+          backgroundColor: AppColors.error,
+        ),
+      );
+      return;
+    }
+
+    await _clearStaleSession();
+    if (!mounted) return;
+    messenger.showSnackBar(
+      SnackBar(content: Text(successMsg)),
+    );
+    router.go(AppRoutes.home);
+  }
+
   Widget _buildProfile(
     BuildContext context,
     User user,
@@ -239,7 +307,11 @@ class _ProfileViewState extends State<_ProfileView> {
       children: [
         ProfileHeader(name: user.name, subtitle: subtitle),
         const SizedBox(height: AppSpacing.sm),
-        ProfileMenu(configLinks: configLinks, onLogout: _logout),
+        ProfileMenu(
+          configLinks: configLinks,
+          onLogout: _logout,
+          onDeleteAccount: () => _confirmAndDeleteAccount(context),
+        ),
       ],
     );
   }

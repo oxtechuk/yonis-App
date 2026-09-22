@@ -59,8 +59,10 @@ class _FakeApiClient implements ApiClient {
     Map<String, dynamic>? queryParameters,
     Options? options,
     CancelToken? cancelToken,
-  }) =>
-      throw UnimplementedError();
+  }) async {
+    lastPath = path;
+    return response as T;
+  }
 }
 
 void main() {
@@ -94,5 +96,15 @@ void main() {
 
       expect(source.getUser(), throwsA(isA<SerializationException>()));
     });
+
+    test('deleteAccount calls /api/user with DELETE method', () async {
+      final client = _FakeApiClient({'success': true});
+      final source = ApiProfileRemoteDataSource(client);
+
+      await source.deleteAccount();
+
+      expect(client.lastPath, '/api/user');
+    });
   });
 }
+

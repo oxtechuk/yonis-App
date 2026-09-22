@@ -106,6 +106,12 @@
     "rateApp": "Rate the app",
     "privacyPolicy": "Privacy policy",
     "dataPrivacy": "Data privacy",
+    "deleteAccount": "Delete account",
+    "deleteAccountConfirmTitle": "Confirm Account Deletion?",
+    "deleteAccountConfirmMessage": "Your request to permanently delete your account and personal data from the server will be processed. Are you sure you want to proceed?",
+    "deleteAccountConfirmCta": "Delete Account Permanently",
+    "deleteAccountSuccess": "Account deleted successfully.",
+    "deleteAccountFailed": "Unable to delete account from server. Please contact support.",
     "logout": "Log out",
     "accountDetails": "Account details",
     "loginRequired": "Sign in to view your profile."

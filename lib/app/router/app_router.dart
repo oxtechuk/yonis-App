@@ -23,11 +23,11 @@ GoRouter createAppRouter() {
     routes: [
       GoRoute(
         path: AppRoutes.splash,
-        builder: (_, __) => const SplashPage(),
+        builder: (context, state) => const SplashPage(),
       ),
       GoRoute(
         path: AppRoutes.welcome,
-        builder: (_, __) => const WelcomePage(),
+        builder: (context, state) => const WelcomePage(),
       ),
       GoRoute(
         path: AppRoutes.login,
@@ -131,7 +131,7 @@ GoRouter createAppRouter() {
         },
       ),
       StatefulShellRoute.indexedStack(
-        builder: (_, __, navigationShell) =>
+        builder: (context, state, navigationShell) =>
             AppNavigationShell(navigationShell: navigationShell),
         branches: [
           // 0 — الرئيسية
@@ -139,7 +139,7 @@ GoRouter createAppRouter() {
             routes: [
               GoRoute(
                 path: AppRoutes.home,
-                builder: (_, __) => const HomePage(),
+                builder: (context, state) => const HomePage(),
               ),
               GoRoute(
                 path: AppRoutes.homeItemDetail,
@@ -153,7 +153,7 @@ GoRouter createAppRouter() {
             routes: [
               GoRoute(
                 path: AppRoutes.services,
-                builder: (_, __) => const ServicesPage(),
+                builder: (context, state) => const ServicesPage(),
               ),
             ],
           ),
@@ -162,7 +162,7 @@ GoRouter createAppRouter() {
             routes: [
               GoRoute(
                 path: AppRoutes.sessions,
-                builder: (_, __) => const SessionsPage(),
+                builder: (context, state) => const SessionsPage(),
               ),
             ],
           ),
@@ -171,7 +171,7 @@ GoRouter createAppRouter() {
             routes: [
               GoRoute(
                 path: AppRoutes.profile,
-                builder: (_, __) => const ProfilePage(),
+                builder: (context, state) => const ProfilePage(),
               ),
             ],
           ),

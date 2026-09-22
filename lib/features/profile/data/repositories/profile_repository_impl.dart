@@ -29,4 +29,14 @@ class ProfileRepositoryImpl implements ProfileRepository {
       return FailureResult(FailureMapper.map(exception));
     }
   }
+
+  @override
+  Future<Result<void>> deleteAccount() async {
+    try {
+      await _remoteDataSource.deleteAccount();
+      return const Success(null);
+    } on AppException catch (exception) {
+      return FailureResult(FailureMapper.map(exception));
+    }
+  }
 }

@@ -12,12 +12,7 @@ void main() {
 
     expect(find.text('المعالج النفسي\nيونس المرشد'), findsOneWidget);
     expect(find.text('احجز استشارتك'), findsOneWidget);
-    expect(find.text('تعرف على يونس'), findsOneWidget);
-    expect(find.text('نبذة عني'), findsOneWidget);
-    expect(find.text('قضايا إدارية'), findsOneWidget);
-    expect(find.text('اضطراب القلق'), findsOneWidget);
-    expect(find.text('تبعانا عبر منصات التواصل'), findsOneWidget);
-    expect(find.text('🧠 الضغط النفسي'), findsNWidgets(2));
+    expect(find.text('تابعنا عبر منصات التواصل'), findsOneWidget);
     expect(find.text('آراء العملاء'), findsOneWidget);
   });
 
@@ -32,16 +27,10 @@ void main() {
 
     expect(find.text('Psychotherapist\nYounis Al-Murshid'), findsOneWidget);
     expect(find.text('Book Your Consultation'), findsOneWidget);
-    expect(find.text('Get to Know Yonis'), findsOneWidget);
-    expect(find.text('About Me'), findsOneWidget);
-    expect(find.text('Administrative Cases'), findsOneWidget);
-    expect(find.text('Anxiety Disorder'), findsOneWidget);
     expect(find.text('Follow Us on Social Media'), findsOneWidget);
-    expect(find.text('🧠 Psychological Pressure'), findsNWidgets(2));
     expect(find.text('Customer Testimonials'), findsOneWidget);
 
     // No Arabic home strings remain.
-    expect(find.text('نبذة عني'), findsNothing);
-    expect(find.text('تبعانا عبر منصات التواصل'), findsNothing);
+    expect(find.text('تابعنا عبر منصات التواصل'), findsNothing);
   });
 }

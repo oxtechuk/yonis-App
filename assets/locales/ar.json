@@ -106,6 +106,12 @@
     "rateApp": "قيّم التطبيق",
     "privacyPolicy": "سياسة الخصوصية",
     "dataPrivacy": "خصوصية البيانات",
+    "deleteAccount": "حذف الحساب",
+    "deleteAccountConfirmTitle": "تأكيد حذف الحساب؟",
+    "deleteAccountConfirmMessage": "سيتم إرسال طلب حذف حسابك وبياناتك الشخصية نهائياً من الخادم. هل أنت متأكد من المتابعة؟",
+    "deleteAccountConfirmCta": "حذف الحساب نهائياً",
+    "deleteAccountSuccess": "تم حذف الحساب بنجاح.",
+    "deleteAccountFailed": "تعذر حذف الحساب من الخادم. يرجى التواصل مع الدعم الفني.",
     "logout": "تسجيل الخروج",
     "accountDetails": "تفاصيل الحساب",
     "loginRequired": "سجّل الدخول لعرض حسابك."

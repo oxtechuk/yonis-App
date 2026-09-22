@@ -3,8 +3,10 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../core/error/failure.dart';
+import '../../../../core/result/result.dart';
 import '../../../auth/domain/entities/user.dart';
 import '../../domain/entities/app_config_links.dart';
+import '../../domain/use_cases/delete_account_use_case.dart';
 import '../../domain/use_cases/get_app_config_links_use_case.dart';
 import '../../domain/use_cases/get_profile_user_use_case.dart';
 
@@ -56,12 +58,15 @@ class ProfileCubit extends Cubit<ProfileState> {
   ProfileCubit({
     required GetProfileUserUseCase getProfileUserUseCase,
     required GetAppConfigLinksUseCase getAppConfigLinksUseCase,
+    required DeleteAccountUseCase deleteAccountUseCase,
   })  : _getProfileUserUseCase = getProfileUserUseCase,
         _getAppConfigLinksUseCase = getAppConfigLinksUseCase,
+        _deleteAccountUseCase = deleteAccountUseCase,
         super(const ProfileInitial());
 
   final GetProfileUserUseCase _getProfileUserUseCase;
   final GetAppConfigLinksUseCase _getAppConfigLinksUseCase;
+  final DeleteAccountUseCase _deleteAccountUseCase;
 
   Future<void> load() async {
     emit(const ProfileLoading());
@@ -95,4 +100,9 @@ class ProfileCubit extends Cubit<ProfileState> {
     debugPrint('[profile] config links: $links');
     emit(ProfileLoaded(user, links));
   }
+
+  Future<Result<void>> deleteAccount() async {
+    return _deleteAccountUseCase.call();
+  }
 }
+
