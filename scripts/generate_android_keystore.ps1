@@ -2,7 +2,9 @@
 # Run this script on a machine with JDK installed (keytool available)
 # Requires: Java JDK 17+
 
-$KeystoreName = "younis_release.keystore"
+$ScriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
+$RepoRoot = Split-Path -Parent $ScriptDir
+$KeystoreName = Join-Path $RepoRoot "younis_release.keystore"
 $Alias = "younis_key"
 $Validity = 10000
 $KeyAlg = "RSA"
@@ -61,7 +63,7 @@ if ($LASTEXITCODE -ne 0) {
 Write-Host "`nEncoding keystore to Base64 for Codemagic..." -ForegroundColor Yellow
 $Base64Content = [Convert]::ToBase64String([IO.File]::ReadAllBytes($KeystoreName))
 
-$Base64OutputFile = "younis_release_keystore_base64.txt"
+$Base64OutputFile = Join-Path $RepoRoot "younis_release_keystore_base64.txt"
 $Base64Content | Out-File -FilePath $Base64OutputFile -Encoding UTF8
 
 Write-Host "" -ForegroundColor Green
