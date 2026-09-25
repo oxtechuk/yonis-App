@@ -87,6 +87,9 @@ abstract class  LocaleKeys {
   static const sessions_statusUpcoming = 'sessions.statusUpcoming';
   static const sessions_statusCompleted = 'sessions.statusCompleted';
   static const sessions_statusCancelled = 'sessions.statusCancelled';
+  static const sessions_statusConfirmed = 'sessions.statusConfirmed';
+  static const sessions_statusPendingPayment = 'sessions.statusPendingPayment';
+  static const sessions_statusReviewPayment = 'sessions.statusReviewPayment';
   static const sessions_dateLabel = 'sessions.dateLabel';
   static const sessions_timeLabel = 'sessions.timeLabel';
   static const sessions_reschedule = 'sessions.reschedule';

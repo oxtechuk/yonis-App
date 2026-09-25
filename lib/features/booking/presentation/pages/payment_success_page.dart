@@ -9,6 +9,7 @@ import '../../../../app/styles/app_colors.dart';
 import '../../../../app/styles/app_sizes.dart';
 import '../../../../app/styles/app_spacing.dart';
 import '../../../../app/styles/app_text_styles.dart';
+import '../../domain/booking_events.dart';
 import '../widgets/payment_success_details_card.dart';
 
 class PaymentSuccessPage extends StatelessWidget {
@@ -98,7 +99,10 @@ class PaymentSuccessPage extends StatelessWidget {
 
               // ── Bottom actions ─────────────────────────────────
               _BottomActions(
-                onGoSessions: () => context.go(AppRoutes.sessions),
+                onGoSessions: () {
+                  BookingEvents.notifyBookingCreated();
+                  context.go(AppRoutes.sessions);
+                },
                 onGoHome: () => context.go(AppRoutes.home),
               ),
             ],

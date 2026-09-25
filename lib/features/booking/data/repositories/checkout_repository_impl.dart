@@ -2,6 +2,7 @@ import '../../../../core/error/app_exception.dart';
 import '../../../../core/error/failure_mapper.dart';
 import '../../../../core/result/result.dart';
 import '../../../../core/storage/secure_storage.dart';
+import '../../domain/booking_events.dart';
 import '../../domain/entities/check_user_result.dart';
 import '../../domain/entities/checkout_result.dart';
 import '../../domain/entities/confirm_payment_result.dart';
@@ -118,6 +119,9 @@ class CheckoutRepositoryImpl implements CheckoutRepository {
           SecureStorageKeys.accessToken,
           token.trim(),
         );
+      }
+      if (dto.success) {
+        BookingEvents.notifyBookingCreated();
       }
       return Success(dto.toEntity());
     } on AppException catch (exception) {

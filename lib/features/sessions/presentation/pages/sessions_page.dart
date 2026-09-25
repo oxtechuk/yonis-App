@@ -16,6 +16,7 @@ import '../../../../app/widgets/login_required_view.dart';
 import '../../../../app/widgets/primary_button.dart';
 import '../../../../core/storage/secure_storage.dart';
 import '../../../auth/domain/auth_state.dart';
+import '../../../booking/domain/booking_events.dart';
 import '../../domain/entities/patient_booking.dart';
 import '../cubit/cancel_booking_cubit.dart';
 import '../cubit/sessions_cubit.dart';
@@ -59,13 +60,20 @@ class _SessionsViewState extends State<_SessionsView>
   void initState() {
     super.initState();
     _tabController = TabController(length: 3, vsync: this);
+    BookingEvents.bookingCreated.addListener(_onBookingCreated);
     _checkAuthAndLoad();
   }
 
   @override
   void dispose() {
+    BookingEvents.bookingCreated.removeListener(_onBookingCreated);
     _tabController.dispose();
     super.dispose();
+  }
+
+  void _onBookingCreated() {
+    if (!mounted) return;
+    _checkAuthAndLoad();
   }
 
   /// The backend requires a logged-in patient: the access token persisted
@@ -164,6 +172,7 @@ class _SessionsViewState extends State<_SessionsView>
       BookingStatus.cancelled => SessionStatus.cancelled,
       BookingStatus.upcoming => SessionStatus.upcoming,
     };
+    final rawLower = booking.rawStatus.trim().toLowerCase();
     final statusLabel = switch (booking.status) {
       BookingStatus.completed => context.tr(
         LocaleKeys.sessions_statusCompleted,
@@ -171,7 +180,14 @@ class _SessionsViewState extends State<_SessionsView>
       BookingStatus.cancelled => context.tr(
         LocaleKeys.sessions_statusCancelled,
       ),
-      BookingStatus.upcoming => context.tr(LocaleKeys.sessions_statusUpcoming),
+      BookingStatus.upcoming =>
+        rawLower.contains('review') || rawLower.contains('مراجعة')
+            ? context.tr(LocaleKeys.sessions_statusReviewPayment)
+            : (rawLower.contains('awaiting') || rawLower.contains('دفع'))
+                ? context.tr(LocaleKeys.sessions_statusPendingPayment)
+                : (rawLower.contains('confirm') || rawLower.contains('مؤكد'))
+                    ? context.tr(LocaleKeys.sessions_statusConfirmed)
+                    : context.tr(LocaleKeys.sessions_statusUpcoming),
     };
     return Session(
       id: booking.id,
@@ -403,23 +419,32 @@ class _RefreshableList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (sessions.isEmpty) {
-      return SessionList(
-        sessions: sessions,
-        showActions: showActions,
-        cancellingId: cancellingId,
-        onCancelSession: onCancelSession,
-      );
-    }
     return RefreshIndicator(
       color: AppColors.primary,
       onRefresh: onRefresh,
-      child: SessionList(
-        sessions: sessions,
-        showActions: showActions,
-        cancellingId: cancellingId,
-        onCancelSession: onCancelSession,
-      ),
+      child: sessions.isEmpty
+          ? LayoutBuilder(
+              builder: (context, constraints) => SingleChildScrollView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(minHeight: constraints.maxHeight),
+                  child: Center(
+                    child: Text(
+                      context.tr(LocaleKeys.sessions_empty),
+                      style: AppTextStyles.body.copyWith(
+                        color: AppColors.textSecondary,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            )
+          : SessionList(
+              sessions: sessions,
+              showActions: showActions,
+              cancellingId: cancellingId,
+              onCancelSession: onCancelSession,
+            ),
     );
   }
 }
