@@ -33,6 +33,8 @@ class _FakeCheckoutRepository implements CheckoutRepository {
     String? phone,
     String? email,
     String? password,
+    String? transferNumber,
+    String? receiptImagePath,
   }) async {
     lastArgs = {
       'serviceId': serviceId,
@@ -47,6 +49,8 @@ class _FakeCheckoutRepository implements CheckoutRepository {
       'phone': phone,
       'email': email,
       'password': password,
+      'transferNumber': transferNumber,
+      'receiptImagePath': receiptImagePath,
     };
     return _result;
   }

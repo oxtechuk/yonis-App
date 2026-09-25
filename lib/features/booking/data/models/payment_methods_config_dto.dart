@@ -53,6 +53,7 @@ class PaymentMethodOptionDto {
     this.badge,
     this.iconClass,
     this.color,
+    this.link,
     this.isEnabled = true,
   });
 
@@ -73,6 +74,7 @@ class PaymentMethodOptionDto {
         json['icon_class'] ?? json['icon'],
       ),
       color: PaymentMethodsConfigDto._str(json['color']),
+      link: PaymentMethodsConfigDto._str(json['link'] ?? json['payment_url']),
       isEnabled: json['is_enabled'] as bool? ?? true,
     );
   }
@@ -88,6 +90,7 @@ class PaymentMethodOptionDto {
   final String? badge;
   final String? iconClass;
   final String? color;
+  final String? link;
   final bool isEnabled;
 
   PaymentMethodOption toEntity() => PaymentMethodOption(
@@ -102,6 +105,7 @@ class PaymentMethodOptionDto {
         badge: badge,
         iconClass: iconClass,
         color: color,
+        link: link,
         isEnabled: isEnabled,
       );
 }

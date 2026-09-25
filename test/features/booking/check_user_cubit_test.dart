@@ -35,6 +35,8 @@ class _FakeCheckoutRepository implements CheckoutRepository {
     String? phone,
     String? email,
     String? password,
+    String? transferNumber,
+    String? receiptImagePath,
   }) {
     throw UnimplementedError('not exercised by these tests');
   }

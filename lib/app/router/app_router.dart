@@ -120,13 +120,17 @@ GoRouter createAppRouter() {
             referenceNumber:
                 extra?['referenceNumber'] as String? ?? 'REF-8492',
             serviceName:
-                extra?['serviceName'] as String? ?? 'جلسة استشارة نفسية',
+                extra?['serviceName'] as String? ?? 'جلسة استشارة',
             appointmentDate:
-                extra?['appointmentDate'] as String? ?? '١٥ أكتوبر ٢٠٢٣',
+                extra?['appointmentDate'] as String? ?? '',
             appointmentTime:
-                extra?['appointmentTime'] as String? ?? '٤:٠٠ مساء - ٥:٠٠ مساء',
+                extra?['appointmentTime'] as String? ?? '',
             consultantName:
-                extra?['consultantName'] as String? ?? 'د. أحمد محمود',
+                extra?['consultantName'] as String?,
+            paymentMethod:
+                extra?['paymentMethod'] as String?,
+            amount:
+                extra?['amount'] as String?,
           );
         },
       ),

@@ -20,6 +20,8 @@ class InitializeCheckoutUseCase {
     String? phone,
     String? email,
     String? password,
+    String? transferNumber,
+    String? receiptImagePath,
   }) =>
       _repository.initializeCheckout(
         serviceId: serviceId,
@@ -34,5 +36,7 @@ class InitializeCheckoutUseCase {
         phone: phone,
         email: email,
         password: password,
+        transferNumber: transferNumber,
+        receiptImagePath: receiptImagePath,
       );
 }

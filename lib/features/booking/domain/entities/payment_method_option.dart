@@ -14,6 +14,7 @@ class PaymentMethodOption extends Equatable {
     this.badge,
     this.iconClass,
     this.color,
+    this.link,
     this.isEnabled = true,
   });
 
@@ -33,6 +34,7 @@ class PaymentMethodOption extends Equatable {
 
   /// Brand colour as a hex string, e.g. `#7c3aed`.
   final String? color;
+  final String? link;
   final bool isEnabled;
 
   String nameFor(bool isArabic) {
@@ -54,6 +56,7 @@ class PaymentMethodOption extends Equatable {
         badge,
         iconClass,
         color,
+        link,
         isEnabled,
       ];
 }

@@ -86,22 +86,29 @@ class CheckoutRepositoryImpl implements CheckoutRepository {
     String? phone,
     String? email,
     String? password,
+    String? transferNumber,
+    String? receiptImagePath,
   }) async {
     try {
-      final dto = await _remoteDataSource.initialize(<String, dynamic>{
-        'service_id': serviceId,
-        'booking_type': bookingType,
-        'consultation_type': consultationType,
-        'payment_method': paymentMethod,
-        'date': date,
-        'start_time': startTime,
-        'title': title,
-        'notes': notes,
-        'name': name,
-        'phone': phone,
-        'email': email,
-        'password': password,
-      });
+      final dto = await _remoteDataSource.initialize(
+        <String, dynamic>{
+          'service_id': serviceId,
+          'booking_type': bookingType,
+          'consultation_type': consultationType,
+          'payment_method': paymentMethod,
+          'date': date,
+          'start_time': startTime,
+          'title': title,
+          'notes': notes,
+          'name': name,
+          'phone': phone,
+          'email': email,
+          'password': password,
+          if (transferNumber != null && transferNumber.trim().isNotEmpty)
+            'transfer_number': transferNumber.trim(),
+        },
+        receiptImagePath: receiptImagePath,
+      );
       // The backend returns an access token for the (possibly newly
       // created) patient — persist it like login so the user stays
       // logged in across restarts (bootstrap restores from this key).

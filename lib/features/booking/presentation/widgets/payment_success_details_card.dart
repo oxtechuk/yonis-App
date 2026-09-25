@@ -7,7 +7,7 @@ import '../../../../app/styles/app_radius.dart';
 import '../../../../app/styles/app_spacing.dart';
 import '../../../../app/styles/app_text_styles.dart';
 
-/// Elevated card listing the confirmed booking details.
+/// Elevated E-Ticket card listing the confirmed booking details matching the website.
 class SuccessDetailsCard extends StatelessWidget {
   const SuccessDetailsCard({
     super.key,
@@ -15,14 +15,18 @@ class SuccessDetailsCard extends StatelessWidget {
     required this.serviceName,
     required this.appointmentDate,
     required this.appointmentTime,
-    required this.consultantName,
+    this.consultantName,
+    this.paymentMethod,
+    this.amount,
   });
 
   final String referenceNumber;
   final String serviceName;
   final String appointmentDate;
   final String appointmentTime;
-  final String consultantName;
+  final String? consultantName;
+  final String? paymentMethod;
+  final String? amount;
 
   @override
   Widget build(BuildContext context) {
@@ -31,9 +35,10 @@ class SuccessDetailsCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: AppColors.white,
         borderRadius: AppRadius.allXl,
+        border: Border.all(color: AppColors.border, width: 1.5),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.06),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 16,
             offset: const Offset(0, 4),
           ),
@@ -41,84 +46,167 @@ class SuccessDetailsCard extends StatelessWidget {
       ),
       child: Column(
         children: [
-          _DetailRow(
-            label: context.tr(LocaleKeys.payment_reference),
-            showDivider: true,
-            child: Text(
-              '#$referenceNumber',
-              style: AppTextStyles.body.copyWith(
-                color: AppColors.primary,
-                fontWeight: FontWeight.w700,
+          // ── E-Ticket Header ──
+          Container(
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppSpacing.md,
+              vertical: AppSpacing.sm + 4,
+            ),
+            decoration: BoxDecoration(
+              color: AppColors.background,
+              borderRadius: const BorderRadius.only(
+                topLeft: Radius.circular(AppRadius.xl),
+                topRight: Radius.circular(AppRadius.xl),
+              ),
+              border: const Border(
+                bottom: BorderSide(color: AppColors.border),
               ),
             ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Row(
+                  children: [
+                    const Icon(
+                      Icons.confirmation_number_outlined,
+                      color: AppColors.primary,
+                      size: 20,
+                    ),
+                    const SizedBox(width: AppSpacing.xs + 2),
+                    Text(
+                      context.tr(LocaleKeys.payment_eTicket),
+                      style: AppTextStyles.body.copyWith(
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.textPrimary,
+                      ),
+                    ),
+                  ],
+                ),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 4,
+                  ),
+                  decoration: BoxDecoration(
+                    color: AppColors.primary,
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: Text(
+                    '#$referenceNumber',
+                    style: AppTextStyles.caption.copyWith(
+                      color: AppColors.white,
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: 0.5,
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
+
+          // ── Service Row ──
           _DetailRow(
             label: context.tr(LocaleKeys.payment_service),
             showDivider: true,
             child: Text(
               serviceName,
               style: AppTextStyles.body.copyWith(
-                color: AppColors.primary,
+                color: AppColors.textPrimary,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ),
+
+          // ── Appointment Date & Time Row ──
+          _DetailRow(
+            label: context.tr(LocaleKeys.payment_appointment),
+            showDivider: true,
+            child: Text(
+              '$appointmentDate | $appointmentTime',
+              style: AppTextStyles.body.copyWith(
+                color: AppColors.textPrimary,
                 fontWeight: FontWeight.w600,
               ),
             ),
           ),
-          _DetailRow(
-            label: context.tr(LocaleKeys.payment_appointment),
-            showDivider: true,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  appointmentDate,
-                  style: AppTextStyles.body.copyWith(
-                    color: AppColors.primary,
-                    fontWeight: FontWeight.w600,
+
+          // ── Payment Method Row ──
+          if (paymentMethod != null && paymentMethod!.isNotEmpty)
+            _DetailRow(
+              label: context.tr(LocaleKeys.payment_paymentMethod),
+              showDivider: true,
+              child: Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 3,
+                ),
+                decoration: BoxDecoration(
+                  color: AppColors.success.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: AppColors.success.withValues(alpha: 0.3),
                   ),
                 ),
-                Text(
-                  appointmentTime,
-                  style: AppTextStyles.bodySmall.copyWith(
-                    color: AppColors.primary,
+                child: Text(
+                  paymentMethod!,
+                  style: AppTextStyles.caption.copyWith(
+                    color: AppColors.success,
+                    fontWeight: FontWeight.w700,
                   ),
                 ),
-              ],
+              ),
             ),
-          ),
-          _DetailRow(
-            label: context.tr(LocaleKeys.payment_consultant),
-            showDivider: false,
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  consultantName,
-                  style: AppTextStyles.body.copyWith(
-                    color: AppColors.textPrimary,
-                    fontWeight: FontWeight.w600,
-                  ),
+
+          // ── Amount Row ──
+          if (amount != null && amount!.isNotEmpty)
+            _DetailRow(
+              label: context.tr(LocaleKeys.payment_orderTotal),
+              showDivider: consultantName != null && consultantName!.isNotEmpty,
+              child: Text(
+                amount!,
+                style: AppTextStyles.title.copyWith(
+                  color: AppColors.primary,
+                  fontWeight: FontWeight.w900,
+                  fontSize: 18,
                 ),
-                const SizedBox(width: AppSpacing.sm),
-                // Consultant avatar placeholder
-                Container(
-                  width: 36,
-                  height: 36,
-                  decoration: BoxDecoration(
-                    color: AppColors.primary.withValues(alpha: 0.12),
-                    shape: BoxShape.circle,
-                    border: Border.all(
-                      color: AppColors.primary.withValues(alpha: 0.3),
+              ),
+            ),
+
+          // ── Consultant Row (optional) ──
+          if (consultantName != null && consultantName!.isNotEmpty)
+            _DetailRow(
+              label: context.tr(LocaleKeys.payment_consultant),
+              showDivider: false,
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    consultantName!,
+                    style: AppTextStyles.body.copyWith(
+                      color: AppColors.textPrimary,
+                      fontWeight: FontWeight.w600,
                     ),
                   ),
-                  child: const Icon(
-                    Icons.person,
-                    color: AppColors.primary,
-                    size: 20,
+                  const SizedBox(width: AppSpacing.sm),
+                  Container(
+                    width: 32,
+                    height: 32,
+                    decoration: BoxDecoration(
+                      color: AppColors.primary.withValues(alpha: 0.12),
+                      shape: BoxShape.circle,
+                      border: Border.all(
+                        color: AppColors.primary.withValues(alpha: 0.3),
+                      ),
+                    ),
+                    child: const Icon(
+                      Icons.person,
+                      color: AppColors.primary,
+                      size: 18,
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
         ],
       ),
     );

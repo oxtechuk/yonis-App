@@ -8,7 +8,10 @@ import '../models/confirm_payment_result_dto.dart';
 abstract interface class CheckoutRemoteDataSource {
   Future<CheckUserResultDto> checkUser({required String phone});
 
-  Future<CheckoutResultDto> initialize(Map<String, dynamic> body);
+  Future<CheckoutResultDto> initialize(
+    Map<String, dynamic> body, {
+    String? receiptImagePath,
+  });
 
   Future<ConfirmPaymentResultDto> confirmPayment({
     required String bookingRef,
@@ -45,10 +48,28 @@ class ApiCheckoutRemoteDataSource implements CheckoutRemoteDataSource {
   }
 
   @override
-  Future<CheckoutResultDto> initialize(Map<String, dynamic> body) async {
+  Future<CheckoutResultDto> initialize(
+    Map<String, dynamic> body, {
+    String? receiptImagePath,
+  }) async {
+    dynamic payload = body;
+    Options? options;
+
+    if (receiptImagePath != null && receiptImagePath.isNotEmpty) {
+      final fileName = receiptImagePath.split(RegExp(r'[/\\]')).last;
+      final map = Map<String, dynamic>.from(body);
+      map['receipt_image'] = await MultipartFile.fromFile(
+        receiptImagePath,
+        filename: fileName,
+      );
+      payload = FormData.fromMap(map);
+      options = Options(contentType: Headers.multipartFormDataContentType);
+    }
+
     final json = await _apiClient.post<Map<String, dynamic>>(
       _initializePath,
-      data: body,
+      data: payload,
+      options: options,
     );
     return CheckoutResultDto.fromJson(json);
   }

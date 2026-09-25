@@ -15,17 +15,21 @@ class PaymentSuccessPage extends StatelessWidget {
   const PaymentSuccessPage({
     super.key,
     this.referenceNumber = 'REF-8492',
-    this.serviceName = 'جلسة استشارة نفسية',
-    this.appointmentDate = '١٥ أكتوبر ٢٠٢٣',
-    this.appointmentTime = '٤:٠٠ مساء - ٥:٠٠ مساء',
-    this.consultantName = 'د. أحمد محمود',
+    this.serviceName = 'جلسة استشارة',
+    this.appointmentDate = '',
+    this.appointmentTime = '',
+    this.consultantName,
+    this.paymentMethod,
+    this.amount,
   });
 
   final String referenceNumber;
   final String serviceName;
   final String appointmentDate;
   final String appointmentTime;
-  final String consultantName;
+  final String? consultantName;
+  final String? paymentMethod;
+  final String? amount;
 
   @override
   Widget build(BuildContext context) {
@@ -53,35 +57,37 @@ class PaymentSuccessPage extends StatelessWidget {
 
                       // ── Title ──────────────────────────────────
                       Text(
-                        context.tr(LocaleKeys.payment_confirmedTitle),
+                        context.tr(LocaleKeys.payment_requestReceived),
                         textAlign: TextAlign.center,
                         style: AppTextStyles.headline.copyWith(
-                          color: AppColors.primary,
+                          color: AppColors.textPrimary,
                           fontWeight: FontWeight.w800,
                         ),
                       ),
 
-                      const SizedBox(height: AppSpacing.sm),
+                      const SizedBox(height: AppSpacing.xs + 2),
 
                       // ── Subtitle ───────────────────────────────
                       Text(
-                        context.tr(LocaleKeys.payment_confirmedSubtitle),
+                        context.tr(LocaleKeys.payment_processingNotice),
                         textAlign: TextAlign.center,
                         style: AppTextStyles.body.copyWith(
                           color: AppColors.textSecondary,
-                          height: 1.6,
+                          height: 1.5,
                         ),
                       ),
 
                       const SizedBox(height: AppSpacing.xl),
 
-                      // ── Booking details card ───────────────────
+                      // ── E-Ticket details card ───────────────────
                       SuccessDetailsCard(
                         referenceNumber: referenceNumber,
                         serviceName: serviceName,
                         appointmentDate: appointmentDate,
                         appointmentTime: appointmentTime,
                         consultantName: consultantName,
+                        paymentMethod: paymentMethod,
+                        amount: amount,
                       ),
 
                       const SizedBox(height: AppSpacing.xl),
@@ -92,9 +98,7 @@ class PaymentSuccessPage extends StatelessWidget {
 
               // ── Bottom actions ─────────────────────────────────
               _BottomActions(
-                onStartConsultation: () {
-                  // TODO: navigate to session/chat screen
-                },
+                onGoSessions: () => context.go(AppRoutes.sessions),
                 onGoHome: () => context.go(AppRoutes.home),
               ),
             ],
@@ -111,31 +115,31 @@ class _SuccessIcon extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: 90,
-      height: 90,
+      width: 76,
+      height: 76,
       decoration: BoxDecoration(
-        color: AppColors.primary,
+        color: AppColors.success,
         shape: BoxShape.circle,
         boxShadow: [
           BoxShadow(
-            color: AppColors.primary.withValues(alpha: 0.3),
-            blurRadius: 24,
-            offset: const Offset(0, 8),
+            color: AppColors.success.withValues(alpha: 0.3),
+            blurRadius: 20,
+            offset: const Offset(0, 6),
           ),
         ],
       ),
-      child: const Icon(Icons.check_rounded, color: AppColors.white, size: 48),
+      child: const Icon(Icons.check_rounded, color: AppColors.white, size: 44),
     );
   }
 }
 
 class _BottomActions extends StatelessWidget {
   const _BottomActions({
-    required this.onStartConsultation,
+    required this.onGoSessions,
     required this.onGoHome,
   });
 
-  final VoidCallback onStartConsultation;
+  final VoidCallback onGoSessions;
   final VoidCallback onGoHome;
 
   @override
@@ -152,11 +156,11 @@ class _BottomActions extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // Primary — start consultation
+          // Primary — Go to Sessions
           SizedBox(
             height: AppSizes.buttonHeight,
             child: FilledButton.icon(
-              onPressed: onStartConsultation,
+              onPressed: onGoSessions,
               style: FilledButton.styleFrom(
                 backgroundColor: AppColors.primary,
                 shape: RoundedRectangleBorder(
@@ -169,7 +173,7 @@ class _BottomActions extends StatelessWidget {
                 size: 20,
               ),
               label: Text(
-                context.tr(LocaleKeys.payment_startConsultation),
+                context.tr(LocaleKeys.payment_viewDashboard),
                 style: AppTextStyles.button.copyWith(
                   color: AppColors.white,
                   fontSize: 15,
@@ -196,7 +200,7 @@ class _BottomActions extends StatelessWidget {
                 size: 20,
               ),
               label: Text(
-                context.tr(LocaleKeys.payment_backHome),
+                context.tr(LocaleKeys.payment_closeHome),
                 style: AppTextStyles.button.copyWith(
                   color: AppColors.textPrimary,
                   fontSize: 15,

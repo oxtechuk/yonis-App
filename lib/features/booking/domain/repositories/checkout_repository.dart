@@ -46,5 +46,7 @@ abstract interface class CheckoutRepository {
     String? phone,
     String? email,
     String? password,
+    String? transferNumber,
+    String? receiptImagePath,
   });
 }

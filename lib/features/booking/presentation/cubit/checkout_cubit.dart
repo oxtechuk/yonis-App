@@ -67,6 +67,8 @@ class CheckoutCubit extends Cubit<CheckoutState> {
     String? phone,
     String? email,
     String? password,
+    String? transferNumber,
+    String? receiptImagePath,
   }) async {
     emit(const CheckoutSubmitting());
     final result = await _initializeCheckoutUseCase.call(
@@ -82,6 +84,8 @@ class CheckoutCubit extends Cubit<CheckoutState> {
       phone: phone,
       email: email,
       password: password,
+      transferNumber: transferNumber,
+      receiptImagePath: receiptImagePath,
     );
     result.fold(
       onFailure: (failure) => emit(CheckoutError(failure)),

@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../../../app/di/dependency_injection.dart';
 import '../../../../app/localization/locale_direction.dart';
@@ -12,34 +13,32 @@ import '../../../../app/localization/locale_keys.g.dart';
 import '../../../../app/router/app_routes.dart';
 import '../../../../app/styles/app_colors.dart';
 import '../../../../app/styles/app_radius.dart';
+import '../../../../app/styles/app_sizes.dart';
 import '../../../../app/styles/app_spacing.dart';
 import '../../../../app/styles/app_text_styles.dart';
 import '../../../../app/widgets/app_skeleton.dart';
 import '../../../../app/widgets/app_toast.dart';
-import '../../../../app/widgets/primary_button.dart';
+import '../../../../app/widgets/bootstrap_icon_mapper.dart';
 import '../../../auth/domain/auth_state.dart';
 import '../../../auth/presentation/cubit/login_cubit.dart';
 import '../../../home/domain/entities/service.dart';
 import '../../domain/entities/payment_method_option.dart';
 import '../cubit/check_user_cubit.dart';
 import '../cubit/checkout_cubit.dart';
-import '../cubit/confirm_local_payment_cubit.dart';
-import '../cubit/confirm_payment_cubit.dart';
 import '../cubit/payment_methods_cubit.dart';
-import '../models/booking_models.dart';
 import '../widgets/booking_app_bar.dart';
 import '../widgets/booking_create_account_section.dart';
-import '../widgets/outlined_card_field.dart';
-import '../widgets/payment_method_selector.dart';
-import '../widgets/price_summary.dart';
+import '../widgets/payment_success_details_card.dart';
 
-/// Second (and final) step of the booking flow: account check (phone lookup /
-/// create account or login — skipped when a stored login token already
-/// identifies the user) + payment method selection + QR on one page.
-///
-/// Receives details + schedule from [BookingPage]. Confirming a payment
-/// method sends the checkout (`/api/checkout/initialize`) and the QR code /
-/// booking reference appear inline underneath — there is no third page.
+/// Second (and final) step of the booking flow matching the website experience:
+/// - Order & pricing summary banner (with duration and booking type)
+/// - Guest account check & registration (skipped when already logged in)
+/// - Dynamic payment method selection (ZainCash, SuperKi, Card) with immediate QR & instructions display
+/// - Sender transfer/wallet number field
+/// - Receipt screenshot drop/upload target with camera/gallery picker and preview
+/// - Terms and conditions agreement checkbox
+/// - Sticky bottom action bar with total price & "تأكيد الحجز النهائي" button
+/// - Immediate transition to E-Ticket [PaymentSuccessPage] on completion.
 class CheckoutPaymentPage extends StatefulWidget {
   const CheckoutPaymentPage({
     super.key,
@@ -113,25 +112,26 @@ class _CheckoutPaymentPageState extends State<CheckoutPaymentPage> {
   late final LoginCubit _loginCubit;
   late final PaymentMethodsCubit _paymentMethodsCubit;
 
-  /// Nothing pre-selected: checkout is only sent after the user taps
-  /// a payment method.
-  PaymentMethodOption? _paymentMethod;
+  PaymentMethodOption? _selectedMethod;
 
-  // Account form controllers (guests only — hidden when a stored login
-  // token already identifies the user).
+  // Account form controllers (guests only)
   final _nameController = TextEditingController();
   final _phoneController = TextEditingController();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   bool _obscurePassword = true;
 
-  // Login password — used only when check-user finds an existing account.
+  // Login password (if check-user finds an existing account)
   final _loginPasswordController = TextEditingController();
   bool _obscureLoginPassword = true;
 
-  /// The full E.164 phone (dial code + digits) last sent to check-user —
-  /// captured here since [CreateAccountSection] owns the country picker.
   String? _checkedPhone;
+
+  // Payment proof details (Transfer Number & Receipt Screenshot)
+  final _transferNumberController = TextEditingController();
+  File? _receiptImage;
+  final _picker = ImagePicker();
+  bool _termsAccepted = true;
 
   @override
   void initState() {
@@ -153,31 +153,23 @@ class _CheckoutPaymentPageState extends State<CheckoutPaymentPage> {
     _emailController.dispose();
     _passwordController.dispose();
     _loginPasswordController.dispose();
+    _transferNumberController.dispose();
     super.dispose();
   }
 
-  /// Legacy entry: opened with a ticket already (no booking inputs) — just
-  /// display it, nothing to send.
   bool get _isLegacyTicket =>
       widget.bookingReference.isNotEmpty &&
       (widget.serviceId == null || widget.date == null);
 
-  ConsultationOption _optionFor(BuildContext context) {
-    final isArabic = context.locale.languageCode == 'ar';
-    return ConsultationOption(
-      label:
-          widget.optionLabel ??
-          widget.serviceTitle ??
-          widget.service?.titleFor(isArabic) ??
-          widget.title ??
-          '',
-      price: (widget.optionPrice ?? widget.amount).toDouble(),
-      durationMinutes: widget.optionDuration,
-      channel: widget.optionChannel ?? widget.consultationType,
-      currencySymbol: widget.currencySymbol.isNotEmpty
-          ? widget.currencySymbol
-          : widget.service?.currencySymbol,
-    );
+  static String _formatAmount(num amount) =>
+      amount == amount.round() ? amount.round().toString() : amount.toString();
+
+  String get _displayPrice {
+    final price = widget.optionPrice ?? widget.amount;
+    final sym = widget.currencySymbol.isNotEmpty
+        ? widget.currencySymbol
+        : widget.service?.currencySymbol ?? 'د.ع';
+    return '${_formatAmount(price)} $sym';
   }
 
   void _onPhoneChecked(String fullPhone) {
@@ -205,19 +197,13 @@ class _CheckoutPaymentPageState extends State<CheckoutPaymentPage> {
     }
   }
 
-  /// Account must be resolved before any checkout: guests verify their
-  /// phone first (and log in when the number is recognized).
   bool _isAccountReady() {
-    // A persisted login token already identifies the user on the backend
-    // (sent as `Authorization: Bearer`) — no phone check needed.
     if (AuthState.instance.isLoggedIn) return true;
     final checkState = _checkUserCubit.state;
     if (checkState is! CheckUserLoaded) {
       AppToast.show(context, context.tr(LocaleKeys.booking_verifyPhoneFirst));
       return false;
     }
-    // A recognized account must actually log in first — that's what gets
-    // the auth token the checkout call is identified by.
     if (checkState.result.isRegistered && _loginCubit.state is! LoginSuccess) {
       AppToast.show(context, context.tr(LocaleKeys.booking_loginFirst));
       return false;
@@ -228,8 +214,77 @@ class _CheckoutPaymentPageState extends State<CheckoutPaymentPage> {
     return true;
   }
 
-  void _submitFor(PaymentMethodOption method) {
+  Future<void> _pickReceiptImage() async {
+    final source = await showModalBottomSheet<ImageSource>(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (sheetContext) => SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ListTile(
+                leading: const Icon(
+                  Icons.photo_library_outlined,
+                  color: AppColors.primary,
+                ),
+                title: Text(
+                  sheetContext.tr(LocaleKeys.payment_pickFromGallery),
+                  style: AppTextStyles.body.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                onTap: () =>
+                    Navigator.of(sheetContext).pop(ImageSource.gallery),
+              ),
+              ListTile(
+                leading: const Icon(
+                  Icons.photo_camera_outlined,
+                  color: AppColors.primary,
+                ),
+                title: Text(
+                  sheetContext.tr(LocaleKeys.payment_pickFromCamera),
+                  style: AppTextStyles.body.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                onTap: () =>
+                    Navigator.of(sheetContext).pop(ImageSource.camera),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    if (source == null) return;
+    final picked = await _picker.pickImage(
+      source: source,
+      imageQuality: 85,
+      maxWidth: 1600,
+    );
+    if (picked == null || !mounted) return;
+    setState(() => _receiptImage = File(picked.path));
+  }
+
+  void _removeReceiptImage() {
+    setState(() => _receiptImage = null);
+  }
+
+  void _submitFinalBooking() {
     if (_checkoutCubit.state is CheckoutSubmitting) return;
+
+    if (!_termsAccepted) {
+      AppToast.show(
+        context,
+        context.tr(LocaleKeys.payment_termsRequired),
+      );
+      return;
+    }
+
     final serviceId = widget.serviceId;
     final date = widget.date;
     final startTime = widget.startTime;
@@ -237,123 +292,104 @@ class _CheckoutPaymentPageState extends State<CheckoutPaymentPage> {
       AppToast.show(context, context.tr(LocaleKeys.booking_selectDateTime));
       return;
     }
+
     if (!_isAccountReady()) return;
 
-    // New flow: account payload comes from this step's account section.
-    // Legacy callers may still pass it via extras — fall back to those.
-    final bool isRegistered;
-    final String? name;
-    final String? phone;
-    final String? email;
-    final String? password;
-    if (AuthState.instance.isLoggedIn) {
-      isRegistered = true;
-      name = phone = email = password = null;
-    } else if (_checkedPhone != null) {
-      final checkState = _checkUserCubit.state;
-      isRegistered =
-          checkState is CheckUserLoaded && checkState.result.isRegistered;
-      name = isRegistered ? null : _nameController.text.trim();
-      phone = isRegistered ? null : _checkedPhone;
-      email = isRegistered ? null : _emailController.text.trim();
-      password = isRegistered ? null : _passwordController.text;
-    } else {
-      isRegistered = widget.isRegistered ?? false;
-      name = isRegistered ? null : widget.name;
-      phone = isRegistered ? null : widget.phone;
-      email = isRegistered ? null : widget.email;
-      password = isRegistered ? null : widget.password;
-    }
+    final isRegistered = AuthState.instance.isLoggedIn
+        ? true
+        : (_checkedPhone != null
+            ? (_checkUserCubit.state is CheckUserLoaded &&
+                (_checkUserCubit.state as CheckUserLoaded).result.isRegistered)
+            : (widget.isRegistered ?? false));
+
+    final String? name = isRegistered
+        ? null
+        : (_checkedPhone != null
+            ? _nameController.text.trim()
+            : widget.name);
+    final String? phone = isRegistered
+        ? null
+        : (_checkedPhone ?? widget.phone);
+    final String? email = isRegistered
+        ? null
+        : (_checkedPhone != null
+            ? _emailController.text.trim()
+            : widget.email);
+    final String? password = isRegistered
+        ? null
+        : (_checkedPhone != null
+            ? _passwordController.text
+            : widget.password);
+
+    final selectedMethodId = _selectedMethod?.id ?? 'zaincash';
 
     _checkoutCubit.submit(
       serviceId: serviceId,
       bookingType: widget.bookingType ?? 'online',
       consultationType: widget.consultationType ?? 'video',
-      paymentMethod: method.id,
+      paymentMethod: selectedMethodId,
       date: date,
       startTime: startTime,
-      title: widget.title ?? '',
+      title: widget.title ?? widget.serviceTitle ?? '',
       notes: widget.notes,
       name: name,
       phone: phone,
       email: email,
       password: password,
+      transferNumber: _transferNumberController.text.trim(),
+      receiptImagePath: _receiptImage?.path,
     );
   }
 
-  /// Tapping a payment method sends `/api/checkout/initialize` for it right
-  /// away and its QR / booking reference render below. The list stays
-  /// switchable: picking another method re-sends for that one and replaces
-  /// the QR. Tapping the selected method again clears the selection.
-  void _onMethodSelected(PaymentMethodOption? method) {
-    // Ignore taps while a request is in flight to avoid overlapping
-    // checkouts.
-    if (_checkoutCubit.state is CheckoutSubmitting) return;
-
-    if (method == null) {
-      setState(() => _paymentMethod = null);
-      _checkoutCubit.reset();
-      return;
-    }
-
-    setState(() => _paymentMethod = method);
-    _submitFor(method);
-  }
-
-  /// The method list is only frozen while a checkout request is actually in
-  /// flight — otherwise the user may keep switching methods.
-  bool _selectionLocked(CheckoutState state) => state is CheckoutSubmitting;
-
-  void _retryLastMethod() {
-    final method = _paymentMethod;
-    if (method != null) _submitFor(method);
-  }
-
   void _onCheckoutChanged(BuildContext context, CheckoutState state) {
-    // Success renders inline below with a button to My Sessions — no
-    // automatic navigation. Only failures toast here.
+    final isArabic = context.locale.languageCode == 'ar';
     switch (state) {
+      case CheckoutLoaded(:final result) when result.success:
+        if (result.token != null && result.token!.trim().isNotEmpty) {
+          AuthState.instance.login();
+        }
+        // Navigate immediately to the E-Ticket success screen matching the website
+        final methodLabel = _selectedMethod?.nameFor(isArabic) ??
+            result.paymentMethod ??
+            widget.paymentMethod;
+        final serviceName = widget.serviceTitle ??
+            widget.service?.titleFor(isArabic) ??
+            widget.title ??
+            context.tr(LocaleKeys.booking_instantSession);
+        final date = widget.date ?? '';
+        final time = widget.timeDisplay ?? widget.startTime ?? '';
+        final amountLabel =
+            '${_formatAmount(result.amount ?? widget.optionPrice ?? widget.amount)} ${result.currencySymbol ?? widget.currencySymbol}';
+
+        context.go(
+          AppRoutes.paymentSuccess,
+          extra: <String, dynamic>{
+            'referenceNumber': result.bookingReference ?? '',
+            'serviceName': serviceName,
+            'appointmentDate': date,
+            'appointmentTime': time,
+            'paymentMethod': methodLabel,
+            'amount': amountLabel,
+          },
+        );
       case CheckoutLoaded(:final result) when !result.success:
         AppToast.show(
           context,
           result.message ?? context.tr(LocaleKeys.booking_bookingFailed),
         );
-      case CheckoutLoaded(:final result) when result.success:
-        // The backend returns an access token for the patient account
-        // (already persisted by the repository) — treat them as logged in
-        // so account-gated tabs unlock immediately.
-        if (result.token != null && result.token!.trim().isNotEmpty) {
-          AuthState.instance.login();
-        }
+      case CheckoutLoaded():
+        break;
       case CheckoutError(:final failure):
         AppToast.show(context, failure.message);
-      case CheckoutInitial() || CheckoutSubmitting() || CheckoutLoaded():
+      case CheckoutInitial() || CheckoutSubmitting():
         break;
     }
   }
 
-  /// Resolves a payment-method id to its localized display name using the
-  /// list already loaded from `/api/payment-methods`, falling back to the
-  /// currently selected method or a humanized id.
-  String _paymentMethodLabel(BuildContext context, String methodId) {
-    final isArabic = context.locale.languageCode == 'ar';
-    final state = _paymentMethodsCubit.state;
-    if (state is PaymentMethodsLoaded) {
-      for (final m in state.config.methods) {
-        if (m.id == methodId) return m.nameFor(isArabic);
-      }
-    }
-    if (_paymentMethod?.id == methodId) {
-      return _paymentMethod!.nameFor(isArabic);
-    }
-    return methodId.isEmpty ? '' : methodId;
-  }
-
-  static String _formatAmount(num amount) =>
-      amount == amount.round() ? amount.round().toString() : amount.toString();
-
   @override
   Widget build(BuildContext context) {
+    final isArabic = context.locale.languageCode == 'ar';
+
     return MultiBlocListener(
       listeners: [
         BlocListener<CheckoutCubit, CheckoutState>(
@@ -373,7 +409,7 @@ class _CheckoutPaymentPageState extends State<CheckoutPaymentPage> {
             child: Column(
               children: [
                 BookingAppBar(
-                  title: context.tr(LocaleKeys.booking_paymentTitle),
+                  title: context.tr(LocaleKeys.payment_title),
                   onBack: () => context.pop(),
                 ),
                 Expanded(
@@ -385,9 +421,9 @@ class _CheckoutPaymentPageState extends State<CheckoutPaymentPage> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                        // ── Account check / creation (hidden when a stored
-                        // token already identifies the user) ──────────────
-                        if (!AuthState.instance.isLoggedIn) ...[
+                        // ── Step 2: Account Check/Creation (Guests only) ──
+                        if (!AuthState.instance.isLoggedIn &&
+                            !_isLegacyTicket) ...[
                           Form(
                             key: _accountFormKey,
                             child: BlocBuilder<CheckUserCubit, CheckUserState>(
@@ -427,113 +463,104 @@ class _CheckoutPaymentPageState extends State<CheckoutPaymentPage> {
                           ),
                           const SizedBox(height: AppSpacing.sm),
                           const RememberAccountCard(),
-                          const SizedBox(height: AppSpacing.lg),
+                          const SizedBox(height: AppSpacing.md),
                         ],
-                        Text(
-                          context.tr(LocaleKeys.booking_paymentTitle),
-                          textAlign: TextAlign.start,
-                          style: AppTextStyles.title.copyWith(
-                            color: AppColors.textPrimary,
-                            fontWeight: FontWeight.w700,
+
+                        // ── Legacy Ticket Direct View ──
+                        if (_isLegacyTicket) ...[
+                          SuccessDetailsCard(
+                            referenceNumber: widget.bookingReference,
+                            serviceName: widget.serviceTitle ??
+                                widget.title ??
+                                'جلسة استشارة',
+                            appointmentDate: widget.date ?? '',
+                            appointmentTime:
+                                widget.timeDisplay ?? widget.startTime ?? '',
+                            paymentMethod: widget.paymentMethod,
+                            amount: _displayPrice,
                           ),
-                        ),
-                        const SizedBox(height: AppSpacing.sm),
-                        BlocBuilder<CheckoutCubit, CheckoutState>(
-                          bloc: _checkoutCubit,
-                          builder: (context, checkoutState) {
-                            final locked = _selectionLocked(checkoutState);
-                            return BlocBuilder<PaymentMethodsCubit,
-                                PaymentMethodsState>(
-                              bloc: _paymentMethodsCubit,
-                              builder: (context, state) {
-                                return switch (state) {
-                                  PaymentMethodsLoaded(:final methods)
-                                      when methods.isNotEmpty =>
-                                    PaymentMethodSelector(
-                                      methods: methods,
-                                      selected: _paymentMethod,
-                                      onChanged: _onMethodSelected,
-                                      locked: locked,
-                                    ),
-                                  PaymentMethodsError() => _PaymentMethodsError(
-                                    onRetry: _paymentMethodsCubit.load,
-                                  ),
-                                  PaymentMethodsLoaded() => _PaymentMethodsError(
-                                    onRetry: _paymentMethodsCubit.load,
-                                  ),
-                                  _ => const _PaymentMethodsLoading(),
-                                };
-                              },
-                            );
-                          },
-                        ),
-                        const SizedBox(height: AppSpacing.md),
-                        PriceSummary(option: _optionFor(context)),
-                        const SizedBox(height: AppSpacing.md),
-                        // ── QR + booking result, inline under payment ──
-                        if (_isLegacyTicket)
-                          _LegacyTicketSection(
-                            bookingReference: widget.bookingReference,
-                            paymentMethodLabel: _paymentMethodLabel(
-                              context,
-                              widget.paymentMethod,
-                            ),
-                            amountLabel:
-                                '${_formatAmount(widget.amount)} ${widget.currencySymbol}',
-                            qrCode: widget.qrCode,
-                            paymentInstructions: widget.paymentInstructions,
-                          )
-                        else
-                          BlocBuilder<CheckoutCubit, CheckoutState>(
-                            bloc: _checkoutCubit,
+                          const SizedBox(height: AppSpacing.lg),
+                        ] else ...[
+                          // ── Step 3: Order Summary Banner (Website layout) ──
+                          _OrderSummaryBanner(
+                            priceText: _displayPrice,
+                            isClinic: widget.bookingType == 'clinic',
+                            durationMinutes: widget.optionDuration,
+                            isArabic: isArabic,
+                          ),
+                          const SizedBox(height: AppSpacing.md),
+
+                          // ── Payment Method Selector ──
+                          _SectionHeading(
+                            icon: Icons.account_balance_wallet_outlined,
+                            title: context.tr(LocaleKeys.payment_paymentMethod),
+                          ),
+                          const SizedBox(height: AppSpacing.xs + 2),
+
+                          BlocBuilder<PaymentMethodsCubit, PaymentMethodsState>(
+                            bloc: _paymentMethodsCubit,
                             builder: (context, state) {
                               return switch (state) {
-                                CheckoutSubmitting() =>
-                                  const _SubmittingSection(),
-                                CheckoutLoaded(:final result)
-                                    when result.success =>
-                                  _SuccessSection(
-                                    bookingReference:
-                                        result.bookingReference ?? '',
-                                    paymentMethod:
-                                        result.paymentMethod ??
-                                        _paymentMethod?.id ??
-                                        widget.paymentMethod,
-                                    paymentMethodLabel: _paymentMethodLabel(
-                                      context,
-                                      result.paymentMethod ??
-                                          _paymentMethod?.id ??
-                                          widget.paymentMethod,
-                                    ),
-                                    amountLabel:
-                                        '${_formatAmount(result.amount ?? widget.optionPrice ?? widget.amount)} ${result.currencySymbol ?? widget.currencySymbol}',
-                                    qrCode: result.qrCode,
-                                    paymentInstructions:
-                                        result.paymentInstructions,
-                                    transactionReference:
-                                        result.transactionReference,
-                                    transferNumber: result.transferNumber,
-                                    showConfirmPayment:
-                                        (result.bookingReference ?? '')
-                                            .isNotEmpty,
+                                PaymentMethodsLoaded(:final methods)
+                                    when methods.isNotEmpty =>
+                                  _PaymentMethodsView(
+                                    methods: methods,
+                                    selected: _selectedMethod ??
+                                        (_selectedMethod = methods.firstWhere(
+                                          (m) => m.id == widget.paymentMethod,
+                                          orElse: () => methods.first,
+                                        )),
+                                    onChanged: (method) {
+                                      setState(() => _selectedMethod = method);
+                                    },
+                                    isArabic: isArabic,
                                   ),
-                                CheckoutLoaded() => _FailureSection(
-                                  onRetry: _retryLastMethod,
-                                ),
-                                CheckoutError(:final failure) =>
-                                  _FailureSection(
-                                    message: failure.message,
-                                    onRetry: _retryLastMethod,
+                                PaymentMethodsError() => _PaymentMethodsError(
+                                    onRetry: _paymentMethodsCubit.load,
                                   ),
-                                CheckoutInitial() => const SizedBox.shrink(),
+                                _ => const _PaymentMethodsLoading(),
                               };
                             },
                           ),
-                        const SizedBox(height: AppSpacing.lg),
+                          const SizedBox(height: AppSpacing.md),
+
+                          // ── Transfer Details & Receipt Proof Box ──
+                          _ProofUploadCard(
+                            transferNumberController:
+                                _transferNumberController,
+                            receiptImage: _receiptImage,
+                            onPickImage: _pickReceiptImage,
+                            onRemoveImage: _removeReceiptImage,
+                            isArabic: isArabic,
+                          ),
+                          const SizedBox(height: AppSpacing.md),
+
+                          // ── Terms & Policy Agreement Checkbox ──
+                          _TermsCheckboxRow(
+                            value: _termsAccepted,
+                            onChanged: (v) =>
+                                setState(() => _termsAccepted = v ?? false),
+                          ),
+                          const SizedBox(height: 90), // Spacing for bottom bar
+                        ],
                       ],
                     ),
                   ),
                 ),
+
+                // ── Sticky Bottom Action Bar matching Website ──
+                if (!_isLegacyTicket)
+                  BlocBuilder<CheckoutCubit, CheckoutState>(
+                    bloc: _checkoutCubit,
+                    builder: (context, checkoutState) {
+                      final submitting = checkoutState is CheckoutSubmitting;
+                      return _StickyBottomBar(
+                        priceText: _displayPrice,
+                        submitting: submitting,
+                        onSubmit: _submitFinalBooking,
+                      );
+                    },
+                  ),
               ],
             ),
           ),
@@ -543,27 +570,142 @@ class _CheckoutPaymentPageState extends State<CheckoutPaymentPage> {
   }
 }
 
-/// Skeleton rows while `/api/payment-methods` loads.
-class _PaymentMethodsLoading extends StatelessWidget {
-  const _PaymentMethodsLoading();
+// ─────────────────────────────────────────────────────────────────────────────
+// ORDER SUMMARY BANNER (Matching .order-summary-card in booking_modal.blade.php)
+// ─────────────────────────────────────────────────────────────────────────────
+class _OrderSummaryBanner extends StatelessWidget {
+  const _OrderSummaryBanner({
+    required this.priceText,
+    required this.isClinic,
+    this.durationMinutes,
+    required this.isArabic,
+  });
+
+  final String priceText;
+  final bool isClinic;
+  final int? durationMinutes;
+  final bool isArabic;
 
   @override
   Widget build(BuildContext context) {
-    return const Column(
-      children: [
-        SkeletonPulse(
-          child: SkeletonBox(
-            width: double.infinity,
-            height: 72,
-            borderRadius: 16,
+    return Container(
+      padding: const EdgeInsets.all(AppSpacing.md),
+      decoration: BoxDecoration(
+        color: AppColors.white,
+        borderRadius: AppRadius.allXl,
+        border: Border.all(color: AppColors.border, width: 1.5),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.04),
+            blurRadius: 12,
+            offset: const Offset(0, 3),
           ),
+        ],
+      ),
+      child: Column(
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Row(
+                children: [
+                  Container(
+                    width: 36,
+                    height: 36,
+                    decoration: BoxDecoration(
+                      color: AppColors.primary.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: const Icon(
+                      Icons.shopping_cart_outlined,
+                      color: AppColors.primary,
+                      size: 20,
+                    ),
+                  ),
+                  const SizedBox(width: AppSpacing.sm),
+                  Text(
+                    context.tr(LocaleKeys.payment_orderTotal),
+                    style: AppTextStyles.body.copyWith(
+                      fontWeight: FontWeight.w800,
+                      color: AppColors.textPrimary,
+                    ),
+                  ),
+                ],
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 14,
+                  vertical: 6,
+                ),
+                decoration: BoxDecoration(
+                  color: AppColors.primary,
+                  borderRadius: BorderRadius.circular(20),
+                  boxShadow: [
+                    BoxShadow(
+                      color: AppColors.primary.withValues(alpha: 0.25),
+                      blurRadius: 8,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+                ),
+                child: Text(
+                  priceText,
+                  style: AppTextStyles.body.copyWith(
+                    color: AppColors.white,
+                    fontWeight: FontWeight.w900,
+                    fontSize: 16,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: AppSpacing.sm + 2),
+          const Divider(height: 1, color: AppColors.border),
+          const SizedBox(height: AppSpacing.sm),
+          Wrap(
+            spacing: 12,
+            runSpacing: 6,
+            children: [
+              _FeatureBullet(
+                label: isClinic
+                    ? context.tr(LocaleKeys.payment_clinicVisit)
+                    : context.tr(LocaleKeys.payment_onlineConsultation),
+              ),
+              if (durationMinutes != null && durationMinutes! > 0)
+                _FeatureBullet(
+                  label: '$durationMinutes ${isArabic ? 'دقيقة' : 'min'}',
+                ),
+              _FeatureBullet(
+                label: context.tr(LocaleKeys.payment_directBooking),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _FeatureBullet extends StatelessWidget {
+  const _FeatureBullet({required this.label});
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        const Icon(
+          Icons.check_circle_rounded,
+          color: AppColors.success,
+          size: 15,
         ),
-        SizedBox(height: AppSpacing.sm),
-        SkeletonPulse(
-          child: SkeletonBox(
-            width: double.infinity,
-            height: 72,
-            borderRadius: 16,
+        const SizedBox(width: 4),
+        Text(
+          label,
+          style: AppTextStyles.caption.copyWith(
+            color: AppColors.textSecondary,
+            fontWeight: FontWeight.w700,
           ),
         ),
       ],
@@ -571,7 +713,817 @@ class _PaymentMethodsLoading extends StatelessWidget {
   }
 }
 
-/// Inline error + retry when the payment-method list can't be loaded.
+// ─────────────────────────────────────────────────────────────────────────────
+// PAYMENT METHODS SWITCHER & PANELS (Website segmented switcher + QR)
+// ─────────────────────────────────────────────────────────────────────────────
+class _PaymentMethodsView extends StatelessWidget {
+  const _PaymentMethodsView({
+    required this.methods,
+    required this.selected,
+    required this.onChanged,
+    required this.isArabic,
+  });
+
+  final List<PaymentMethodOption> methods;
+  final PaymentMethodOption selected;
+  final ValueChanged<PaymentMethodOption> onChanged;
+  final bool isArabic;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        // ── Segmented Switcher / Tabs ──
+        Container(
+          padding: const EdgeInsets.all(4),
+          decoration: BoxDecoration(
+            color: const Color(0xFFF1F5F9),
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(color: AppColors.border),
+          ),
+          child: Row(
+            children: methods.map((method) {
+              final isSelected = method.id == selected.id;
+              return Expanded(
+                child: GestureDetector(
+                  onTap: () => onChanged(method),
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 180),
+                    padding: const EdgeInsets.symmetric(vertical: 8),
+                    decoration: BoxDecoration(
+                      color: isSelected ? AppColors.white : Colors.transparent,
+                      borderRadius: BorderRadius.circular(10),
+                      boxShadow: isSelected
+                          ? [
+                              BoxShadow(
+                                color: Colors.black.withValues(alpha: 0.08),
+                                blurRadius: 4,
+                                offset: const Offset(0, 1),
+                              ),
+                            ]
+                          : null,
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        if (method.logo != null && method.logo!.isNotEmpty)
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(4),
+                            child: Image.network(
+                              method.logo!,
+                              width: 18,
+                              height: 18,
+                              fit: BoxFit.contain,
+                              errorBuilder: (context, error, stackTrace) =>
+                                  _FallbackIcon(method: method),
+                            ),
+                          )
+                        else
+                          _FallbackIcon(method: method),
+                        const SizedBox(width: 6),
+                        Flexible(
+                          child: Text(
+                            method.nameFor(isArabic),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: AppTextStyles.caption.copyWith(
+                              color: isSelected
+                                  ? AppColors.primary
+                                  : AppColors.textSecondary,
+                              fontWeight: isSelected
+                                  ? FontWeight.w800
+                                  : FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              );
+            }).toList(),
+          ),
+        ),
+        const SizedBox(height: AppSpacing.sm),
+
+        // ── Active Method Display Panel ──
+        _ActiveMethodPanel(method: selected, isArabic: isArabic),
+      ],
+    );
+  }
+}
+
+class _FallbackIcon extends StatelessWidget {
+  const _FallbackIcon({required this.method});
+  final PaymentMethodOption method;
+
+  @override
+  Widget build(BuildContext context) {
+    if (method.iconClass != null && method.iconClass!.isNotEmpty) {
+      return Icon(
+        bootstrapIconToMaterial(method.iconClass, isClinic: false),
+        size: 16,
+        color: AppColors.primary,
+      );
+    }
+    return const Icon(
+      Icons.account_balance_wallet_outlined,
+      size: 16,
+      color: AppColors.primary,
+    );
+  }
+}
+
+class _ActiveMethodPanel extends StatelessWidget {
+  const _ActiveMethodPanel({
+    required this.method,
+    required this.isArabic,
+  });
+
+  final PaymentMethodOption method;
+  final bool isArabic;
+
+  Future<void> _openCardLink(String url) async {
+    final uri = Uri.tryParse(url);
+    if (uri != null && await canLaunchUrl(uri)) {
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final isCard = method.id == 'card';
+    final hasQr = method.qrImage != null && method.qrImage!.trim().isNotEmpty;
+    final instructions = method.instructions ??
+        (isArabic
+            ? 'امسح رمز الـ QR لإتمام الدفع، ثم أرفق سكرين شوت الإيصال بالأسفل.'
+            : 'Scan the QR code to complete payment, then attach receipt below.');
+
+    return Container(
+      padding: const EdgeInsets.all(AppSpacing.md),
+      decoration: BoxDecoration(
+        color: const Color(0xFFF8FAFC),
+        borderRadius: AppRadius.allXl,
+        border: Border.all(color: AppColors.border),
+      ),
+      child: isCard
+          ? Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Row(
+                      children: [
+                        const Icon(
+                          Icons.security_outlined,
+                          color: AppColors.success,
+                          size: 18,
+                        ),
+                        const SizedBox(width: 6),
+                        Text(
+                          method.badge ??
+                              context.tr(LocaleKeys.payment_secureOnline),
+                          style: AppTextStyles.caption.copyWith(
+                            fontWeight: FontWeight.w700,
+                            color: AppColors.textPrimary,
+                          ),
+                        ),
+                      ],
+                    ),
+                    Row(
+                      children: [
+                        _CardBadge(label: 'VISA', color: AppColors.primary),
+                        const SizedBox(width: 4),
+                        _CardBadge(
+                          label: 'MasterCard',
+                          color: const Color(0xFFDC2626),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+                const SizedBox(height: AppSpacing.sm),
+                Text(
+                  instructions,
+                  style: AppTextStyles.bodySmall.copyWith(
+                    color: AppColors.textSecondary,
+                    height: 1.4,
+                  ),
+                ),
+                if (method.link != null && method.link!.trim().isNotEmpty) ...[
+                  const SizedBox(height: AppSpacing.sm + 2),
+                  OutlinedButton.icon(
+                    onPressed: () => _openCardLink(method.link!.trim()),
+                    style: OutlinedButton.styleFrom(
+                      side: const BorderSide(color: AppColors.primary),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      padding: const EdgeInsets.symmetric(vertical: 10),
+                    ),
+                    icon: const Icon(
+                      Icons.open_in_new_rounded,
+                      size: 16,
+                      color: AppColors.primary,
+                    ),
+                    label: Text(
+                      context.tr(LocaleKeys.payment_openPaymentLink),
+                      style: AppTextStyles.button.copyWith(
+                        color: AppColors.primary,
+                        fontSize: 13,
+                      ),
+                    ),
+                  ),
+                ],
+              ],
+            )
+          : Column(
+              children: [
+                if (hasQr) ...[
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: AppColors.white,
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: AppColors.border),
+                    ),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(8),
+                      child: Image.network(
+                        method.qrImage!,
+                        width: 140,
+                        height: 140,
+                        fit: BoxFit.contain,
+                        errorBuilder: (context, error, stackTrace) =>
+                            const SizedBox(
+                          width: 140,
+                          height: 140,
+                          child: Icon(
+                            Icons.qr_code_2_rounded,
+                            size: 80,
+                            color: AppColors.textSecondary,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: AppSpacing.sm),
+                ] else ...[
+                  const Icon(
+                    Icons.qr_code_scanner_outlined,
+                    size: 48,
+                    color: AppColors.primary,
+                  ),
+                  const SizedBox(height: AppSpacing.xs),
+                ],
+                Text(
+                  instructions,
+                  textAlign: TextAlign.center,
+                  style: AppTextStyles.bodySmall.copyWith(
+                    color: AppColors.textSecondary,
+                    height: 1.4,
+                  ),
+                ),
+              ],
+            ),
+    );
+  }
+}
+
+class _CardBadge extends StatelessWidget {
+  const _CardBadge({required this.label, required this.color});
+  final String label;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+      decoration: BoxDecoration(
+        color: AppColors.white,
+        borderRadius: BorderRadius.circular(4),
+        border: Border.all(color: AppColors.border),
+      ),
+      child: Text(
+        label,
+        style: AppTextStyles.caption.copyWith(
+          color: color,
+          fontWeight: FontWeight.w800,
+          fontSize: 10,
+        ),
+      ),
+    );
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// TRANSFER DETAILS & RECEIPT PROOF (Matching website proof upload box)
+// ─────────────────────────────────────────────────────────────────────────────
+class _ProofUploadCard extends StatelessWidget {
+  const _ProofUploadCard({
+    required this.transferNumberController,
+    required this.receiptImage,
+    required this.onPickImage,
+    required this.onRemoveImage,
+    required this.isArabic,
+  });
+
+  final TextEditingController transferNumberController;
+  final File? receiptImage;
+  final VoidCallback onPickImage;
+  final VoidCallback onRemoveImage;
+  final bool isArabic;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(AppSpacing.md),
+      decoration: BoxDecoration(
+        color: AppColors.white,
+        borderRadius: AppRadius.allXl,
+        border: Border.all(color: AppColors.border),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          // ── Transfer Number Input ──
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Row(
+                children: [
+                  const Icon(
+                    Icons.phone_android_outlined,
+                    color: AppColors.primary,
+                    size: 18,
+                  ),
+                  const SizedBox(width: 6),
+                  Text(
+                    context.tr(LocaleKeys.payment_transferNumberLabel),
+                    style: AppTextStyles.caption.copyWith(
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.textPrimary,
+                    ),
+                  ),
+                ],
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                decoration: BoxDecoration(
+                  color: AppColors.background,
+                  borderRadius: BorderRadius.circular(6),
+                  border: Border.all(color: AppColors.border),
+                ),
+                child: Text(
+                  context.tr(LocaleKeys.payment_optional),
+                  style: AppTextStyles.caption.copyWith(
+                    color: AppColors.textSecondary,
+                    fontSize: 10,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: AppSpacing.xs + 2),
+
+          Container(
+            height: 46,
+            decoration: BoxDecoration(
+              color: const Color(0xFFF8FAFC),
+              borderRadius: BorderRadius.circular(10),
+              border: Border.all(color: AppColors.border),
+            ),
+            child: TextField(
+              controller: transferNumberController,
+              keyboardType: TextInputType.phone,
+              style: AppTextStyles.body.copyWith(
+                fontWeight: FontWeight.w600,
+                fontSize: 14,
+              ),
+              decoration: InputDecoration(
+                border: InputBorder.none,
+                prefixIcon: const Icon(
+                  Icons.tag_rounded,
+                  color: AppColors.textSecondary,
+                  size: 18,
+                ),
+                hintText: context.tr(LocaleKeys.payment_transferNumberHint),
+                hintStyle: AppTextStyles.bodySmall.copyWith(
+                  color: AppColors.textSecondary.withValues(alpha: 0.7),
+                  fontSize: 13,
+                ),
+                contentPadding: const EdgeInsets.symmetric(vertical: 12),
+              ),
+            ),
+          ),
+          const SizedBox(height: AppSpacing.md),
+
+          // ── Receipt Screenshot Header ──
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Row(
+                children: [
+                  const Icon(
+                    Icons.image_outlined,
+                    color: AppColors.success,
+                    size: 18,
+                  ),
+                  const SizedBox(width: 6),
+                  Text(
+                    context.tr(LocaleKeys.payment_receiptImageLabel),
+                    style: AppTextStyles.caption.copyWith(
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.textPrimary,
+                    ),
+                  ),
+                ],
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                decoration: BoxDecoration(
+                  color: AppColors.success.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(6),
+                  border: Border.all(
+                    color: AppColors.success.withValues(alpha: 0.25),
+                  ),
+                ),
+                child: Text(
+                  context.tr(LocaleKeys.payment_fastConfirm),
+                  style: AppTextStyles.caption.copyWith(
+                    color: AppColors.success,
+                    fontSize: 10,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: AppSpacing.xs + 2),
+
+          // ── Dashed Receipt Drop Box ──
+          GestureDetector(
+            onTap: onPickImage,
+            child: CustomPaint(
+              painter: const _DashedRectPainter(
+                color: Color(0xFFCBD5E1),
+                strokeWidth: 1.5,
+                radius: 12,
+                dash: 5,
+                gap: 4,
+              ),
+              child: Container(
+                padding: const EdgeInsets.all(AppSpacing.md),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFF8FAFC),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: receiptImage == null
+                    ? Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const Icon(
+                            Icons.cloud_upload_outlined,
+                            color: AppColors.primary,
+                            size: 36,
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            context.tr(
+                              LocaleKeys.payment_clickToUploadReceipt,
+                            ),
+                            style: AppTextStyles.bodySmall.copyWith(
+                              fontWeight: FontWeight.w700,
+                              color: AppColors.textPrimary,
+                            ),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            context.tr(LocaleKeys.payment_supportedFormats),
+                            style: AppTextStyles.caption.copyWith(
+                              color: AppColors.textSecondary,
+                              fontSize: 11,
+                            ),
+                          ),
+                        ],
+                      )
+                    : Row(
+                        children: [
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(8),
+                            child: Image.file(
+                              receiptImage!,
+                              width: 44,
+                              height: 44,
+                              fit: BoxFit.cover,
+                            ),
+                          ),
+                          const SizedBox(width: AppSpacing.sm),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  receiptImage!.path
+                                      .split(RegExp(r'[/\\]'))
+                                      .last,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: AppTextStyles.bodySmall.copyWith(
+                                    fontWeight: FontWeight.w700,
+                                    color: AppColors.textPrimary,
+                                  ),
+                                ),
+                                const SizedBox(height: 2),
+                                Row(
+                                  children: [
+                                    const Icon(
+                                      Icons.check_circle_rounded,
+                                      color: AppColors.success,
+                                      size: 14,
+                                    ),
+                                    const SizedBox(width: 4),
+                                    Text(
+                                      context.tr(
+                                        LocaleKeys.payment_receiptAttached,
+                                      ),
+                                      style: AppTextStyles.caption.copyWith(
+                                        color: AppColors.success,
+                                        fontWeight: FontWeight.w700,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ),
+                          IconButton(
+                            onPressed: onRemoveImage,
+                            icon: const Icon(
+                              Icons.delete_outline_rounded,
+                              color: Color(0xFFDC2626),
+                              size: 22,
+                            ),
+                          ),
+                        ],
+                      ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// TERMS & AGREEMENT CHECKBOX ROW
+// ─────────────────────────────────────────────────────────────────────────────
+class _TermsCheckboxRow extends StatelessWidget {
+  const _TermsCheckboxRow({
+    required this.value,
+    required this.onChanged,
+  });
+
+  final bool value;
+  final ValueChanged<bool?> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        Checkbox(
+          value: value,
+          onChanged: onChanged,
+          activeColor: AppColors.primary,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(4),
+          ),
+        ),
+        Expanded(
+          child: GestureDetector(
+            onTap: () => onChanged(!value),
+            child: Text(
+              context.tr(LocaleKeys.payment_termsAgreement),
+              style: AppTextStyles.caption.copyWith(
+                color: AppColors.textSecondary,
+                fontWeight: FontWeight.w600,
+                fontSize: 12,
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// STICKY BOTTOM ACTION BAR (Matching website .modal-bottom-bar-fixed)
+// ─────────────────────────────────────────────────────────────────────────────
+class _StickyBottomBar extends StatelessWidget {
+  const _StickyBottomBar({
+    required this.priceText,
+    required this.submitting,
+    required this.onSubmit,
+  });
+
+  final String priceText;
+  final bool submitting;
+  final VoidCallback onSubmit;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.md,
+        vertical: AppSpacing.sm + 2,
+      ),
+      decoration: BoxDecoration(
+        color: AppColors.white,
+        border: const Border(top: BorderSide(color: AppColors.border)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.06),
+            blurRadius: 10,
+            offset: const Offset(0, -3),
+          ),
+        ],
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                priceText,
+                style: AppTextStyles.title.copyWith(
+                  fontWeight: FontWeight.w900,
+                  color: AppColors.textPrimary,
+                  fontSize: 18,
+                ),
+              ),
+              Text(
+                context.tr(LocaleKeys.payment_orderTotal),
+                style: AppTextStyles.caption.copyWith(
+                  color: AppColors.textSecondary,
+                  fontSize: 11,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(width: AppSpacing.md),
+          Expanded(
+            child: SizedBox(
+              height: AppSizes.buttonHeight,
+              child: FilledButton.icon(
+                onPressed: submitting ? null : onSubmit,
+                style: FilledButton.styleFrom(
+                  backgroundColor: AppColors.primary,
+                  disabledBackgroundColor:
+                      AppColors.primary.withValues(alpha: 0.6),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                icon: submitting
+                    ? const SizedBox(
+                        width: 18,
+                        height: 18,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: AppColors.white,
+                        ),
+                      )
+                    : const Icon(
+                        Icons.check_circle_rounded,
+                        color: AppColors.white,
+                        size: 20,
+                      ),
+                label: Text(
+                  context.tr(LocaleKeys.payment_confirmFinalBooking),
+                  style: AppTextStyles.button.copyWith(
+                    color: AppColors.white,
+                    fontWeight: FontWeight.w800,
+                    fontSize: 15,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// DASHED RECTANGLE CUSTOM PAINTER
+// ─────────────────────────────────────────────────────────────────────────────
+class _DashedRectPainter extends CustomPainter {
+  const _DashedRectPainter({
+    required this.color,
+    this.strokeWidth = 1.5,
+    this.gap = 5.0,
+    this.dash = 5.0,
+    this.radius = 12.0,
+  });
+
+  final Color color;
+  final double strokeWidth;
+  final double gap;
+  final double dash;
+  final double radius;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = color
+      ..strokeWidth = strokeWidth
+      ..style = PaintingStyle.stroke;
+
+    final path = Path()
+      ..addRRect(
+        RRect.fromRectAndRadius(
+          Rect.fromLTWH(0, 0, size.width, size.height),
+          Radius.circular(radius),
+        ),
+      );
+
+    final dashPath = Path();
+    for (final metric in path.computeMetrics()) {
+      var distance = 0.0;
+      var draw = true;
+      while (distance < metric.length) {
+        final length = draw ? dash : gap;
+        if (draw) {
+          dashPath.addPath(
+            metric.extractPath(distance, distance + length),
+            Offset.zero,
+          );
+        }
+        distance += length;
+        draw = !draw;
+      }
+    }
+    canvas.drawPath(dashPath, paint);
+  }
+
+  @override
+  bool shouldRepaint(_DashedRectPainter oldDelegate) =>
+      color != oldDelegate.color ||
+      strokeWidth != oldDelegate.strokeWidth ||
+      radius != oldDelegate.radius;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// SECTION HEADING & SKELETONS
+// ─────────────────────────────────────────────────────────────────────────────
+class _SectionHeading extends StatelessWidget {
+  const _SectionHeading({required this.icon, required this.title});
+  final IconData icon;
+  final String title;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Icon(icon, color: AppColors.primary, size: 20),
+        const SizedBox(width: 6),
+        Text(
+          title,
+          style: AppTextStyles.body.copyWith(
+            fontWeight: FontWeight.w800,
+            color: AppColors.textPrimary,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _PaymentMethodsLoading extends StatelessWidget {
+  const _PaymentMethodsLoading();
+
+  @override
+  Widget build(BuildContext context) {
+    return const Column(
+      children: [
+        SkeletonPulse(child: SkeletonBox(height: 48, borderRadius: 14)),
+        SizedBox(height: AppSpacing.sm),
+        SkeletonPulse(child: SkeletonBox(height: 120, borderRadius: 16)),
+      ],
+    );
+  }
+}
+
 class _PaymentMethodsError extends StatelessWidget {
   const _PaymentMethodsError({required this.onRetry});
   final VoidCallback onRetry;
@@ -582,834 +1534,19 @@ class _PaymentMethodsError extends StatelessWidget {
       padding: const EdgeInsets.all(AppSpacing.md),
       decoration: BoxDecoration(
         color: AppColors.white,
-        borderRadius: AppRadius.allLg,
+        borderRadius: AppRadius.allXl,
         border: Border.all(color: AppColors.border),
       ),
       child: Column(
         children: [
           Text(
             context.tr(LocaleKeys.payment_methodsError),
-            textAlign: TextAlign.center,
             style: AppTextStyles.body.copyWith(color: AppColors.textSecondary),
           ),
           const SizedBox(height: AppSpacing.sm),
-          TextButton(
+          OutlinedButton(
             onPressed: onRetry,
             child: Text(context.tr(LocaleKeys.common_retry)),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-/// Loading placeholder shown under the payment methods while checkout runs.
-class _SubmittingSection extends StatelessWidget {
-  const _SubmittingSection();
-
-  @override
-  Widget build(BuildContext context) {
-    return const Column(
-      children: [
-        SkeletonPulse(
-          child: SkeletonBox(width: 220, height: 220, borderRadius: 8),
-        ),
-        SizedBox(height: AppSpacing.md),
-        SizedBox(
-          width: 24,
-          height: 24,
-          child: CircularProgressIndicator(strokeWidth: 2.5),
-        ),
-      ],
-    );
-  }
-}
-
-/// Inline success: QR code + reference + amount + (for a real booking) a
-/// payment-proof upload form, all under the payment methods — no separate
-/// page, no auto-navigation.
-class _SuccessSection extends StatefulWidget {
-  const _SuccessSection({
-    required this.bookingReference,
-    required this.paymentMethodLabel,
-    required this.amountLabel,
-    this.paymentMethod,
-    this.qrCode,
-    this.paymentInstructions,
-    this.transactionReference,
-    this.transferNumber,
-    this.showConfirmPayment = false,
-  });
-
-  final String bookingReference;
-  final String? paymentMethod;
-  final String paymentMethodLabel;
-  final String amountLabel;
-  final String? qrCode;
-  final String? paymentInstructions;
-  final String? transactionReference;
-  final String? transferNumber;
-
-  /// Whether to show the receipt-upload / confirm-payment form (only for a
-  /// freshly created booking, never the legacy ticket display).
-  final bool showConfirmPayment;
-
-  @override
-  State<_SuccessSection> createState() => _SuccessSectionState();
-}
-
-class _SuccessSectionState extends State<_SuccessSection> {
-  final _formKey = GlobalKey<FormState>();
-  final _transferNumberController = TextEditingController();
-  final _picker = ImagePicker();
-
-  // Final "confirm-local" step (shown after the receipt upload succeeds).
-  final _localFormKey = GlobalKey<FormState>();
-  final _localTransferNumberController = TextEditingController();
-  final _txReferenceController = TextEditingController();
-  final _notesController = TextEditingController();
-
-  ConfirmPaymentCubit? _confirmCubit;
-  ConfirmLocalPaymentCubit? _localCubit;
-  File? _receiptImage;
-  bool _localFieldsPrefilled = false;
-
-  @override
-  void initState() {
-    super.initState();
-    if (widget.showConfirmPayment) {
-      _confirmCubit = getIt<ConfirmPaymentCubit>();
-      _localCubit = getIt<ConfirmLocalPaymentCubit>();
-    }
-  }
-
-  @override
-  void dispose() {
-    _confirmCubit?.close();
-    _localCubit?.close();
-    _transferNumberController.dispose();
-    _localTransferNumberController.dispose();
-    _txReferenceController.dispose();
-    _notesController.dispose();
-    super.dispose();
-  }
-
-  Future<void> _pickImage() async {
-    final source = await showModalBottomSheet<ImageSource>(
-      context: context,
-      builder: (sheetContext) => SafeArea(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            ListTile(
-              leading: const Icon(Icons.photo_library_outlined),
-              title: Text(sheetContext.tr(LocaleKeys.payment_pickFromGallery)),
-              onTap: () => Navigator.of(sheetContext).pop(ImageSource.gallery),
-            ),
-            ListTile(
-              leading: const Icon(Icons.photo_camera_outlined),
-              title: Text(sheetContext.tr(LocaleKeys.payment_pickFromCamera)),
-              onTap: () => Navigator.of(sheetContext).pop(ImageSource.camera),
-            ),
-          ],
-        ),
-      ),
-    );
-    if (source == null) return;
-    final picked = await _picker.pickImage(
-      source: source,
-      imageQuality: 80,
-      maxWidth: 1600,
-    );
-    if (picked == null || !mounted) return;
-    setState(() => _receiptImage = File(picked.path));
-  }
-
-  void _submitProof() {
-    final cubit = _confirmCubit;
-    if (cubit == null || cubit.state is ConfirmPaymentSubmitting) return;
-    if (!(_formKey.currentState?.validate() ?? false)) return;
-    if (_receiptImage == null) {
-      AppToast.show(context, context.tr(LocaleKeys.payment_receiptRequired));
-      return;
-    }
-    cubit.submit(
-      bookingRef: widget.bookingReference,
-      paymentMethod: widget.paymentMethod ?? 'zaincash',
-      transferNumber: _transferNumberController.text.trim(),
-      transactionReference: widget.transactionReference,
-      receiptImagePath: _receiptImage!.path,
-    );
-  }
-
-  void _onConfirmStateChanged(BuildContext context, ConfirmPaymentState state) {
-    switch (state) {
-      case ConfirmPaymentLoaded(:final result) when !result.success:
-        AppToast.show(
-          context,
-          result.message ?? context.tr(LocaleKeys.payment_confirmPaymentFailed),
-        );
-      case ConfirmPaymentLoaded(:final result) when result.success:
-        // Step 1 done — seed the final "confirm-local" form once with what
-        // the user already provided / what checkout returned.
-        if (!_localFieldsPrefilled) {
-          _localFieldsPrefilled = true;
-          _localTransferNumberController.text =
-              _transferNumberController.text.trim();
-          if (widget.transactionReference != null) {
-            _txReferenceController.text = widget.transactionReference!;
-          }
-        }
-      case ConfirmPaymentFailure(:final failure):
-        AppToast.show(context, failure.message);
-      case ConfirmPaymentInitial() ||
-          ConfirmPaymentSubmitting() ||
-          ConfirmPaymentLoaded():
-        break;
-    }
-  }
-
-  void _submitLocal() {
-    final cubit = _localCubit;
-    if (cubit == null || cubit.state is ConfirmLocalPaymentSubmitting) return;
-    if (!(_localFormKey.currentState?.validate() ?? false)) return;
-    cubit.submit(
-      bookingReference: widget.bookingReference,
-      paymentMethod: widget.paymentMethod ?? 'zaincash',
-      transferNumber: _localTransferNumberController.text.trim(),
-      transactionReference: _txReferenceController.text.trim(),
-      notes: _notesController.text.trim(),
-    );
-  }
-
-  void _onLocalStateChanged(
-    BuildContext context,
-    ConfirmLocalPaymentState state,
-  ) {
-    switch (state) {
-      case ConfirmLocalPaymentLoaded(:final result) when !result.success:
-        AppToast.show(
-          context,
-          result.message ?? context.tr(LocaleKeys.payment_confirmPaymentFailed),
-        );
-      case ConfirmLocalPaymentFailure(:final failure):
-        AppToast.show(context, failure.message);
-      case ConfirmLocalPaymentInitial() ||
-          ConfirmLocalPaymentSubmitting() ||
-          ConfirmLocalPaymentLoaded():
-        break;
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        if (widget.paymentInstructions != null) ...[
-          _InstructionsCard(text: widget.paymentInstructions!),
-          const SizedBox(height: AppSpacing.md),
-        ],
-        Container(
-          padding: const EdgeInsets.all(AppSpacing.md),
-          decoration: BoxDecoration(
-            color: AppColors.white,
-            borderRadius: AppRadius.allLg,
-            border: Border.all(color: AppColors.border),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              _DetailRow(
-                label: context.tr(LocaleKeys.payment_eTicket),
-                value: '#${widget.bookingReference}',
-              ),
-              const SizedBox(height: AppSpacing.sm),
-              _DetailRow(
-                label: context.tr(LocaleKeys.payment_paymentMethod),
-                value: widget.paymentMethodLabel,
-              ),
-              const SizedBox(height: AppSpacing.sm),
-              _DetailRow(
-                label: context.tr(LocaleKeys.payment_amountDue),
-                value: widget.amountLabel,
-              ),
-              if (widget.transferNumber != null &&
-                  widget.transferNumber!.isNotEmpty) ...[
-                const SizedBox(height: AppSpacing.sm),
-                _DetailRow(
-                  label: context.tr(LocaleKeys.payment_transferToNumber),
-                  value: widget.transferNumber!,
-                ),
-              ],
-            ],
-          ),
-        ),
-        if (widget.qrCode != null) ...[
-          const SizedBox(height: AppSpacing.md),
-          _QrCodeCard(url: widget.qrCode!),
-        ],
-        if (widget.showConfirmPayment && _confirmCubit != null) ...[
-          const SizedBox(height: AppSpacing.md),
-          // ── Step 1: receipt-image upload ──
-          BlocConsumer<ConfirmPaymentCubit, ConfirmPaymentState>(
-            bloc: _confirmCubit,
-            listener: _onConfirmStateChanged,
-            builder: (context, state) {
-              if (state is ConfirmPaymentLoaded && state.result.success) {
-                return const _ProofSubmittedCard();
-              }
-              final submitting = state is ConfirmPaymentSubmitting;
-              return _ConfirmPaymentForm(
-                formKey: _formKey,
-                transferNumberController: _transferNumberController,
-                receiptImage: _receiptImage,
-                submitting: submitting,
-                onPickImage: _pickImage,
-                onSubmit: _submitProof,
-              );
-            },
-          ),
-          // ── Step 2: confirm-local payment (only after step 1 succeeds) ──
-          BlocBuilder<ConfirmPaymentCubit, ConfirmPaymentState>(
-            bloc: _confirmCubit,
-            builder: (context, proofState) {
-              final proofDone = proofState is ConfirmPaymentLoaded &&
-                  proofState.result.success;
-              if (!proofDone || _localCubit == null) {
-                return const SizedBox.shrink();
-              }
-              return Padding(
-                padding: const EdgeInsets.only(top: AppSpacing.md),
-                child: BlocConsumer<ConfirmLocalPaymentCubit,
-                    ConfirmLocalPaymentState>(
-                  bloc: _localCubit,
-                  listener: _onLocalStateChanged,
-                  builder: (context, state) {
-                    if (state is ConfirmLocalPaymentLoaded &&
-                        state.result.success) {
-                      return const _LocalPaymentConfirmedCard();
-                    }
-                    return _ConfirmLocalPaymentForm(
-                      formKey: _localFormKey,
-                      transferNumberController: _localTransferNumberController,
-                      transactionReferenceController: _txReferenceController,
-                      notesController: _notesController,
-                      submitting: state is ConfirmLocalPaymentSubmitting,
-                      onSubmit: _submitLocal,
-                    );
-                  },
-                ),
-              );
-            },
-          ),
-        ],
-        const SizedBox(height: AppSpacing.lg),
-        PrimaryButton(
-          label: context.tr(LocaleKeys.navigation_sessions),
-          onPressed: () => context.go(AppRoutes.sessions),
-        ),
-      ],
-    );
-  }
-}
-
-/// Receipt-upload form posted to `/api/booking/{ref}/confirm-payment`.
-class _ConfirmPaymentForm extends StatelessWidget {
-  const _ConfirmPaymentForm({
-    required this.formKey,
-    required this.transferNumberController,
-    required this.receiptImage,
-    required this.submitting,
-    required this.onPickImage,
-    required this.onSubmit,
-  });
-
-  final GlobalKey<FormState> formKey;
-  final TextEditingController transferNumberController;
-  final File? receiptImage;
-  final bool submitting;
-  final VoidCallback onPickImage;
-  final VoidCallback onSubmit;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(AppSpacing.md),
-      decoration: BoxDecoration(
-        color: AppColors.white,
-        borderRadius: AppRadius.allLg,
-        border: Border.all(color: AppColors.border),
-      ),
-      child: Form(
-        key: formKey,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Text(
-              context.tr(LocaleKeys.payment_confirmPaymentTitle),
-              style: AppTextStyles.body.copyWith(
-                color: AppColors.textPrimary,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-            const SizedBox(height: AppSpacing.sm),
-            Text(
-              context.tr(LocaleKeys.payment_transferNumberLabel),
-              textAlign: TextAlign.start,
-              style: AppTextStyles.body.copyWith(
-                color: AppColors.textSecondary,
-              ),
-            ),
-            const SizedBox(height: AppSpacing.xs),
-            OutlinedCardField(
-              controller: transferNumberController,
-              hintText: context.tr(LocaleKeys.payment_transferNumberHint),
-              validator: (value) => (value == null || value.trim().isEmpty)
-                  ? context.tr(LocaleKeys.validation_required)
-                  : null,
-            ),
-            const SizedBox(height: AppSpacing.md),
-            Text(
-              context.tr(LocaleKeys.payment_receiptImageLabel),
-              textAlign: TextAlign.start,
-              style: AppTextStyles.body.copyWith(
-                color: AppColors.textSecondary,
-              ),
-            ),
-            const SizedBox(height: AppSpacing.xs),
-            _ReceiptPicker(image: receiptImage, onTap: onPickImage),
-            const SizedBox(height: AppSpacing.lg),
-            PrimaryButton(
-              label: submitting
-                  ? context.tr(LocaleKeys.booking_submitting)
-                  : context.tr(LocaleKeys.payment_submitProof),
-              onPressed: submitting ? null : onSubmit,
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _ReceiptPicker extends StatelessWidget {
-  const _ReceiptPicker({required this.image, required this.onTap});
-
-  final File? image;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: AppRadius.allMd,
-      child: Container(
-        height: image == null ? 96 : 180,
-        decoration: BoxDecoration(
-          color: AppColors.background,
-          borderRadius: AppRadius.allMd,
-          border: Border.all(color: AppColors.border, style: BorderStyle.solid),
-        ),
-        clipBehavior: Clip.antiAlias,
-        child: image == null
-            ? Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Icon(
-                    Icons.cloud_upload_outlined,
-                    color: AppColors.textSecondary,
-                  ),
-                  const SizedBox(height: AppSpacing.xs),
-                  Text(
-                    context.tr(LocaleKeys.payment_pickImage),
-                    style: AppTextStyles.body.copyWith(
-                      color: AppColors.textSecondary,
-                    ),
-                  ),
-                ],
-              )
-            : Stack(
-                fit: StackFit.expand,
-                children: [
-                  Image.file(image!, fit: BoxFit.cover),
-                  Positioned(
-                    right: 8,
-                    top: 8,
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 10,
-                        vertical: 4,
-                      ),
-                      decoration: BoxDecoration(
-                        color: Colors.black54,
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      child: Text(
-                        context.tr(LocaleKeys.payment_changeImage),
-                        style: AppTextStyles.body.copyWith(
-                          color: AppColors.white,
-                          fontSize: 12,
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-      ),
-    );
-  }
-}
-
-class _ProofSubmittedCard extends StatelessWidget {
-  const _ProofSubmittedCard();
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(AppSpacing.md),
-      decoration: BoxDecoration(
-        color: AppColors.white,
-        borderRadius: AppRadius.allLg,
-        border: Border.all(color: AppColors.primary.withValues(alpha: 0.4)),
-      ),
-      child: Row(
-        children: [
-          const Icon(Icons.check_circle_outline, color: AppColors.primary),
-          const SizedBox(width: AppSpacing.sm),
-          Expanded(
-            child: Text(
-              context.tr(LocaleKeys.payment_confirmPaymentSuccess),
-              style: AppTextStyles.body.copyWith(
-                color: AppColors.textPrimary,
-                height: 1.5,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-/// Final confirmation form posted as JSON to `/api/payment/confirm-local`.
-class _ConfirmLocalPaymentForm extends StatelessWidget {
-  const _ConfirmLocalPaymentForm({
-    required this.formKey,
-    required this.transferNumberController,
-    required this.transactionReferenceController,
-    required this.notesController,
-    required this.submitting,
-    required this.onSubmit,
-  });
-
-  final GlobalKey<FormState> formKey;
-  final TextEditingController transferNumberController;
-  final TextEditingController transactionReferenceController;
-  final TextEditingController notesController;
-  final bool submitting;
-  final VoidCallback onSubmit;
-
-  @override
-  Widget build(BuildContext context) {
-    String? required(String? value) => (value == null || value.trim().isEmpty)
-        ? context.tr(LocaleKeys.validation_required)
-        : null;
-
-    return Container(
-      padding: const EdgeInsets.all(AppSpacing.md),
-      decoration: BoxDecoration(
-        color: AppColors.white,
-        borderRadius: AppRadius.allLg,
-        border: Border.all(color: AppColors.border),
-      ),
-      child: Form(
-        key: formKey,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Text(
-              context.tr(LocaleKeys.payment_confirmLocalTitle),
-              style: AppTextStyles.body.copyWith(
-                color: AppColors.textPrimary,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-            const SizedBox(height: AppSpacing.xs),
-            Text(
-              context.tr(LocaleKeys.payment_confirmLocalSubtitle),
-              style: AppTextStyles.caption.copyWith(
-                color: AppColors.textSecondary,
-                height: 1.5,
-              ),
-            ),
-            const SizedBox(height: AppSpacing.md),
-            _FieldLabel(text: context.tr(LocaleKeys.payment_transferNumberLabel)),
-            OutlinedCardField(
-              controller: transferNumberController,
-              hintText: context.tr(LocaleKeys.payment_transferNumberHint),
-              validator: required,
-            ),
-            const SizedBox(height: AppSpacing.md),
-            _FieldLabel(
-              text: context.tr(LocaleKeys.payment_transactionReferenceLabel),
-            ),
-            OutlinedCardField(
-              controller: transactionReferenceController,
-              hintText: context.tr(
-                LocaleKeys.payment_transactionReferenceHint,
-              ),
-              validator: required,
-            ),
-            const SizedBox(height: AppSpacing.md),
-            _FieldLabel(text: context.tr(LocaleKeys.payment_notesLabel)),
-            OutlinedCardField(
-              controller: notesController,
-              hintText: context.tr(LocaleKeys.payment_notesHint),
-              maxLines: 3,
-            ),
-            const SizedBox(height: AppSpacing.lg),
-            PrimaryButton(
-              label: submitting
-                  ? context.tr(LocaleKeys.booking_submitting)
-                  : context.tr(LocaleKeys.payment_confirmLocalCta),
-              onPressed: submitting ? null : onSubmit,
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _FieldLabel extends StatelessWidget {
-  const _FieldLabel({required this.text});
-  final String text;
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: AppSpacing.xs),
-      child: Text(
-        text,
-        textAlign: TextAlign.start,
-        style: AppTextStyles.body.copyWith(color: AppColors.textSecondary),
-      ),
-    );
-  }
-}
-
-class _LocalPaymentConfirmedCard extends StatelessWidget {
-  const _LocalPaymentConfirmedCard();
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(AppSpacing.md),
-      decoration: BoxDecoration(
-        color: AppColors.primary.withValues(alpha: 0.08),
-        borderRadius: AppRadius.allLg,
-        border: Border.all(color: AppColors.primary.withValues(alpha: 0.4)),
-      ),
-      child: Row(
-        children: [
-          const Icon(Icons.verified_outlined, color: AppColors.primary),
-          const SizedBox(width: AppSpacing.sm),
-          Expanded(
-            child: Text(
-              context.tr(LocaleKeys.payment_confirmLocalSuccess),
-              style: AppTextStyles.body.copyWith(
-                color: AppColors.textPrimary,
-                height: 1.5,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-/// Legacy ticket display (opened with a reference, nothing to send).
-class _LegacyTicketSection extends StatelessWidget {
-  const _LegacyTicketSection({
-    required this.bookingReference,
-    required this.paymentMethodLabel,
-    required this.amountLabel,
-    this.qrCode,
-    this.paymentInstructions,
-  });
-
-  final String bookingReference;
-  final String paymentMethodLabel;
-  final String amountLabel;
-  final String? qrCode;
-  final String? paymentInstructions;
-
-  @override
-  Widget build(BuildContext context) {
-    return _SuccessSection(
-      bookingReference: bookingReference,
-      paymentMethodLabel: paymentMethodLabel,
-      amountLabel: amountLabel,
-      qrCode: qrCode,
-      paymentInstructions: paymentInstructions,
-    );
-  }
-}
-
-/// Inline failure with retry — stays on the same page.
-class _FailureSection extends StatelessWidget {
-  const _FailureSection({this.message, required this.onRetry});
-
-  final String? message;
-  final VoidCallback onRetry;
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Text(
-          message ?? context.tr(LocaleKeys.booking_bookingFailed),
-          textAlign: TextAlign.center,
-          style: AppTextStyles.body.copyWith(color: AppColors.error),
-        ),
-        const SizedBox(height: AppSpacing.sm),
-        PrimaryButton(
-          label: context.tr(LocaleKeys.common_retry),
-          onPressed: onRetry,
-        ),
-      ],
-    );
-  }
-}
-
-class _InstructionsCard extends StatelessWidget {
-  const _InstructionsCard({required this.text});
-  final String text;
-
-  static const Color _amber = Color(0xFFF2A20C);
-  static const Color _amberTint = Color(0xFFFFF9EC);
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(AppSpacing.md),
-      decoration: BoxDecoration(
-        color: _amberTint,
-        borderRadius: AppRadius.allLg,
-        border: Border.all(color: _amber.withValues(alpha: 0.35)),
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            width: 22,
-            height: 22,
-            margin: const EdgeInsets.only(left: AppSpacing.sm),
-            decoration: const BoxDecoration(
-              color: _amber,
-              shape: BoxShape.circle,
-            ),
-            child: const Icon(
-              Icons.info_outline,
-              color: AppColors.white,
-              size: 14,
-            ),
-          ),
-          Expanded(
-            child: Text(
-              text,
-              textAlign: TextAlign.start,
-              style: AppTextStyles.body.copyWith(
-                color: AppColors.textPrimary,
-                height: 1.6,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _DetailRow extends StatelessWidget {
-  const _DetailRow({required this.label, required this.value});
-  final String label;
-  final String value;
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Text(
-          '$label:',
-          style: AppTextStyles.body.copyWith(color: AppColors.textSecondary),
-        ),
-        Flexible(
-          child: Text(
-            value,
-            textAlign: TextAlign.end,
-            style: AppTextStyles.body.copyWith(
-              color: AppColors.textPrimary,
-              fontWeight: FontWeight.w700,
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class _QrCodeCard extends StatelessWidget {
-  const _QrCodeCard({required this.url});
-  final String url;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(AppSpacing.md),
-      decoration: BoxDecoration(
-        color: AppColors.white,
-        borderRadius: AppRadius.allLg,
-        border: Border.all(color: AppColors.border),
-      ),
-      child: Column(
-        children: [
-          Text(
-            context.tr(LocaleKeys.payment_scanQr),
-            style: AppTextStyles.body.copyWith(
-              color: AppColors.textPrimary,
-              fontWeight: FontWeight.w700,
-            ),
-          ),
-          const SizedBox(height: AppSpacing.md),
-          ClipRRect(
-            borderRadius: AppRadius.allMd,
-            child: Image.network(
-              url,
-              width: 220,
-              height: 220,
-              fit: BoxFit.contain,
-              loadingBuilder: (context, child, progress) {
-                if (progress == null) return child;
-                return const SkeletonPulse(
-                  child: SkeletonBox(width: 220, height: 220, borderRadius: 8),
-                );
-              },
-              errorBuilder: (context, error, stackTrace) => const SizedBox(
-                width: 220,
-                height: 220,
-                child: Center(
-                  child: Icon(
-                    Icons.broken_image_outlined,
-                    color: AppColors.textSecondary,
-                    size: 40,
-                  ),
-                ),
-              ),
-            ),
           ),
         ],
       ),
