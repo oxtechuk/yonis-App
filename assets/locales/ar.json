@@ -115,6 +115,10 @@
     "deleteAccountConfirmCta": "حذف الحساب نهائياً",
     "deleteAccountSuccess": "تم حذف الحساب بنجاح.",
     "deleteAccountFailed": "تعذر حذف الحساب من الخادم. يرجى التواصل مع الدعم الفني.",
+    "deleteAccountError": "تعذر حذف الحساب من الخادم. يرجى التواصل مع الدعم الفني.",
+    "cancel": "إلغاء",
+    "confirm": "تأكيد",
+    "deleting": "جاري حذف الحساب...",
     "logout": "تسجيل الخروج",
     "accountDetails": "تفاصيل الحساب",
     "loginRequired": "سجّل الدخول لعرض حسابك."

@@ -109,7 +109,9 @@ abstract class  LocaleKeys {
   static const profile_deleteAccount = 'profile.deleteAccount';
   static const profile_deleteAccountConfirmTitle = 'profile.deleteAccountConfirmTitle';
   static const profile_deleteAccountConfirmMessage = 'profile.deleteAccountConfirmMessage';
+  static const profile_deleteAccountConfirmCta = 'profile.deleteAccountConfirmCta';
   static const profile_deleteAccountSuccess = 'profile.deleteAccountSuccess';
+  static const profile_deleteAccountFailed = 'profile.deleteAccountFailed';
   static const profile_deleteAccountError = 'profile.deleteAccountError';
   static const profile_cancel = 'profile.cancel';
   static const profile_confirm = 'profile.confirm';

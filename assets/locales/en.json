@@ -115,6 +115,10 @@
     "deleteAccountConfirmCta": "Delete Account Permanently",
     "deleteAccountSuccess": "Account deleted successfully.",
     "deleteAccountFailed": "Unable to delete account from server. Please contact support.",
+    "deleteAccountError": "Unable to delete account from server. Please contact support.",
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "deleting": "Deleting account...",
     "logout": "Log out",
     "accountDetails": "Account details",
     "loginRequired": "Sign in to view your profile."

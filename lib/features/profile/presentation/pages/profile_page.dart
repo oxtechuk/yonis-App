@@ -233,7 +233,7 @@ class _ProfileViewState extends State<_ProfileView> {
     final confirmTitle = pageContext.tr(LocaleKeys.profile_deleteAccountConfirmTitle);
     final confirmMsg = pageContext.tr(LocaleKeys.profile_deleteAccountConfirmMessage);
     final cancelLabel = pageContext.tr(LocaleKeys.profile_cancel);
-    final deleteLabel = pageContext.tr(LocaleKeys.profile_deleteAccount);
+    final deleteLabel = pageContext.tr(LocaleKeys.profile_deleteAccountConfirmCta);
     final errorMsg = pageContext.tr(LocaleKeys.profile_deleteAccountError);
     final successMsg = pageContext.tr(LocaleKeys.profile_deleteAccountSuccess);
 
@@ -262,8 +262,15 @@ class _ProfileViewState extends State<_ProfileView> {
     showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (_) => const Center(
-        child: CircularProgressIndicator(color: AppColors.primary),
+      builder: (_) => AlertDialog(
+        content: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const CircularProgressIndicator(color: AppColors.primary),
+            const SizedBox(width: AppSpacing.md),
+            Text(pageContext.tr(LocaleKeys.profile_deleting)),
+          ],
+        ),
       ),
     );
 
