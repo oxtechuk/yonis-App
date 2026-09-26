@@ -5,10 +5,13 @@ plugins {
     id("dev.flutter.flutter-gradle-plugin")
 }
 
-def keyPropertiesFile = rootProject.file("key.properties")
-def keyProperties = new Properties()
+import java.io.FileInputStream
+import java.util.Properties
+
+val keyPropertiesFile = rootProject.file("key.properties")
+val keyProperties = Properties()
 if (keyPropertiesFile.exists()) {
-    keyProperties.load(new FileInputStream(keyPropertiesFile))
+    keyProperties.load(FileInputStream(keyPropertiesFile))
 }
 
 android {
@@ -22,15 +25,17 @@ android {
     }
 
     kotlinOptions {
-        jvmTarget = JavaVersion.VERSION_17.toString()
+        jvmTarget = "17"
     }
 
     signingConfigs {
         create("release") {
-            storeFile = keyPropertiesFile.exists() ? file(keyProperties["storeFile"]) : null
-            storePassword = keyProperties["storePassword"]
-            keyAlias = keyProperties["keyAlias"]
-            keyPassword = keyProperties["keyPassword"]
+            if (keyPropertiesFile.exists()) {
+                storeFile = file(keyProperties["storeFile"] as String)
+                storePassword = keyProperties["storePassword"] as String
+                keyAlias = keyProperties["keyAlias"] as String
+                keyPassword = keyProperties["keyPassword"] as String
+            }
         }
     }
 
