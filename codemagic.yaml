@@ -1,0 +1,105 @@
+# ==============================================================================
+# Younis Application — Codemagic CI/CD Pipeline
+# Repo: https://github.com/oxtechuk/yonis-App
+# Step 10: iOS TestFlight Release Workflow
+# ==============================================================================
+# Required Codemagic setup (outside repo):
+# 1. Team Settings > Team integrations > Developer Portal > Manage keys:
+#    Add App Store Connect API key (App Manager role). Note Key ID + Issuer ID.
+# 2. App Settings > Code signing identities:
+#    - iOS certificates: Generate or Fetch "Apple Distribution" certificate
+#      (or let `fetch-signing-files --create` create it automatically).
+#    - iOS provisioning profiles: Fetch App Store profile for
+#      Bundle ID: com.younis.younisApp (or let --create handle it).
+# 3. App Settings > Environment variables > Variable group `app_store_credentials`:
+#    - APP_STORE_CONNECT_KEY_IDENTIFIER (secret)
+#    - APP_STORE_CONNECT_ISSUER_ID (secret)
+#    - APP_STORE_CONNECT_PRIVATE_KEY (secret, full .p8 contents)
+#    - CERTIFICATE_PRIVATE_KEY (secret, RSA 2048 private key for cert management)
+# 4. App Settings > App Store Connect publishing: enable integration
+#    OR rely on env vars above (this yaml uses env-var auth via fetch-signing-files).
+# ==============================================================================
+
+workflows:
+  # ----------------------------------------------------------------------------
+  # iOS TESTFLIGHT RELEASE WORKFLOW (Step 10)
+  # Trigger: push to main + manual. Builds signed IPA, uploads to TestFlight.
+  # ----------------------------------------------------------------------------
+  ios-testflight:
+    name: iOS TestFlight Release
+    instance_type: mac_mini_m2
+    max_build_duration: 45
+    triggering:
+      events:
+        - push
+      branch_patterns:
+        - pattern: main
+          include: true
+      cancel_previous_builds: true
+    environment:
+      groups:
+        - app_store_credentials
+      vars:
+        BUNDLE_ID: com.younis.younisApp
+        APP_ENV: production
+      flutter: stable
+      xcode: latest
+      cocoapods: default
+    scripts:
+      - name: Set up keychain for code signing
+        script: |
+          keychain initialize
+      - name: Fetch Apple signing files (cert + profile)
+        script: |
+          app-store-connect fetch-signing-files "$BUNDLE_ID" \
+            --type IOS_APP_STORE \
+            --create
+      - name: Add certificates to keychain
+        script: |
+          keychain add-certificates
+      - name: Apply provisioning profiles to Xcode project
+        script: |
+          xcode-project use-profiles
+      - name: Install Flutter dependencies
+        script: |
+          flutter --version
+          flutter pub get
+      - name: Run test suite (fail fast on broken main)
+        script: |
+          flutter test
+      - name: Determine dynamic iOS build number
+        script: |
+          # App Store requires unique CFBundleVersion per upload.
+          # Query latest TestFlight/App Store build, increment by 1.
+          set -e
+          LATEST_BUILD=$(app-store-connect get-latest-app-store-build-number "$BUNDLE_ID" || echo 0)
+          # get-latest-app-store-build-number can print empty on first ever upload
+          if [ -z "$LATEST_BUILD" ]; then
+            LATEST_BUILD=0
+          fi
+          NEW_BUILD=$((LATEST_BUILD + 1))
+          echo "Latest store build: $LATEST_BUILD -> new build: $NEW_BUILD"
+          echo "NEW_BUILD=$NEW_BUILD" >> $CM_ENV
+      - name: Install CocoaPods dependencies
+        script: |
+          find . -name "Podfile" -execdir pod install \;
+          # Fallback: generate Podfile via Flutter if pod install found nothing
+          # (first CI run has no committed Podfile — this is expected).
+          if [ ! -f "ios/Podfile.lock" ]; then
+            echo "No Podfile.lock found, generating iOS config..."
+            flutter build ios --config-only --release --dart-define=APP_ENV=$APP_ENV
+            find . -name "Podfile" -execdir pod install \;
+          fi
+      - name: Build signed iOS IPA
+        script: |
+          flutter build ipa --release \
+            --build-number=$NEW_BUILD \
+            --dart-define=APP_ENV=$APP_ENV \
+            --export-options-plist=$HOME/export_options.plist
+    artifacts:
+      - build/ios/ipa/*.ipa
+      - /tmp/xcodebuild_logs/*.log
+    publishing:
+      app_store_connect:
+        auth: integration
+        submit_to_testflight: true
