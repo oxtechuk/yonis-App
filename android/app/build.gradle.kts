@@ -52,6 +52,9 @@ android {
 
     buildTypes {
         release {
+            if (!keyPropertiesFile.exists() && gradle.startParameter.taskNames.any { it.contains("Release", ignoreCase = true) }) {
+                throw GradleException("android/key.properties not found: release builds would be signed with the debug key and rejected by Google Play.")
+            }
             signingConfig = if (keyPropertiesFile.exists()) signingConfigs.getByName("release") else signingConfigs.getByName("debug")
         }
     }

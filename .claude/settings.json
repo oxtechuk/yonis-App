@@ -1,0 +1,7 @@
+{
+  "permissions": {
+    "allow": [
+      "PowerShell(& \"C:\\\\Users\\\\DELL\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\d--amir-main-work-projects-OX-tech-mobile-apps-younis-app\\\\e5e05e25-f90d-4176-86bb-7a3b0a97f891\\\\scratchpad\\\\make_key.ps1\")"
+    ]
+  }
+}
