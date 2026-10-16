@@ -7,7 +7,7 @@ abstract final class AppImages {
   static const String splashLogo = 'assets/images/white_logo.png';
 
   /// Full-color brand lockup, designed for light/white surfaces.
-  static const String mainLogo = 'assets/images/colored_logo.png';
+  static const String mainLogo = 'assets/images/app_logo.png';
 
   /// Hero image used on the home page.
   static const String homeHero = 'assets/images/younis_home_img.png';
