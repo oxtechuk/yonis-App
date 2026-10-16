@@ -5,9 +5,11 @@ import '../../../../app/di/dependency_injection.dart';
 import '../../../../app/styles/app_colors.dart';
 import '../../../../app/styles/app_spacing.dart';
 import '../../../../app/widgets/app_skeleton.dart';
+import '../../domain/entities/home_slider.dart';
 import '../cubit/doctor_profile_cubit.dart';
 import '../cubit/reels_cubit.dart';
 import '../cubit/services_cubit.dart';
+import '../cubit/sliders_cubit.dart';
 import '../cubit/testimonials_cubit.dart';
 import '../widgets/book_service_bottom_sheet.dart';
 import '../widgets/home_about_card.dart';
@@ -23,6 +25,9 @@ class HomePage extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiBlocProvider(
       providers: [
+        BlocProvider<SlidersCubit>(
+          create: (_) => getIt<SlidersCubit>()..load(),
+        ),
         BlocProvider<DoctorProfileCubit>(
           create: (_) => getIt<DoctorProfileCubit>()..load(),
         ),
@@ -49,62 +54,71 @@ class HomePage extends StatelessWidget {
               onRefresh: () => _refreshAll(innerContext),
               child: SingleChildScrollView(
                 physics: const AlwaysScrollableScrollPhysics(),
-              child: Column(
-                children: [
-                  // Hero is static (localized strings + fallback asset), so it
-                  // renders instantly. The network image swaps in with the
-                  // data; only bio/specialties wait behind skeletons.
-                  BlocBuilder<DoctorProfileCubit, DoctorProfileState>(
-                    builder: (context, state) {
-                      final heroImage = state is DoctorProfileLoaded
-                          ? state.profile.heroImage
-                          : null;
-                      return HomeHeroSection(
-                        heroImageUrl: heroImage,
-                        onBookTap: () =>
-                            BookServiceBottomSheet.show(innerContext),
-                        onAboutTap: () {
-                          // TODO: navigate to about
-                        },
-                      );
-                    },
-                  ),
-                  const SizedBox(height: AppSpacing.lg),
-                  BlocBuilder<DoctorProfileCubit, DoctorProfileState>(
-                    builder: (context, state) {
-                      return switch (state) {
-                        DoctorProfileInitial() || DoctorProfileLoading() =>
-                          const HomeAboutSkeleton(),
-                        DoctorProfileLoaded(:final profile) =>
-                          HomeAboutCard(bio: profile.bio),
-                        DoctorProfileError() => const HomeAboutCard(),
-                      };
-                    },
-                  ),
-                  const SizedBox(height: AppSpacing.lg),
-                  BlocBuilder<DoctorProfileCubit, DoctorProfileState>(
-                    builder: (context, state) {
-                      return switch (state) {
-                        DoctorProfileInitial() || DoctorProfileLoading() =>
-                          const HomeSpecialtiesSkeleton(),
-                        DoctorProfileLoaded(:final profile) =>
-                          HomeSpecialtiesSection(
-                            specialties: profile.specialties,
-                          ),
-                        DoctorProfileError() =>
-                          const HomeSpecialtiesSection(),
-                      };
-                    },
-                  ),
-                  const SizedBox(height: AppSpacing.lg),
-                  const HomeReelsSection(),
-                  const SizedBox(height: AppSpacing.lg),
-                  const HomeTestimonialsSection(),
-                  const SizedBox(height: AppSpacing.xl),
-                ],
+                child: Column(
+                  children: [
+                    BlocBuilder<SlidersCubit, SlidersState>(
+                      builder: (context, slidersState) {
+                        final sliders = slidersState is SlidersLoaded
+                            ? slidersState.sliders
+                            : const <HomeSlider>[];
+                        return BlocBuilder<
+                          DoctorProfileCubit,
+                          DoctorProfileState
+                        >(
+                          builder: (context, profileState) {
+                            final heroImage =
+                                profileState is DoctorProfileLoaded
+                                ? profileState.profile.heroImage
+                                : null;
+                            return HomeHeroSection(
+                              sliders: sliders,
+                              heroImageUrl: heroImage,
+                              onBookTap: () =>
+                                  BookServiceBottomSheet.show(innerContext),
+                              onAboutTap: () {
+                                // TODO: navigate to about
+                              },
+                            );
+                          },
+                        );
+                      },
+                    ),
+                    const SizedBox(height: AppSpacing.lg),
+                    BlocBuilder<DoctorProfileCubit, DoctorProfileState>(
+                      builder: (context, state) {
+                        return switch (state) {
+                          DoctorProfileInitial() || DoctorProfileLoading() =>
+                            const HomeAboutSkeleton(),
+                          DoctorProfileLoaded(:final profile) =>
+                            HomeAboutCard(bio: profile.bio),
+                          DoctorProfileError() => const HomeAboutCard(),
+                        };
+                      },
+                    ),
+                    const SizedBox(height: AppSpacing.lg),
+                    BlocBuilder<DoctorProfileCubit, DoctorProfileState>(
+                      builder: (context, state) {
+                        return switch (state) {
+                          DoctorProfileInitial() || DoctorProfileLoading() =>
+                            const HomeSpecialtiesSkeleton(),
+                          DoctorProfileLoaded(:final profile) =>
+                            HomeSpecialtiesSection(
+                              specialties: profile.specialties,
+                            ),
+                          DoctorProfileError() =>
+                            const HomeSpecialtiesSection(),
+                        };
+                      },
+                    ),
+                    const SizedBox(height: AppSpacing.lg),
+                    const HomeReelsSection(),
+                    const SizedBox(height: AppSpacing.lg),
+                    const HomeTestimonialsSection(),
+                    const SizedBox(height: AppSpacing.xl),
+                  ],
+                ),
               ),
             ),
-          ),
           ),
         ),
       ),
@@ -115,6 +129,7 @@ class HomePage extends StatelessWidget {
 /// Pull-to-refresh: refetch every home section.
 Future<void> _refreshAll(BuildContext context) {
   return Future.wait([
+    context.read<SlidersCubit>().load(),
     context.read<DoctorProfileCubit>().load(),
     context.read<ServicesCubit>().load('online', forceRefresh: true),
     context.read<ServicesCubit>().preload('clinic', forceRefresh: true),
