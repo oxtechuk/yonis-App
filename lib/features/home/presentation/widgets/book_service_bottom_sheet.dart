@@ -16,6 +16,7 @@ import '../../../../app/styles/app_spacing.dart';
 import '../../../../app/styles/app_text_styles.dart';
 import '../../../../app/widgets/app_skeleton.dart';
 import '../../domain/entities/service.dart';
+import '../cubit/doctors_cubit.dart';
 import '../cubit/services_cubit.dart';
 import 'service_option_card.dart';
 
@@ -32,14 +33,48 @@ class BookServiceBottomSheet extends StatefulWidget {
   static void show(BuildContext context) {
     final router = GoRouter.of(context);
     final servicesCubit = getIt<ServicesCubit>();
-    // Present the sheet FIRST so the entrance animation starts on this
-    // frame. Kicking the fetches afterwards (post-frame) keeps the
-    // resulting cubit emits — which also rebuild the offstage
-    // ServicesPage branch sharing this singleton — off the critical
-    // path of the sheet sliding up.
-    // load() is a no-op when 'online' is cached or already loading
-    // (see ServicesCubit), so warm taps open instantly; preload()
-    // warms the other tab without clobbering UI.
+    final doctorsCubit = getIt<DoctorsCubit>();
+
+    final currentState = doctorsCubit.state;
+    if (currentState is DoctorsLoaded) {
+      if (!currentState.hasResolvedDoctor) {
+        router.push(
+          AppRoutes.doctors,
+          extra: () {
+            if (context.mounted) {
+              _presentSheet(context, router, servicesCubit);
+            }
+          },
+        );
+        return;
+      }
+      _presentSheet(context, router, servicesCubit);
+      return;
+    }
+
+    doctorsCubit.load().then((_) {
+      if (!context.mounted) return;
+      final loadedState = doctorsCubit.state;
+      if (loadedState is DoctorsLoaded && !loadedState.hasResolvedDoctor) {
+        router.push(
+          AppRoutes.doctors,
+          extra: () {
+            if (context.mounted) {
+              _presentSheet(context, router, servicesCubit);
+            }
+          },
+        );
+      } else {
+        _presentSheet(context, router, servicesCubit);
+      }
+    });
+  }
+
+  static void _presentSheet(
+    BuildContext context,
+    GoRouter router,
+    ServicesCubit servicesCubit,
+  ) {
     showModalBottomSheet<void>(
       context: context,
       useRootNavigator: false,

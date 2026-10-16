@@ -11,6 +11,7 @@ abstract final class AppRoutes {
   static String homeItemDetailLocation(String itemId) => '/home/items/$itemId';
 
   static const String login = '/login';
+  static const String doctors = '/doctors';
   static const String booking = '/booking';
   static const String bookingStep2 = '/booking/step2';
   static const String payment = '/booking/payment';

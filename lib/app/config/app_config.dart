@@ -46,7 +46,7 @@ class AppConfig {
   factory AppConfig.forEnvironment(AppEnvironment environment) {
     return AppConfig(
       environment: environment,
-      appName: 'Yonis',
+      appName: 'المرشد - Almurshid',
       baseUrl: _baseUrls[environment]!,
       enableNetworkLogs: !environment.isProduction,
     );

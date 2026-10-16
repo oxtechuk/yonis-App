@@ -75,6 +75,13 @@ abstract class  LocaleKeys {
   static const home = 'home';
   static const services_title = 'services.title';
   static const services_empty = 'services.empty';
+  static const services_selectDoctorTitle = 'services.selectDoctorTitle';
+  static const services_selectDoctorSubtitle = 'services.selectDoctorSubtitle';
+  static const services_experienceYears = 'services.experienceYears';
+  static const services_consultationFee = 'services.consultationFee';
+  static const services_selectDoctorButton = 'services.selectDoctorButton';
+  static const services_changeDoctor = 'services.changeDoctor';
+  static const services_noDoctors = 'services.noDoctors';
   static const services = 'services';
   static const sessions_headerTitle = 'sessions.headerTitle';
   static const sessions_headerSubtitle = 'sessions.headerSubtitle';

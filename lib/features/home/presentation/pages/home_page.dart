@@ -6,6 +6,7 @@ import '../../../../app/styles/app_colors.dart';
 import '../../../../app/styles/app_spacing.dart';
 import '../../../../app/widgets/app_skeleton.dart';
 import '../cubit/doctor_profile_cubit.dart';
+import '../cubit/doctors_cubit.dart';
 import '../cubit/reels_cubit.dart';
 import '../cubit/services_cubit.dart';
 import '../cubit/sliders_cubit.dart';
@@ -24,6 +25,9 @@ class HomePage extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiBlocProvider(
       providers: [
+        BlocProvider<DoctorsCubit>.value(
+          value: getIt<DoctorsCubit>()..load(),
+        ),
         BlocProvider<SlidersCubit>(
           create: (_) => getIt<SlidersCubit>()..load(),
         ),
@@ -79,7 +83,10 @@ class HomePage extends StatelessWidget {
                           DoctorProfileInitial() || DoctorProfileLoading() =>
                             const HomeAboutSkeleton(),
                           DoctorProfileLoaded(:final profile) =>
-                            HomeAboutCard(bio: profile.bio),
+                            HomeAboutCard(
+                              title: profile.title,
+                              bio: profile.bio,
+                            ),
                           DoctorProfileError() => const SizedBox.shrink(),
                         };
                       },
@@ -117,6 +124,7 @@ class HomePage extends StatelessWidget {
 /// Pull-to-refresh: refetch every home section.
 Future<void> _refreshAll(BuildContext context) {
   return Future.wait([
+    context.read<DoctorsCubit>().load(forceRefresh: true),
     context.read<SlidersCubit>().load(),
     context.read<DoctorProfileCubit>().load(),
     context.read<ServicesCubit>().load('online', forceRefresh: true),

@@ -1,5 +1,5 @@
 {
-  "appName": "Yonis",
+  "appName": "المرشد - Almurshid",
   "common": {
     "ok": "OK",
     "cancel": "Cancel",
@@ -78,7 +78,14 @@
   },
   "services": {
     "title": "Our Services",
-    "empty": "No services available"
+    "empty": "No services available",
+    "selectDoctorTitle": "Select a Doctor or Specialist",
+    "selectDoctorSubtitle": "Please choose a doctor to view services and book your appointment",
+    "experienceYears": "{years} yrs experience",
+    "consultationFee": "Consultation fee: {fee} {currency}",
+    "selectDoctorButton": "Select Doctor",
+    "changeDoctor": "Change Doctor",
+    "noDoctors": "No doctors available right now"
   },
   "sessions": {
     "headerTitle": "Bookings",

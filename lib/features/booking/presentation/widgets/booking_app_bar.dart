@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../../../../app/localization/locale_direction.dart';
 import '../../../../app/styles/app_colors.dart';
 import '../../../../app/styles/app_sizes.dart';
 import '../../../../app/styles/app_spacing.dart';
@@ -35,8 +34,8 @@ class BookingAppBar extends StatelessWidget {
         children: [
           IconButton(
             onPressed: onBack,
-            icon: Icon(
-              context.isRtl ? Icons.arrow_forward : Icons.arrow_back,
+            icon: const Icon(
+              Icons.arrow_back,
               color: AppColors.textPrimary,
             ),
             padding: EdgeInsets.zero,

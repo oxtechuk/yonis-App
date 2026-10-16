@@ -1,21 +1,28 @@
 import 'package:easy_localization/easy_localization.dart' hide TextDirection;
 import 'package:flutter/material.dart';
 
-import '../../../../app/localization/locale_keys.g.dart';
 import '../../../../app/styles/app_colors.dart';
 import '../../../../app/styles/app_spacing.dart';
 import '../../../../app/styles/app_text_styles.dart';
 
 class HomeAboutCard extends StatelessWidget {
-  const HomeAboutCard({super.key, this.bio});
+  const HomeAboutCard({
+    super.key,
+    this.title,
+    this.bio,
+  });
+
+  /// Doctor title from the profile API.
+  final String? title;
 
   /// Doctor bio from the profile API.
   final String? bio;
 
   @override
   Widget build(BuildContext context) {
-    final text = bio?.trim() ?? '';
-    if (text.isEmpty) {
+    final headerText = title?.trim() ?? '';
+    final bodyText = bio?.trim() ?? '';
+    if (headerText.isEmpty && bodyText.isEmpty) {
       return const SizedBox.shrink();
     }
 
@@ -49,32 +56,42 @@ class HomeAboutCard extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Row(
-                          children: [
-                            const Icon(
-                              Icons.info_outline_rounded,
-                              color: AppColors.primary,
-                              size: 22,
-                            ),
-                            const SizedBox(width: AppSpacing.xs),
-                            Text(
-                              context.tr(LocaleKeys.home_aboutTitle),
-                              style: AppTextStyles.title.copyWith(
-                                color: AppColors.primary,
-                                fontWeight: FontWeight.bold,
+                        if (headerText.isNotEmpty) ...[
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Padding(
+                                padding: EdgeInsets.only(top: 2),
+                                child: Icon(
+                                  Icons.info_outline_rounded,
+                                  color: AppColors.primary,
+                                  size: 22,
+                                ),
                               ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: AppSpacing.sm),
-                        Text(
-                          text,
-                          textAlign: TextAlign.center,
-                          style: AppTextStyles.body.copyWith(
-                            color: AppColors.textSecondary,
-                            height: 1.8,
+                              const SizedBox(width: AppSpacing.xs),
+                              Expanded(
+                                child: Text(
+                                  headerText,
+                                  style: AppTextStyles.title.copyWith(
+                                    color: AppColors.primary,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
-                        ),
+                          if (bodyText.isNotEmpty)
+                            const SizedBox(height: AppSpacing.sm),
+                        ],
+                        if (bodyText.isNotEmpty)
+                          Text(
+                            bodyText,
+                            textAlign: TextAlign.center,
+                            style: AppTextStyles.body.copyWith(
+                              color: AppColors.textSecondary,
+                              height: 1.8,
+                            ),
+                          ),
                       ],
                     ),
                   ),

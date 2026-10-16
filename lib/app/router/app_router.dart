@@ -11,6 +11,7 @@ import '../../features/home/domain/entities/service.dart';
 import '../../features/home/presentation/pages/home_item_detail_page.dart';
 import '../../features/home/presentation/pages/home_page.dart';
 import '../../features/profile/presentation/pages/profile_page.dart';
+import '../../features/services/presentation/pages/doctor_selection_page.dart';
 import '../../features/services/presentation/pages/services_page.dart';
 import '../../features/sessions/presentation/pages/sessions_page.dart';
 import 'app_navigation_shell.dart';
@@ -28,6 +29,14 @@ GoRouter createAppRouter() {
         path: AppRoutes.login,
         builder: (_, state) => LoginPage(
           onGuestBooking: state.extra is VoidCallback
+              ? state.extra as VoidCallback
+              : null,
+        ),
+      ),
+      GoRoute(
+        path: AppRoutes.doctors,
+        builder: (_, state) => DoctorSelectionPage(
+          onDoctorSelected: state.extra is VoidCallback
               ? state.extra as VoidCallback
               : null,
         ),

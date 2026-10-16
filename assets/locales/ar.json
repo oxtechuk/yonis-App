@@ -1,5 +1,5 @@
 {
-  "appName": "يونس",
+  "appName": "المرشد - Almurshid",
   "common": {
     "ok": "موافق",
     "cancel": "إلغاء",
@@ -78,7 +78,14 @@
   },
   "services": {
     "title": "خدمتنا",
-    "empty": "لا توجد خدمات متاحة"
+    "empty": "لا توجد خدمات متاحة",
+    "selectDoctorTitle": "اختر المختص",
+    "selectDoctorSubtitle": "يرجى اختيار المختص المناسب لعرض الخدمات وحجز موعدك",
+    "experienceYears": "{years} سنوات خبرة",
+    "consultationFee": "سعر الكشف: {fee} {currency}",
+    "selectDoctorButton": "اختيار الطبيب",
+    "changeDoctor": "تغيير الطبيب",
+    "noDoctors": "لا يوجد أطباء متاحون حالياً"
   },
   "sessions": {
     "headerTitle": "حجوزات",
