@@ -120,6 +120,27 @@ class SkeletonCircle extends StatelessWidget {
 // Page / section composites (each mirrors its real card layout)
 // ---------------------------------------------------------------------------
 
+/// Hero slider placeholder mirroring [HomeHeroSection].
+class HomeHeroSkeleton extends StatelessWidget {
+  const HomeHeroSkeleton({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final size = MediaQuery.sizeOf(context);
+    final imageHeight = (size.height * 0.52).clamp(260.0, 480.0);
+    return SkeletonPulse(
+      child: Container(
+        width: double.infinity,
+        height: imageHeight,
+        decoration: const BoxDecoration(
+          color: AppColors.border,
+          borderRadius: BorderRadius.vertical(bottom: Radius.circular(28)),
+        ),
+      ),
+    );
+  }
+}
+
 /// About-card placeholder mirroring [HomeAboutCard].
 class HomeAboutSkeleton extends StatelessWidget {
   const HomeAboutSkeleton({super.key});

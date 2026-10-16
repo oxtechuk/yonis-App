@@ -5,7 +5,6 @@ import '../../../../app/di/dependency_injection.dart';
 import '../../../../app/styles/app_colors.dart';
 import '../../../../app/styles/app_spacing.dart';
 import '../../../../app/widgets/app_skeleton.dart';
-import '../../domain/entities/home_slider.dart';
 import '../cubit/doctor_profile_cubit.dart';
 import '../cubit/reels_cubit.dart';
 import '../cubit/services_cubit.dart';
@@ -57,30 +56,20 @@ class HomePage extends StatelessWidget {
                 child: Column(
                   children: [
                     BlocBuilder<SlidersCubit, SlidersState>(
-                      builder: (context, slidersState) {
-                        final sliders = slidersState is SlidersLoaded
-                            ? slidersState.sliders
-                            : const <HomeSlider>[];
-                        return BlocBuilder<
-                          DoctorProfileCubit,
-                          DoctorProfileState
-                        >(
-                          builder: (context, profileState) {
-                            final heroImage =
-                                profileState is DoctorProfileLoaded
-                                ? profileState.profile.heroImage
-                                : null;
-                            return HomeHeroSection(
+                      builder: (context, state) {
+                        return switch (state) {
+                          SlidersInitial() || SlidersLoading() =>
+                            const HomeHeroSkeleton(),
+                          SlidersLoaded(:final sliders) => HomeHeroSection(
                               sliders: sliders,
-                              heroImageUrl: heroImage,
                               onBookTap: () =>
                                   BookServiceBottomSheet.show(innerContext),
                               onAboutTap: () {
                                 // TODO: navigate to about
                               },
-                            );
-                          },
-                        );
+                            ),
+                          SlidersError() => const SizedBox.shrink(),
+                        };
                       },
                     ),
                     const SizedBox(height: AppSpacing.lg),
@@ -91,7 +80,7 @@ class HomePage extends StatelessWidget {
                             const HomeAboutSkeleton(),
                           DoctorProfileLoaded(:final profile) =>
                             HomeAboutCard(bio: profile.bio),
-                          DoctorProfileError() => const HomeAboutCard(),
+                          DoctorProfileError() => const SizedBox.shrink(),
                         };
                       },
                     ),
@@ -105,8 +94,7 @@ class HomePage extends StatelessWidget {
                             HomeSpecialtiesSection(
                               specialties: profile.specialties,
                             ),
-                          DoctorProfileError() =>
-                            const HomeSpecialtiesSection(),
+                          DoctorProfileError() => const SizedBox.shrink(),
                         };
                       },
                     ),

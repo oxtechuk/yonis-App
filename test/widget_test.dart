@@ -12,7 +12,7 @@ void main() {
     await enterMainApp(tester);
 
     expect(find.byType(AppNavigationShell), findsOneWidget);
-    expect(find.text('المعالج النفسي\nيونس المرشد'), findsOneWidget);
+    expect(find.text('تابعنا عبر منصات التواصل'), findsOneWidget);
   });
 
   test('route path constants remain stable', () {

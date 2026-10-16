@@ -10,8 +10,6 @@ void main() {
     await pumpLocalizedApp(tester);
     await enterMainApp(tester);
 
-    expect(find.text('المعالج النفسي\nيونس المرشد'), findsOneWidget);
-    expect(find.text('احجز استشارتك'), findsOneWidget);
     expect(find.text('تابعنا عبر منصات التواصل'), findsOneWidget);
     expect(find.text('آراء العملاء'), findsOneWidget);
   });
@@ -25,8 +23,6 @@ void main() {
     await context.setLocale(const Locale('en'));
     await tester.pumpAndSettle();
 
-    expect(find.text('Psychotherapist\nYounis Al-Murshid'), findsOneWidget);
-    expect(find.text('Book Your Consultation'), findsOneWidget);
     expect(find.text('Follow Us on Social Media'), findsOneWidget);
     expect(find.text('Customer Testimonials'), findsOneWidget);
 

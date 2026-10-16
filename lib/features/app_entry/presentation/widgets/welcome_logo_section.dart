@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../../../../app/styles/app_images.dart';
 import '../../../../app/styles/app_radius.dart';
 import 'welcome_circle_painter.dart';
 
@@ -22,7 +21,7 @@ class WelcomeCircleBackdrop extends StatelessWidget {
   }
 }
 
-/// The splash image or brand logo centered inside the visible part of the white section.
+/// The splash image centered inside the visible part of the white section.
 class WelcomeLogo extends StatelessWidget {
   const WelcomeLogo({
     super.key,
@@ -36,26 +35,20 @@ class WelcomeLogo extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final url = imageUrl?.trim();
-    if (url != null && url.isNotEmpty) {
-      return Center(
-        child: ClipRRect(
-          borderRadius: AppRadius.allLg,
-          child: Image.network(
-            url,
-            width: width,
-            fit: BoxFit.contain,
-            errorBuilder: (_, _, _) => Image.asset(
-              AppImages.mainLogo,
-              width: width,
-              fit: BoxFit.contain,
-            ),
-          ),
-        ),
-      );
+    if (url == null || url.isEmpty) {
+      return const SizedBox.shrink();
     }
 
     return Center(
-      child: Image.asset(AppImages.mainLogo, width: width, fit: BoxFit.contain),
+      child: ClipRRect(
+        borderRadius: AppRadius.allLg,
+        child: Image.network(
+          url,
+          width: width,
+          fit: BoxFit.contain,
+          errorBuilder: (_, _, _) => const SizedBox.shrink(),
+        ),
+      ),
     );
   }
 }

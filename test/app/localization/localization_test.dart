@@ -89,7 +89,7 @@ void main() {
 
     // Home content translated too.
     expect(
-      find.text('Psychotherapist\nYounis Al-Murshid'),
+      find.text('Follow Us on Social Media'),
       findsOneWidget,
     );
 

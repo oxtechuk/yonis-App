@@ -9,33 +9,21 @@ import '../../../../app/styles/app_text_styles.dart';
 class HomeSpecialtiesSection extends StatelessWidget {
   const HomeSpecialtiesSection({super.key, this.specialties});
 
-  /// Specialties from the doctor profile API. Falls back to the localized
-  /// placeholder chips while loading or when the API provides none.
+  /// Specialties from the doctor profile API.
   final List<String>? specialties;
-
-  static const _fallbackKeys = [
-    LocaleKeys.home_specialties_administrativeCases,
-    LocaleKeys.home_specialties_anxietyDisorder,
-    LocaleKeys.home_specialties_awareness,
-    LocaleKeys.home_specialties_addiction,
-    LocaleKeys.home_specialties_generalRights,
-    LocaleKeys.home_specialties_medicalErrors,
-    LocaleKeys.home_specialties_labor,
-    LocaleKeys.home_specialties_commercial,
-    LocaleKeys.home_specialties_hyperactivity,
-    LocaleKeys.home_specialties_traffic,
-    LocaleKeys.home_specialties_realEstate,
-    LocaleKeys.home_specialties_enforcementCases,
-    LocaleKeys.home_specialties_semiJudicialCommittees,
-  ];
 
   @override
   Widget build(BuildContext context) {
-    final isRtl = context.locale.languageCode == 'ar';
-    final labels = (specialties != null && specialties!.isNotEmpty)
-        ? specialties!
-        : _fallbackKeys.map(context.tr).toList();
+    final labels = specialties
+            ?.map((s) => s.trim())
+            .where((s) => s.isNotEmpty)
+            .toList(growable: false) ??
+        const <String>[];
+    if (labels.isEmpty) {
+      return const SizedBox.shrink();
+    }
 
+    final isRtl = context.locale.languageCode == 'ar';
     return Directionality(
       textDirection: isRtl ? TextDirection.rtl : TextDirection.ltr,
       child: Padding(
@@ -75,7 +63,7 @@ class _Chip extends StatelessWidget {
         vertical: AppSpacing.sm,
       ),
       decoration: BoxDecoration(
-        color: Color(0xffE5E7EB),
+        color: const Color(0xffE5E7EB),
         borderRadius: BorderRadius.circular(50),
         boxShadow: [
           BoxShadow(
@@ -85,7 +73,6 @@ class _Chip extends StatelessWidget {
           ),
         ],
       ),
-      // Use bodySmall from design tokens — no fontSize override
       child: Text(
         label,
         style: AppTextStyles.bodySmall.copyWith(

@@ -6,7 +6,6 @@ import 'package:flutter/material.dart';
 import '../../../../app/localization/locale_keys.g.dart';
 import '../../../../app/styles/app_colors.dart';
 import '../../../../app/styles/app_durations.dart';
-import '../../../../app/styles/app_images.dart';
 import '../../../../app/styles/app_radius.dart';
 import '../../../../app/styles/app_sizes.dart';
 import '../../../../app/styles/app_spacing.dart';
@@ -16,16 +15,14 @@ import '../../domain/entities/home_slider.dart';
 class HomeHeroSection extends StatefulWidget {
   const HomeHeroSection({
     super.key,
-    this.sliders = const [],
+    required this.sliders,
     this.onBookTap,
     this.onAboutTap,
-    this.heroImageUrl,
   });
 
   final List<HomeSlider> sliders;
   final VoidCallback? onBookTap;
   final VoidCallback? onAboutTap;
-  final String? heroImageUrl;
 
   @override
   State<HomeHeroSection> createState() => _HomeHeroSectionState();
@@ -79,12 +76,16 @@ class _HomeHeroSectionState extends State<HomeHeroSection> {
 
   @override
   Widget build(BuildContext context) {
+    final sliders = widget.sliders;
+    if (sliders.isEmpty) {
+      return const SizedBox.shrink();
+    }
+
     final size = MediaQuery.sizeOf(context);
     // Hero image: 52% of screen height on phones, capped for tablets
     final imageHeight = (size.height * 0.52).clamp(260.0, 480.0);
     // Button height from design token
     final btnHeight = AppSizes.buttonHeight;
-    final sliders = widget.sliders;
     final hasMultipleSliders = sliders.length > 1;
 
     return Column(
@@ -99,78 +100,60 @@ class _HomeHeroSectionState extends State<HomeHeroSection> {
               child: SizedBox(
                 width: double.infinity,
                 height: imageHeight,
-                child: sliders.isEmpty
-                    ? _HeroSlideItem(
-                        imageUrl: widget.heroImageUrl,
-                        title: context.tr(LocaleKeys.home_heroTitle),
-                        subtitle: context.tr(LocaleKeys.home_heroSubtitle),
-                        imageHeight: imageHeight,
-                        bottomContentOffset: btnHeight / 2 + AppSpacing.lg,
-                      )
-                    : Stack(
-                        children: [
-                          PageView.builder(
-                            controller: _pageController,
-                            itemCount: sliders.length,
-                            onPageChanged: (index) {
-                              setState(() => _currentIndex = index);
-                            },
-                            itemBuilder: (context, index) {
-                              final slider = sliders[index];
-                              final title = slider.title.isNotEmpty
-                                  ? slider.title
-                                  : context.tr(LocaleKeys.home_heroTitle);
-                              final subtitle = slider.subtitle.isNotEmpty
-                                  ? slider.subtitle
-                                  : context.tr(LocaleKeys.home_heroSubtitle);
-                              return _HeroSlideItem(
-                                imageUrl: slider.imageUrl.isNotEmpty
-                                    ? slider.imageUrl
-                                    : widget.heroImageUrl,
-                                title: title,
-                                subtitle: subtitle,
-                                imageHeight: imageHeight,
-                                bottomContentOffset: hasMultipleSliders
-                                    ? btnHeight / 2 + AppSpacing.xl + AppSpacing.sm
-                                    : btnHeight / 2 + AppSpacing.lg,
+                child: Stack(
+                  children: [
+                    PageView.builder(
+                      controller: _pageController,
+                      itemCount: sliders.length,
+                      onPageChanged: (index) {
+                        setState(() => _currentIndex = index);
+                      },
+                      itemBuilder: (context, index) {
+                        final slider = sliders[index];
+                        return _HeroSlideItem(
+                          imageUrl: slider.imageUrl,
+                          title: slider.title,
+                          subtitle: slider.subtitle,
+                          imageHeight: imageHeight,
+                          bottomContentOffset: hasMultipleSliders
+                              ? btnHeight / 2 + AppSpacing.xl + AppSpacing.sm
+                              : btnHeight / 2 + AppSpacing.lg,
+                        );
+                      },
+                    ),
+                    if (hasMultipleSliders)
+                      Positioned(
+                        left: 0,
+                        right: 0,
+                        bottom: btnHeight / 2 + AppSpacing.md,
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: List.generate(
+                            sliders.length,
+                            (index) {
+                              final isSelected = index == _currentIndex;
+                              return AnimatedContainer(
+                                duration: AppDurations.fast,
+                                margin: const EdgeInsets.symmetric(
+                                  horizontal: 3,
+                                ),
+                                width: isSelected ? 20 : 8,
+                                height: 8,
+                                decoration: BoxDecoration(
+                                  color: isSelected
+                                      ? AppColors.white
+                                      : AppColors.white.withValues(alpha: 0.45),
+                                  borderRadius: BorderRadius.circular(
+                                    AppRadius.pill,
+                                  ),
+                                ),
                               );
                             },
                           ),
-                          if (hasMultipleSliders)
-                            Positioned(
-                              left: 0,
-                              right: 0,
-                              bottom: btnHeight / 2 + AppSpacing.md,
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: List.generate(
-                                  sliders.length,
-                                  (index) {
-                                    final isSelected = index == _currentIndex;
-                                    return AnimatedContainer(
-                                      duration: AppDurations.fast,
-                                      margin: const EdgeInsets.symmetric(
-                                        horizontal: 3,
-                                      ),
-                                      width: isSelected ? 20 : 8,
-                                      height: 8,
-                                      decoration: BoxDecoration(
-                                        color: isSelected
-                                            ? AppColors.white
-                                            : AppColors.white.withValues(
-                                                alpha: 0.45,
-                                              ),
-                                        borderRadius: BorderRadius.circular(
-                                          AppRadius.pill,
-                                        ),
-                                      ),
-                                    );
-                                  },
-                                ),
-                              ),
-                            ),
-                        ],
+                        ),
                       ),
+                  ],
+                ),
               ),
             ),
             Positioned(
@@ -220,7 +203,7 @@ class _HeroSlideItem extends StatelessWidget {
     required this.bottomContentOffset,
   });
 
-  final String? imageUrl;
+  final String imageUrl;
   final String title;
   final String subtitle;
   final double imageHeight;
@@ -228,34 +211,24 @@ class _HeroSlideItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final hasNetworkImage = imageUrl != null && imageUrl!.trim().isNotEmpty;
+    final hasNetworkImage = imageUrl.trim().isNotEmpty;
     return Stack(
       fit: StackFit.expand,
       children: [
-        hasNetworkImage
-            ? Image.network(
-                imageUrl!,
-                width: double.infinity,
-                height: imageHeight,
-                fit: BoxFit.cover,
-                errorBuilder: (_, _, _) => Image.asset(
-                  AppImages.homeHero,
-                  width: double.infinity,
-                  height: imageHeight,
-                  fit: BoxFit.contain,
-                ),
-              )
-            : Image.asset(
-                AppImages.homeHero,
-                width: double.infinity,
-                height: imageHeight,
-                fit: BoxFit.contain,
-              ),
+        if (hasNetworkImage)
+          Image.network(
+            imageUrl,
+            width: double.infinity,
+            height: imageHeight,
+            fit: BoxFit.cover,
+            errorBuilder: (_, _, _) =>
+                const ColoredBox(color: AppColors.primary),
+          )
+        else
+          const ColoredBox(color: AppColors.primary),
         Positioned.fill(
           child: DecoratedBox(
             decoration: BoxDecoration(
-              // Full-image dark scrim so white title/subtitle
-              // stay readable on any photo from the API.
               gradient: LinearGradient(
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
@@ -275,23 +248,26 @@ class _HeroSlideItem extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              Text(
-                title,
-                textAlign: TextAlign.center,
-                style: AppTextStyles.display.copyWith(
-                  color: AppColors.white,
-                  fontWeight: FontWeight.bold,
-                  height: 1.3,
+              if (title.isNotEmpty)
+                Text(
+                  title,
+                  textAlign: TextAlign.center,
+                  style: AppTextStyles.display.copyWith(
+                    color: AppColors.white,
+                    fontWeight: FontWeight.bold,
+                    height: 1.3,
+                  ),
                 ),
-              ),
-              const SizedBox(height: AppSpacing.sm),
-              Text(
-                subtitle,
-                textAlign: TextAlign.center,
-                style: AppTextStyles.body.copyWith(
-                  color: AppColors.white.withValues(alpha: 0.88),
+              if (title.isNotEmpty && subtitle.isNotEmpty)
+                const SizedBox(height: AppSpacing.sm),
+              if (subtitle.isNotEmpty)
+                Text(
+                  subtitle,
+                  textAlign: TextAlign.center,
+                  style: AppTextStyles.body.copyWith(
+                    color: AppColors.white.withValues(alpha: 0.88),
+                  ),
                 ),
-              ),
             ],
           ),
         ),
