@@ -75,7 +75,7 @@ Future<void> bootstrap() async {
   final Widget app = kReleaseMode
       ? YounisApp()
       : DevicePreview(
-          enabled: !true,
+          enabled: true,
           builder: (_) => YounisApp(appBuilder: DevicePreview.appBuilder),
         );
 

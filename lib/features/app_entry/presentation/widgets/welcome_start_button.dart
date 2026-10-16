@@ -13,7 +13,12 @@ import '../../../../app/styles/app_text_styles.dart';
 
 /// Full-width white CTA that enters the guest-first main shell.
 class WelcomeStartButton extends StatelessWidget {
-  const WelcomeStartButton({super.key});
+  const WelcomeStartButton({
+    super.key,
+    this.onPressed,
+  });
+
+  final VoidCallback? onPressed;
 
   @override
   Widget build(BuildContext context) {
@@ -30,7 +35,7 @@ class WelcomeStartButton extends StatelessWidget {
         width: double.infinity,
         height: AppSizes.buttonHeight,
         child: FilledButton(
-          onPressed: () => context.go(AppRoutes.home),
+          onPressed: onPressed ?? () => context.go(AppRoutes.home),
           style: FilledButton.styleFrom(
             backgroundColor: AppColors.white,
             foregroundColor: AppColors.primary,

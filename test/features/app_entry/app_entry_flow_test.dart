@@ -1,83 +1,95 @@
-import 'dart:ui' as ui;
-
 import 'package:easy_localization/easy_localization.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:younis_app/app/localization/locale_keys.g.dart';
 import 'package:younis_app/app/router/app_navigation_shell.dart';
-import 'package:younis_app/app/styles/app_durations.dart';
+import 'package:younis_app/features/app_entry/data/models/splash_config_dto.dart';
 import 'package:younis_app/features/app_entry/presentation/pages/splash_page.dart';
-import 'package:younis_app/features/app_entry/presentation/pages/welcome_page.dart';
 
 import '../../support/pump_app.dart';
 
 void main() {
-  testWidgets('app starts on splash and auto-navigates to welcome', (
+  test('SplashConfigDto parses /api/splash JSON payload accurately', () {
+    final json = <String, dynamic>{
+      'success': true,
+      'is_enabled': true,
+      'duration': 3,
+      'title': 'مرحباً بك في تطبيق عيادة د. يونس المرشدي',
+      'subtitle': 'احجز استشارتك الطبية والنفسية بكل سهولة وسرية تامة',
+      'image_url':
+          'https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?auto=format&fit=crop&w=1000&q=80',
+    };
+
+    final entity = SplashConfigDto.fromResponseJson(json).toEntity();
+
+    expect(entity.isEnabled, isTrue);
+    expect(entity.durationSeconds, 3);
+    expect(entity.duration, const Duration(seconds: 3));
+    expect(entity.title, 'مرحباً بك في تطبيق عيادة د. يونس المرشدي');
+    expect(
+      entity.subtitle,
+      'احجز استشارتك الطبية والنفسية بكل سهولة وسرية تامة',
+    );
+    expect(
+      entity.imageUrl,
+      'https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?auto=format&fit=crop&w=1000&q=80',
+    );
+  });
+
+  testWidgets(
+    'displays dynamic splash content and auto-navigates to home after duration',
+    (tester) async {
+      await pumpLocalizedApp(tester);
+
+      expect(find.byType(SplashPage), findsOneWidget);
+      expect(
+        find.text('مرحباً بك في تطبيق عيادة د. يونس المرشدي'),
+        findsOneWidget,
+      );
+      expect(
+        find.text('احجز استشارتك الطبية والنفسية بكل سهولة وسرية تامة'),
+        findsOneWidget,
+      );
+      expect(find.text('ابدأ الآن'), findsOneWidget);
+
+      // Advance fake time past the API duration (3 seconds).
+      await tester.pump(const Duration(seconds: 3));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(SplashPage), findsNothing);
+      expect(find.byType(AppNavigationShell), findsOneWidget);
+    },
+  );
+
+  testWidgets('tapping Start Now navigates immediately to home', (
     tester,
   ) async {
     await pumpLocalizedApp(tester);
 
     expect(find.byType(SplashPage), findsOneWidget);
-    expect(find.byType(WelcomePage), findsNothing);
-
-    // Advance fake time past the splash duration; no real waiting.
-    await tester.pump(AppDurations.splash);
-    await tester.pumpAndSettle();
-
-    expect(find.byType(SplashPage), findsNothing);
-    expect(find.byType(WelcomePage), findsOneWidget);
-  });
-
-  testWidgets('welcome renders arabic copy by default', (tester) async {
-    await pumpLocalizedApp(tester);
-    await tester.pump(AppDurations.splash);
-    await tester.pumpAndSettle();
-
-    expect(
-      find.text('احجز استشارتك النفسية الآن'),
-      findsOneWidget,
-    );
-    expect(find.text('من جميع أنحاء العالم'), findsOneWidget);
-    expect(find.text('ابدأ الآن'), findsOneWidget);
-
-    // RTL applied at the app root.
-    final directionality = tester.widget<Directionality>(
-      find.byType(Directionality).first,
-    );
-    expect(directionality.textDirection, ui.TextDirection.rtl);
-  });
-
-  testWidgets('welcome renders english copy after switching to english', (
-    tester,
-  ) async {
-    await pumpLocalizedApp(tester);
-    await tester.pump(AppDurations.splash);
-    await tester.pumpAndSettle();
-
-    final context = tester.element(find.byType(WelcomePage));
-    await context.setLocale(const Locale('en'));
-    await tester.pumpAndSettle();
-
-    expect(
-      find.text('Book your psychological consultation now'),
-      findsOneWidget,
-    );
-    expect(find.text('from anywhere in the world'), findsOneWidget);
-    expect(find.text('Start Now'), findsOneWidget);
-  });
-
-  testWidgets('start now enters the main application shell as guest', (
-    tester,
-  ) async {
-    await pumpLocalizedApp(tester);
-    await tester.pump(AppDurations.splash);
-    await tester.pumpAndSettle();
 
     await tester.tap(find.text(LocaleKeys.welcome_startNow.tr()));
     await tester.pumpAndSettle();
 
-    // Main shell with bottom navigation — not login.
     expect(find.byType(AppNavigationShell), findsOneWidget);
-    expect(find.byType(WelcomePage), findsNothing);
+    expect(find.byType(SplashPage), findsNothing);
+  });
+
+  testWidgets('skips splash and navigates directly to home when is_enabled is false', (
+    tester,
+  ) async {
+    await pumpLocalizedApp(
+      tester,
+      splashRemoteDataSource: const FakeSplashRemoteDataSource(
+        SplashConfigDto(
+          isEnabled: false,
+          durationSeconds: 3,
+          title: 'مرحباً بك في تطبيق عيادة د. يونس المرشدي',
+          subtitle: 'احجز استشارتك الطبية والنفسية بكل سهولة وسرية تامة',
+        ),
+      ),
+    );
+
+    expect(find.byType(SplashPage), findsNothing);
+    expect(find.byType(AppNavigationShell), findsOneWidget);
   });
 }

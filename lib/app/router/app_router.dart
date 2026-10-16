@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../features/app_entry/presentation/pages/splash_page.dart';
-import '../../features/app_entry/presentation/pages/welcome_page.dart';
 import '../../features/auth/presentation/pages/login_page.dart';
 import '../../features/booking/presentation/pages/booking_page.dart';
 import '../../features/booking/presentation/pages/booking_step2_page.dart';
@@ -24,10 +23,6 @@ GoRouter createAppRouter() {
       GoRoute(
         path: AppRoutes.splash,
         builder: (context, state) => const SplashPage(),
-      ),
-      GoRoute(
-        path: AppRoutes.welcome,
-        builder: (context, state) => const WelcomePage(),
       ),
       GoRoute(
         path: AppRoutes.login,

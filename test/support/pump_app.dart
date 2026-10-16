@@ -7,18 +7,14 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:younis_app/app/app.dart';
 import 'package:younis_app/app/config/app_config.dart';
-import 'package:younis_app/app/di/dependency_injection.dart';
 import 'package:younis_app/app/config/app_environment.dart';
+import 'package:younis_app/app/di/dependency_injection.dart';
 import 'package:younis_app/app/localization/app_localization.dart';
 import 'package:younis_app/app/localization/locale_keys.g.dart';
-import 'package:younis_app/app/styles/app_durations.dart';
+import 'package:younis_app/features/app_entry/data/models/splash_config_dto.dart';
+import 'package:younis_app/features/app_entry/data/sources/splash_remote_data_source.dart';
 
 /// Loads translations straight from disk in a single synchronous read.
-///
-/// The default [RootBundleAssetLoader] goes through real platform-channel IO,
-/// which fake-async widget tests cannot await; that makes translation loads
-/// race against pumpAndSettle. Reading the file synchronously resolves every
-/// load (initial and on setLocale) as a microtask instead.
 class _TestFileAssetLoader extends AssetLoader {
   const _TestFileAssetLoader();
 
@@ -29,24 +25,45 @@ class _TestFileAssetLoader extends AssetLoader {
   }
 }
 
+class FakeSplashRemoteDataSource implements SplashRemoteDataSource {
+  const FakeSplashRemoteDataSource([this.dto = defaultDto]);
+
+  static const SplashConfigDto defaultDto = SplashConfigDto(
+    isEnabled: true,
+    durationSeconds: 3,
+    title: 'مرحباً بك في تطبيق عيادة د. يونس المرشدي',
+    subtitle: 'احجز استشارتك الطبية والنفسية بكل سهولة وسرية تامة',
+    imageUrl:
+        'https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?auto=format&fit=crop&w=1000&q=80',
+  );
+
+  final SplashConfigDto dto;
+
+  @override
+  Future<SplashConfigDto> getSplashConfig() async => dto;
+}
+
 /// Pumps the real application widget tree (EasyLocalization -> YounisApp)
 /// exactly as bootstrap composes it, without running bootstrap itself.
-Future<void> pumpLocalizedApp(WidgetTester tester) async {
-  // easy_localization keeps device/saved locale in static late fields that
-  // are only initialized by ensureInitialized() (normally called in main),
-  // so tests must call it explicitly before pumping the app.
+Future<void> pumpLocalizedApp(
+  WidgetTester tester, {
+  SplashRemoteDataSource? splashRemoteDataSource,
+}) async {
   TestWidgetsFlutterBinding.ensureInitialized();
   SharedPreferences.setMockInitialValues(<String, Object>{});
   await EasyLocalization.ensureInitialized();
 
-  // get_it is process-global and outlives individual test cases, so the
-  // composition root is configured once for the whole test run.
+  getIt.allowReassignment = true;
   if (!getIt.isRegistered<AppConfig>()) {
     configureDependencies(
       environment: AppEnvironment.development,
       sharedPreferences: await SharedPreferences.getInstance(),
     );
   }
+
+  getIt.registerLazySingleton<SplashRemoteDataSource>(
+    () => splashRemoteDataSource ?? const FakeSplashRemoteDataSource(),
+  );
 
   await tester.pumpWidget(
     EasyLocalization(
@@ -61,13 +78,12 @@ Future<void> pumpLocalizedApp(WidgetTester tester) async {
   await tester.pumpAndSettle();
 }
 
-/// Walks the real entry flow (splash timer -> welcome -> Start Now) so tests
+/// Walks the real entry flow (dynamic splash -> Start Now) so tests
 /// land on the main application shell exactly like a user would.
 Future<void> enterMainApp(WidgetTester tester) async {
-  // Fires the splash Timer in fake time; no real waiting.
-  await tester.pump(AppDurations.splash);
-  await tester.pumpAndSettle();
-
-  await tester.tap(find.text(LocaleKeys.welcome_startNow.tr()));
-  await tester.pumpAndSettle();
+  final startButton = find.text(LocaleKeys.welcome_startNow.tr());
+  if (startButton.evaluate().isNotEmpty) {
+    await tester.tap(startButton);
+    await tester.pumpAndSettle();
+  }
 }
