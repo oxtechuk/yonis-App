@@ -69,23 +69,23 @@ Fill top-to-bottom. Do NOT click `Add for Review` until a Build is selected and 
 Shown at top of product page, editable anytime. Arabic example (selector on `Arabic`):
 
 ```text
-احجز عيادة أو استشارة نفسية أونلاين مع يونس المرشد. أطباء موثوقون، حجز سريع، ودفع محلي سهل.
+احجز زيارة عيادة أو استشارة نفسية وطبية أونلاين عبر منصة المرشد. نخبة من الأطباء والأخصائيين الموثوقين، حجز سريع، ودفع محلي سهل.
 ```
 
 ### 2.3 Description (4000 chars, required)
 User-facing description. Currently editing the **Arabic** localization — paste this, then add English via the language `+` button:
 
 ```text
-تطبيق يونس المرشد لحجز المواعيد الطبية والاستشارات النفسية.
+تطبيق المرشد (Almurshid) لحجز المواعيد الطبية والاستشارات النفسية.
 
-- تصفح ملفات الأطباء والتخصصات
-- احجز زيارة عيادة أو جلسة أونلاين (شات / صوت / فيديو)
-- حدد الموعد المناسب لك وأدر حجوزاتك
+- تصفح ملفات الأطباء والأخصائيين والتخصصات المختلفة
+- احجز زيارة عيادة أو جلسة أونلاين (محادثة / صوت / فيديو)
+- حدد الموعد المناسب لك وأدر حجوزاتك بسهولة
 - ادفع محلياً عبر ZainCash و SuperPay وارفع صورة الإيصال من الكاميرا أو المعرض
-- عربي / English بالكامل
+- يدعم اللغتين العربية والإنجليزية بالكامل
 - خصوصية تامة: لا يتم تسجيل أو تخزين الجلسات
 
-حمّل التطبيق واحجز جلستك الأولى اليوم.
+حمّل تطبيق المرشد واحجز جلستك اليوم.
 الدعم: https://younis-almurshid.com
 الخصوصية: https://younis-almurshid.com/privacy
 ```
@@ -93,7 +93,7 @@ User-facing description. Currently editing the **Arabic** localization — paste
 ### 2.4 Keywords (100 chars, required, comma-separated)
 
 ```text
-حجز,طبيب,استشارة,نفسي,عيادة,younis,doctor,therapy,clinic,booking
+المرشد,حجز,طبيب,استشارة,نفسي,عيادة,أطباء,almurshid,doctor,therapy,clinic,booking
 ```
 
 ### 2.5 Support URL (required) / Marketing URL (optional)
@@ -102,7 +102,7 @@ User-facing description. Currently editing the **Arabic** localization — paste
 
 ### 2.6 Version / Copyright
 - `Version`: keep `1.0`
-- `Copyright`: `2026 Younis Almurshid`
+- `Copyright`: `2026 Almurshid`
 
 Leave `Routing App Coverage File` empty (not a maps app).
 

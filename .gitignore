@@ -47,6 +47,7 @@ app.*.map.json
 # Signing credentials and keystores (Step 1: Harden .gitignore)
 *.jks
 *.keystore
+*.keystore.old*
 android/key.properties
 *.p12
 *.mobileprovision
@@ -54,6 +55,8 @@ android/key.properties
 *.cer
 *.pem
 .env*
+apple.config.txt
+notes.txt
 
 # Base64 encoded keystore (Step 4)
 *younis_release_keystore_base64*.txt
