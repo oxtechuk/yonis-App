@@ -1,7 +1,7 @@
 # Younis App — Release Runbook
 
 **Application:** Younis Almurshid (يونس المرشد) / `younis_app`
-**Bundle ID (iOS):** `com.younis.younisApp`
+**Bundle ID (iOS):** `com.younis.almurshid`
 **Application ID (Android):** `com.younis.younis_app`
 **Production backend:** `https://younis-almurshid.com`
 **Privacy policy:** `https://younis-almurshid.com/privacy`

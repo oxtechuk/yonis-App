@@ -42,7 +42,7 @@ workflows:
       groups:
         - app_store_credentials
       vars:
-        BUNDLE_ID: com.younis.younisApp
+        BUNDLE_ID: com.younis.almurshid
         APP_ENV: production
       flutter: stable
       xcode: latest
